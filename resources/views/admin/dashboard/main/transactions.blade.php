@@ -209,95 +209,9 @@
                                 </div>
                             </div>
 
-                            @php
-                                $topArtworks = [
-                                    ['rank' => 1, 'title' => 'Realisme', 'image' => 'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?q=80&w=400&auto=format&fit=crop'],
-                                    ['rank' => 2, 'title' => 'Naturalisme', 'image' => 'https://images.unsplash.com/photo-1549490349-8643362247b5?q=80&w=400&auto=format&fit=crop'],
-                                    ['rank' => 3, 'title' => 'Impresionisme', 'image' => 'https://images.unsplash.com/photo-1615529151169-7b1ff50dc7f2?q=80&w=400&auto=format&fit=crop'],
-                                    ['rank' => 4, 'title' => 'Ekspresionisme', 'image' => 'https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?q=80&w=400&auto=format&fit=crop'],
-                                    ['rank' => 5, 'title' => 'Kubisme', 'image' => 'https://images.unsplash.com/photo-1612812166620-a072f77ec45b?w=500&auto=format&fit=crop&q=60'],
-                                    ['rank' => 6, 'title' => 'Surealisme', 'image' => 'https://images.unsplash.com/photo-1578301978018-3005759f48f7?q=80&w=400&auto=format&fit=crop'],
-                                    ['rank' => 7, 'title' => 'Abstrak', 'image' => 'https://images.unsplash.com/photo-1582201942988-13e60e4556ee?q=80&w=400&auto=format&fit=crop'],
-                                    ['rank' => 8, 'title' => 'Minimalisme', 'image' => 'https://images.unsplash.com/photo-1543857778-c4a1a3e0b2eb?q=80&w=400&auto=format&fit=crop'],
-                                    ['rank' => 9, 'title' => 'Konseptual', 'image' => 'https://images.unsplash.com/photo-1579783483458-83d02161294e?q=80&w=400&auto=format&fit=crop'],
-                                    ['rank' => 10, 'title' => 'Pointilisme', 'image' => 'https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?q=80&w=400&auto=format&fit=crop'],
-                                ];
-                            @endphp
 
-                            @php
-                                $transactionData = [
-                                    [
-                                        'artwork' => 'Mona Lisa',
-                                        'artist' => 'Leonardo Da Vinci',
-                                        'collector' => 'Clark Kent',
-                                        'price' => '$2,500',
-                                        'date' => '23 Apr 2026',
-                                    ],
-                                    [
-                                        'artwork' => 'Starry Night',
-                                        'artist' => 'Vincent van Gogh',
-                                        'collector' => 'Bruce Wayne',
-                                        'price' => '$3,200',
-                                        'date' => '24 Apr 2026',
-                                    ],
-                                    [
-                                        'artwork' => 'The Scream',
-                                        'artist' => 'Edvard Munch',
-                                        'collector' => 'Diana Prince',
-                                        'price' => '$1,800',
-                                        'date' => '25 Apr 2026',
-                                    ],
-                                    [
-                                        'artwork' => 'The Birth of Venus',
-                                        'artist' => 'Sandro Botticelli',
-                                        'collector' => 'Barry Allen',
-                                        'price' => '$2,200',
-                                        'date' => '26 Apr 2026',
-                                    ],
-                                    [
-                                        'artwork' => 'Persistence of Memory',
-                                        'artist' => 'Salvador Dalí',
-                                        'collector' => 'Hal Jordan',
-                                        'price' => '$1,500',
-                                        'date' => '27 Apr 2026',
-                                    ],
-                                    [
-                                        'artwork' => 'Girl with a Pearl Earring',
-                                        'artist' => 'Johannes Vermeer',
-                                        'collector' => 'Arthur Curry',
-                                        'price' => '$2,100',
-                                        'date' => '28 Apr 2026',
-                                    ],
-                                    [
-                                        'artwork' => 'The Night Watch',
-                                        'artist' => 'Rembrandt van Rijn',
-                                        'collector' => 'Victor Stone',
-                                        'price' => '$4,000',
-                                        'date' => '29 Apr 2026',
-                                    ],
-                                    [
-                                        'artwork' => 'The Kiss',
-                                        'artist' => 'Gustav Klimt',
-                                        'collector' => 'Selina Kyle',
-                                        'price' => '$2,800',
-                                        'date' => '30 Apr 2026',
-                                    ],
-                                    [
-                                        'artwork' => 'Las Meninas',
-                                        'artist' => 'Diego Velázquez',
-                                        'collector' => 'Oliver Queen',
-                                        'price' => '$3,500',
-                                        'date' => '01 May 2026',
-                                    ],
-                                    [
-                                        'artwork' => 'American Gothic',
-                                        'artist' => 'Grant Wood',
-                                        'collector' => 'Billy Batson',
-                                        'price' => '$1,200',
-                                        'date' => '02 May 2026',
-                                    ],
-                                ];
-                            @endphp
+
+
 
                             <div class="relative">
                                 {{-- List Artworks --}}
@@ -312,6 +226,7 @@
                                                 </div>
                                                 <div class="relative z-10 flex-1">
                                                     <h3 class="text-gray-200 font-bold text-sm leading-tight">{{ $art['title'] }}</h3>
+                                                    <p class="text-[10px] text-gray-500 font-medium">{{ $art['sold_count'] }} Items Sold</p>
                                                 </div>
                                                 <div class="absolute inset-0 z-0 opacity-10 group-hover:opacity-30 transition-all duration-700">
                                                     <img src="{{ $art['image'] }}" class="w-full h-full object-cover grayscale group-hover:grayscale-0">
@@ -332,7 +247,7 @@
                                                 <h2 class="text-3xl font-bold text-gray-300 tracking-tight leading-none">Top Selling Artworks</h2>
                                                 <div class="flex items-center gap-2 mt-3">
                                                     <span class="h-1 w-8 bg-[#C9A74E] rounded-full"></span>
-                                                    <p class="text-gray-500 text-sm font-medium tracking-wide">By Realisme Art</p>
+                                                    <p class="text-gray-500 text-sm font-medium tracking-wide" id="modalCategoryLabel">By Realisme Art</p>
                                                 </div>
                                             </div>
                                             
@@ -792,27 +707,7 @@
             closeFilterDropdown();
         }
 
-        // optimized table rendering function
-        function renderTableRows() {
-            const tableBody = document.getElementById('modalTableBody');
-            
-            // Using map and join is more performant than += innerHTML in a loop
-            tableBody.innerHTML = transactions.map(data => `
-                <tr class="hover:bg-white/[0.02] transition-colors group">
-                    <td class="px-6 py-5 text-gray-300 font-bold text-sm uppercase tracking-tight">${data.artwork}</td>
-                    <td class="px-6 py-5 text-gray-400 text-sm border-l border-neutral-800/50 text-center">${data.artist}</td>
-                    <td class="px-6 py-5 text-gray-400 text-sm border-l border-neutral-800/50 text-center">${data.collector}</td>
-                    <td class="px-6 py-5 text-[#C9A74E] font-black text-sm border-l border-neutral-800/50 text-center">${data.price}</td>
-                    <td class="px-6 py-5 text-gray-500 text-sm border-l border-neutral-800/50 text-center">${data.date}</td>
-                    <td class="px-6 py-5 border-l border-neutral-800/50 text-right">
-                        <button onclick="openModal('${data.artwork}', '${data.artist}', '${data.collector}', '${data.price}', '${data.date}')" 
-                                class="bg-[#141414] hover:bg-[#C9A74E] text-gray-400 hover:text-black text-[10px] font-bold py-2 px-5 rounded-lg border border-neutral-800 hover:border-[#C9A74E] transition-all uppercase tracking-widest shadow-md">
-                            Details
-                        </button>
-                    </td>
-                </tr>
-            `).join('');
-        }
+
 
         // Global click listener to close dropdown when clicking outside
         window.addEventListener('click', (event) => {
@@ -822,27 +717,59 @@
         });
 
         // -- Logic untuk artwork --
-        // Convert PHP array to JavaScript
-        const transactions = @json($transactionData);
+        // Initialize as empty, will be populated via AJAX
+        let transactions = [];
 
         // open the modal and render the table
-        function openArtModal(category = null) {
+        async function openArtModal(categoryData = null) {
             const modal = document.getElementById('artModal');
             const modalContent = document.getElementById('modalContent');
+            const tableBody = document.getElementById('modalTableBody');
             
-            // Render the table rows using our optimized function
-            renderTableRows();
+            if (!categoryData) return;
+
+            // Update Label
+            document.getElementById('modalCategoryLabel').innerText = `By ${categoryData.title} Art`;
+            
+            // Show Loading State in Table
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="px-6 py-20 text-center">
+                        <div class="flex flex-col items-center gap-4">
+                            <div class="w-10 h-10 border-4 border-[#C9A74E]/20 border-t-[#C9A74E] rounded-full animate-spin"></div>
+                            <p class="text-gray-500 text-xs font-bold uppercase tracking-widest">Fetching Sold Artworks...</p>
+                        </div>
+                    </td>
+                </tr>
+            `;
 
             // Display Modal with Animation
             modal.classList.remove('hidden');
             modal.classList.add('flex');
             
-            // Use requestAnimationFrame for smoother entry animation
             requestAnimationFrame(() => {
                 modal.classList.add('opacity-100');
                 modalContent.classList.remove('scale-95', 'opacity-0');
                 modalContent.classList.add('scale-100', 'opacity-100');
             });
+
+            try {
+                // Fetch Data from Backend
+                const response = await fetch(`/api/sold-artworks/${encodeURIComponent(categoryData.title)}`);
+                transactions = await response.json();
+                
+                // Render the table rows
+                renderTableRows();
+            } catch (error) {
+                console.error("Error fetching sold artworks:", error);
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="px-6 py-20 text-center text-red-500/80 font-bold uppercase tracking-widest text-xs">
+                            Failed to load data. Please try again.
+                        </td>
+                    </tr>
+                `;
+            }
         }
 
         // Closes the modal with a smooth fade-out animation
@@ -867,30 +794,43 @@
             
             if (!tableBody) return;
 
-            tableBody.innerHTML = transactions.map(data => `
-                <tr class="hover:bg-white/[0.03] transition-all duration-300 group border-b border-neutral-800/30">
-                    <td class="px-6 py-5 text-gray-200 font-bold text-sm uppercase tracking-tight">
-                        ${data.artwork}
-                    </td>
-                    <td class="px-6 py-5 text-gray-400 text-sm border-l border-neutral-800/50 text-center">
-                        ${data.artist}
-                    </td>
-                    <td class="px-6 py-5 text-gray-400 text-sm border-l border-neutral-800/50 text-center">
-                        ${data.collector}
-                    </td>
-                    <td class="px-6 py-5 text-[#C9A74E] font-black text-sm border-l border-neutral-800/50 text-center">
-                        ${data.price}
-                    </td>
-                    <td class="px-6 py-5 text-gray-500 text-xs border-l border-neutral-800/50 text-center font-mono">
-                        ${data.date}
-                    </td>
-                    <td class="px-6 py-5 border-l border-neutral-800/50 text-center">
-                        <button class="bg-[#1a1a1a] hover:bg-[#C9A74E] text-gray-400 hover:text-black text-[10px] font-bold py-2 px-5 rounded-lg border border-neutral-800 hover:border-[#C9A74E] transition-all uppercase tracking-widest shadow-lg active:scale-90">
-                            Details
-                        </button>
-                    </td>
-                </tr>
-            `).join('');
+            tableBody.innerHTML = transactions.map(data => {
+                // Prepare activity data to reuse the existing activity modal
+                const detailData = {
+                    name: data.collector,
+                    artwork: data.artwork,
+                    amount: data.price,
+                    time: data.date,
+                    action: `Purchased "${data.artwork}" by ${data.artist}`,
+                    avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(data.collector)}`
+                };
+
+                return `
+                    <tr class="hover:bg-white/[0.03] transition-all duration-300 group border-b border-neutral-800/30">
+                        <td class="px-6 py-5 text-gray-200 font-bold text-sm uppercase tracking-tight">
+                            ${data.artwork}
+                        </td>
+                        <td class="px-6 py-5 text-gray-400 text-sm border-l border-neutral-800/50 text-center">
+                            ${data.artist}
+                        </td>
+                        <td class="px-6 py-5 text-gray-400 text-sm border-l border-neutral-800/50 text-center">
+                            ${data.collector}
+                        </td>
+                        <td class="px-6 py-5 text-[#C9A74E] font-black text-sm border-l border-neutral-800/50 text-center">
+                            ${data.price}
+                        </td>
+                        <td class="px-6 py-5 text-gray-500 text-xs border-l border-neutral-800/50 text-center font-mono">
+                            ${data.date}
+                        </td>
+                        <td class="px-6 py-5 border-l border-neutral-800/50 text-center">
+                            <button onclick='openActivityModal(${JSON.stringify(detailData).replace(/'/g, "&apos;")})' 
+                                    class="bg-[#1a1a1a] hover:bg-[#C9A74E] text-gray-400 hover:text-black text-[10px] font-bold py-2 px-5 rounded-lg border border-neutral-800 hover:border-[#C9A74E] transition-all uppercase tracking-widest shadow-lg active:scale-90">
+                                Details
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
         }
 
         // logic untuk dropdown menu pada widget

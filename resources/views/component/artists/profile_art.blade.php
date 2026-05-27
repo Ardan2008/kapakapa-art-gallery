@@ -6,6 +6,9 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <title>Kuthoadem Gallery | Artist Profile</title>
+    <!-- Swiper.js CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <title>Kuthoadem Gallery | Artist Profile</title>
     <style>
@@ -33,6 +36,84 @@
         .smooth-transition {
             transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
         }
+
+        .artwork-slider {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            will-change: transform;
+        }
+
+        .artwork-slide {
+            flex-shrink: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .artwork-slider img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* Swiper Custom Styling */
+        .swiper-button-next, .swiper-button-prev {
+            color: #C9A74E !important;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            width: 50px !important;
+            height: 50px !important;
+            border-radius: 50%;
+            border: 1px solid rgba(201, 167, 78, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .swiper-button-next:after, .swiper-button-prev:after {
+            font-size: 18px !important;
+            font-weight: bold;
+        }
+
+        .swiper-button-next:hover, .swiper-button-prev:hover {
+            background: rgba(201, 167, 78, 0.1);
+            border-color: #C9A74E;
+            box-shadow: 0 0 15px rgba(201, 167, 78, 0.3);
+        }
+
+        .swiper-pagination-bullet {
+            background: #fff !important;
+            opacity: 0.3 !important;
+        }
+
+        .swiper-pagination-bullet-active {
+            background: #C9A74E !important;
+            opacity: 1 !important;
+            width: 20px !important;
+            border-radius: 4px !important;
+            transition: width 0.3s ease;
+        }
+
+        #mobilePageIndicator {
+            transition: opacity 0.5s ease;
+            backdrop-filter: blur(10px) !important;
+            -webkit-backdrop-filter: blur(10px) !important;
+            background-color: rgba(0, 0, 0, 0.5) !important;
+            z-index: 999 !important;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.02);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(201, 167, 78, 0.2);
+            border-radius: 10px;
+        }
     </style>
 </head>
 <body class="antialiased selection:bg-gold selection:text-black">
@@ -47,46 +128,32 @@
                     <div class="absolute -inset-3 border border-[#C9A74E]/10 rounded-full"></div>
                     
                     <div class="w-48 h-48 md:w-64 md:h-64 rounded-full overflow-hidden border border-[#C9A74E]/20">
-                        <img src="https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?q=80&w=1000&auto=format&fit=crop" 
-                            class="w-full h-full object-cover grayscale hover:grayscale-0 hover:scale-110 transition-transform duration-[3s] ease-out" 
-                            alt="Alphonse Mucha">
+                        @if($artist->profile_url)
+                            <img src="{{ asset($artist->profile_url) }}" 
+                                class="w-full h-full object-cover grayscale hover:grayscale-0 hover:scale-110 transition-transform duration-[3s] ease-out" 
+                                alt="{{ $artist->name }}">
+                        @else
+                            <img src="https://api.dicebear.com/8.x/notionists/svg?seed={{ urlencode($artist->name) }}" 
+                                class="w-full h-full object-cover grayscale hover:grayscale-0 hover:scale-110 transition-transform duration-[3s] ease-out" 
+                                alt="{{ $artist->name }}">
+                        @endif
                     </div>
                 </div>
 
                 <div class="flex-grow text-center lg:text-left pt-4">
                     <div class="flex flex-col lg:flex-row lg:items-baseline gap-4 md:gap-8 mb-4">
                         <h2 class="text-5xl md:text-7xl font-serif font-bold text-gray-300 tracking-tight">
-                            Alphonse Mucha
+                            {{ $artist->name }}
                         </h2>
                     </div>
 
                     <p class="text-gold/60 font-sans tracking-[0.4em] text-[11px] uppercase mb-10 font-medium">
-                        Czech, 1860 — 1939
+                        {{ $artist->birthplace }}, {{ $artist->career }}
                     </p>
 
                     <div class="relative max-w-4xl">
                         <div id="bioText" class="text-slate-300/90 text-lg md:text-xl leading-relaxed font-light transition-all duration-1000 ease-in-out overflow-hidden max-h-[120px]">
-                            <p>
-                                Alfons Maria Mucha, known internationally as <span class="text-gray-300 font-semibold">Alphonse Mucha</span>, 
-                                was a prolific Czech painter, illustrator, and graphic artist who lived in Paris during the height of the Art Nouveau period. 
-                                He rose to sudden fame through his stylized and decorative theatrical posters, most notably those of the legendary actress Sarah Bernhardt, which revolutionized the visual language of advertisement in the late 19th century.
-                            </p>
-
-                            <p class="mt-6">
-                                His distinctive artistic style, often referred to as <span class="text-gold">"Le Style Mucha,"</span> became synonymous with the era. 
-                                It featured beautiful young women in flowing, Neoclassical-looking robes, often surrounded by lush, intricate floral patterns and ornate circular haloes reminiscent of stained glass. 
-                                Beyond posters, his creative genius extended into jewelry design, interior decor, and tapestries, all embodying a sense of organic harmony and ethereal elegance.
-                            </p>
-
-                            <p class="mt-6 text-slate-400">
-                                In the second chapter of his illustrious career, at the age of 43, Mucha returned to his homeland in the Bohemia-Moravia region. 
-                                He spent nearly two decades dedicated to his masterpiece, <span class="italic text-gray-300">The Slav Epic</span>—a series of twenty monumental canvases depicting the history and mythology of the Slavic peoples. 
-                                This work was his profound tribute to national identity, moving away from commercial art toward a more spiritual and historical narrative.
-                            </p>
-
-                            <p class="mt-6 text-slate-400">
-                                Today, Mucha's legacy remains a cornerstone of decorative arts. His ability to blend delicate organic forms with precise geometric structures created a timeless visual balance that continues to influence modern graphic design and contemporary illustration worldwide.
-                            </p>
+                            {!! nl2br(e($artist->bio)) !!}
                         </div>
                         
                         <div id="textOverlay" class="absolute bottom-0 left-0 w-full h-20 bg-gradient-to-t from-[#0a0a0a] to-transparent transition-opacity duration-700"></div>
@@ -111,7 +178,7 @@
                 <div class="relative group">
                     <div class="flex items-baseline gap-6 relative z-10">
                         <span class="text-6xl font-serif text-gray-300 leading-none tracking-tighter transition-all duration-700 group-hover:italic group-hover:text-gold">
-                            10
+                            {{ count($artist->artworks) }}
                         </span>
                         <div class="flex flex-col">
                             <span class="text-gold text-[8px] uppercase tracking-[0.8em] font-bold mb-1">Archive</span>
@@ -139,89 +206,22 @@
             </div>
 
             @php
-                $artists = [
-                    [
-                        'name' => 'Monaco, Monte-Carlo. Chemins de Fer P.L.M.', 
-                        'year' => '1897', 
-                        'category' => 'Naturalisme', 
-                        'image' => 'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&q=80&w=800',
-                        'offset' => false
-                    ],
-                    [
-                        'name' => 'La Passion Edmond Haraucourt', 
-                        'year' => '1901', 
-                        'category' => 'Surealisme', 
-                        'image' => 'https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?auto=format&fit=crop&q=80&w=800',
-                        'offset' => true
-                    ],
-                    [
-                        'name' => 'The Starry Night', 
-                        'year' => '1889', 
-                        'category' => 'Abstract', 
-                        'image' => 'https://images.unsplash.com/photo-1541450805268-4822a3a774ca?auto=format&fit=crop&q=80&w=800',
-                        'offset' => false
-                    ],
-                    [
-                        'name' => 'The Kiss', 
-                        'year' => '1907', 
-                        'category' => 'Kubisme', 
-                        'image' => 'https://images.unsplash.com/photo-1615412704911-55d589229864?auto=format&fit=crop&q=80&w=800',
-                        'offset' => true
-                    ],
-                    [
-                        'name' => 'Water Lilies', 
-                        'year' => '1919', 
-                        'category' => 'Klasikisme', 
-                        'image' => 'https://plus.unsplash.com/premium_photo-1733317297744-23736fcc1995?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8d2F0ZXIlMjBsaWxpZXN8ZW58MHx8MHx8fDA%3D',
-                        'offset' => false
-                    ],
-                    [
-                        'name' => 'The Great Wave off Kanagawa', 
-                        'year' => '1831', 
-                        'category' => 'Ekspresionisme', 
-                        'image' => 'https://images.unsplash.com/photo-1578301978018-3005759f48f7?auto=format&fit=crop&q=80&w=800',
-                        'offset' => true
-                    ],
-                    [
-                        'name' => 'Self-Portrait with Thorn Necklace', 
-                        'year' => '1940', 
-                        'category' => 'Abstrak', 
-                        'image' => 'https://images.unsplash.com/photo-1580136579312-94651dfd596d?auto=format&fit=crop&q=80&w=800',
-                        'offset' => false
-                    ],
-                    [
-                        'name' => 'Guernica', 
-                        'year' => '1937', 
-                        'category' => 'Impresionisme', 
-                        'image' => 'https://plus.unsplash.com/premium_photo-1676827547885-4179513a7a68?q=80&w=450&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-                        'offset' => true
-                    ],
-                    [
-                        'name' => 'The Scream', 
-                        'year' => '1893', 
-                        'category' => 'Romantisme', 
-                        'image' => 'https://images.unsplash.com/photo-1553465528-5a213ccc0c7b?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8c2NyZWFtfGVufDB8fDB8fHww',
-                        'offset' => false
-                    ],
-                    [
-                        'name' => 'Landscape at Hakone', 
-                        'year' => '1922', 
-                        'category' => 'Realisme', 
-                        'image' => 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&q=80&w=800',
-                        'offset' => true
-                    ],
-                ];
+                $artworks = $artist->artworks;
             @endphp
 
             <div class="max-w-[1600px] mx-auto px-8 pt-10 pb-32 lg:pt-14 bg-[#0a0a0a]">
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-y-32 gap-x-12">
-                    @foreach($artists as $index => $artist)
+                    @foreach($artworks as $index => $art)
+                        @php
+                            $artImages = is_array($art->images) ? $art->images : json_decode($art->images, true);
+                            $imagesJson = json_encode($artImages);
+                        @endphp
                         <a href="javascript:void(0)" 
-                        onclick="openModal('{{ $artist['image'] }}', '{{ $artist['name'] }}', '{{ $artist['category'] }}', '{{ $artist['count'] ?? 1 }}')"
+                        onclick="openModal({{ $imagesJson }}, '{{ addslashes($art->title) }}', '{{ addslashes($art->category) }}', '{{ $art->width }}', '{{ $art->height }}', '{{ $art->unit }}')"
                         data-aos="fade-up" 
                         data-aos-delay="{{ ($index % 5) * 100 }}"
                         data-aos-duration="1000"
-                        class="group cursor-pointer block {{ ($artist['offset'] ?? false) ? 'lg:mt-24' : '' }} smooth-transition">
+                        class="group cursor-pointer block {{ ($index % 2 == 1) ? 'lg:mt-24' : '' }} smooth-transition">
                             
                             <div class="relative aspect-[10/14] mb-10 bg-zinc-900 border border-white/5 group-hover:border-[#C9A74E]/20 overflow-visible smooth-transition">
                                 <div class="absolute -top-4 -left-4 flex items-center gap-3 opacity-0 group-hover:opacity-100 smooth-transition transform translate-y-2 group-hover:translate-y-0 z-10">
@@ -229,22 +229,40 @@
                                     <div class="w-12 h-[0.5px] bg-[#C9A74E]/40"></div>
                                 </div>
                                 
-                                <div class="w-full h-full overflow-hidden relative">
-                                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60 group-hover:opacity-30 smooth-transition z-10"></div>
-                                    <img src="{{ $artist['image'] }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[1.2s] ease-out">
+                                <div class="w-full h-full overflow-hidden relative artwork-card-container">
+                                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60 group-hover:opacity-30 smooth-transition z-20 pointer-events-none"></div>
+                                    <div class="artwork-slider h-full">
+                                        @php
+                                            $artImages = is_array($art->images) ? $art->images : json_decode($art->images, true);
+                                            // Take only up to 3 images as per requirement
+                                            $displayImages = array_slice($artImages ?? [], 0, 3);
+                                        @endphp
+                                        @foreach($displayImages as $imgIndex => $imagePath)
+                                            <div class="artwork-slide">
+                                                <img src="{{ $imagePath }}" 
+                                                    class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[1.2s] ease-out" 
+                                                    alt="{{ $art->title }}">
+                                            </div>
+                                        @endforeach
+                                        @if(empty($displayImages))
+                                            <div class="artwork-slide">
+                                                <img src="https://via.placeholder.com/500x700?text=No+Image" class="w-full h-full object-cover">
+                                            </div>
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
 
                             <div class="px-1 text-center sm:text-left">
                                 <h3 class="text-lg md:text-xl font-serif text-gray-300 mb-5 tracking-wide smooth-transition group-hover:text-gold group-hover:italic group-hover:translate-x-2">
-                                    {{ $artist['name'] }}
+                                    {{ $art->title }}
                                 </h3>
                                 <div class="flex items-center justify-center sm:justify-start gap-3 mb-4">
                                     <div class="w-1 h-1 bg-gold rounded-full opacity-20 group-hover:opacity-100 smooth-transition"></div>
                                     <div class="h-[1px] bg-[#C9A74E]/20 w-8 smooth-transition group-hover:w-16 group-hover:bg-[#C9A74E]/50"></div>
                                 </div>
                                 <p class="text-[9px] uppercase tracking-[0.6em] text-slate-500 font-medium group-hover:text-slate-200 smooth-transition">
-                                    {{ $artist['category'] }} // {{ $artist['year'] }}
+                                    {{ $art->category }} // {{ $art->width && $art->height ? $art->width . ' x ' . $art->height . ' ' . $art->unit : 'No Dimensions' }}
                                 </p>
                             </div>
                         </a>
@@ -299,30 +317,32 @@
             </div>
         </button>
 
-        <div id="imageContainer" class="w-full md:w-2/3 bg-[#050505] flex items-center justify-center p-6 md:p-12 overflow-hidden relative group/zoom min-h-[50vh]">
+        <div id="imageContainer" class="w-full md:w-2/3 bg-[#050505] flex items-center justify-center relative min-h-[50vh]">
             
-            <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(201,167,78,0.05),transparent_70%)] opacity-0 group-hover/zoom:opacity-100 transition-opacity duration-1000"></div>
+            <!-- Page Number Indicator -->
+            <div id="mobilePageIndicator" class="absolute top-5 right-5 px-3 py-1.5 rounded-full border border-white/10 opacity-0 pointer-events-none transition-opacity duration-500">
+                <span class="text-white text-[11px] font-medium tracking-[0.1em]">
+                    <span id="currentPage">1</span> / <span id="totalPages">3</span>
+                </span>
+            </div>
 
-            <div class="relative overflow-hidden shadow-[0_30px_100px_rgba(0,0,0,0.8)] border border-white/5 bg-zinc-900">
-                
-                <div class="absolute inset-0 z-10 pointer-events-none shadow-[inset_0_0_40px_rgba(0,0,0,0.5)]"></div>
-
-                <img id="modalImage" src="" alt="Artwork" 
-                    class="max-h-[70vh] md:max-h-[82vh] w-auto object-contain transition-transform duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] cursor-zoom-in scale-100"
-                    onmousemove="zoomIn(event)" 
-                    onmouseleave="zoomOut(event)">
-                
-                <div class="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 pointer-events-none">
-                    <div class="flex flex-col items-center gap-3 opacity-0 group-hover/zoom:opacity-100 translate-y-4 group-hover/zoom:translate-y-0 transition-all duration-700 ease-out">
-                        <span class="text-[8px] text-gold/60 uppercase tracking-[0.5em] whitespace-nowrap bg-black/40 backdrop-blur-md px-5 py-2.5 border border-gold/10 rounded-full shadow-2xl">
-                            Move cursor to explore details
-                        </span>
-                        <div class="w-12 h-[1px] bg-gradient-to-r from-transparent via-gold/30 to-transparent"></div>
-                    </div>
+            <div class="swiper mySwiper w-full h-full">
+                <div class="swiper-wrapper" id="modalSwiperWrapper">
+                    <!-- Slides will be injected here via JS -->
                 </div>
+                
+                <!-- Desktop Controls -->
+                <div class="swiper-button-next hidden md:flex"></div>
+                <div class="swiper-button-prev hidden md:flex"></div>
+                <div class="swiper-pagination hidden md:block !bottom-8"></div>
+            </div>
 
-                <div class="absolute inset-0 pointer-events-none z-15 opacity-0 group-hover/zoom:opacity-100 transition-opacity duration-1000">
-                    <div class="absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.02] to-transparent -translate-x-full group-hover/zoom:translate-x-full transition-transform duration-[2000ms] ease-in-out"></div>
+            <!-- Hint (Desktop Only) -->
+            <div class="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 pointer-events-none hidden md:block">
+                <div class="flex flex-col items-center gap-3 opacity-0 group-hover/zoom:opacity-100 translate-y-4 group-hover/zoom:translate-y-0 transition-all duration-700 ease-out">
+                    <span class="text-[8px] text-gold/60 uppercase tracking-[0.5em] whitespace-nowrap bg-black/40 backdrop-blur-md px-5 py-2.5 border border-gold/10 rounded-full shadow-2xl">
+                        Scroll or use arrows to navigate
+                    </span>
                 </div>
             </div>
         </div>
@@ -343,9 +363,9 @@
                 
                 <div class="space-y-8">
                     <div class="group bg-white/[0.02] border border-white/5 p-5 rounded-2xl transition-all duration-500 hover:bg-white/[0.04]">
-                        <span class="text-zinc-500 text-[9px] uppercase tracking-[0.2em] block mb-2 font-medium">Collection Volume</span>
+                        <span class="text-zinc-500 text-[9px] uppercase tracking-[0.2em] block mb-2 font-medium">Physical Dimensions</span>
                         <div class="flex items-end gap-2">
-                            <p id="modalCount" class="text-gray-200 text-xl font-light font-serif italic"></p>
+                            <p id="modalDimensions" class="text-gray-200 text-xl font-light font-serif italic"></p>
                             <span class="text-[10px] text-zinc-600 mb-1.5 uppercase">Certified</span>
                         </div>
                     </div>
@@ -527,6 +547,8 @@
     </div>
 
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <!-- Swiper.js JS -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
     <script>
         AOS.init({
@@ -555,41 +577,146 @@
             img.style.transformOrigin = "center center";
         }
 
-        // --- LOGIKA MODAL UTAMA ---
-        function openModal(img, title, author, count) {
-            const modal = document.getElementById('artModal');
+        // --- LOGIKA SWIPER ---
+        let swiper = null;
+        let mobileIndicatorTimeout = null;
+
+        function initSwiper() {
+            if (swiper) {
+                swiper.destroy(true, true);
+            }
             
-            // Set Data ke elemen modal
-            document.getElementById('modalImage').src = img;
+            swiper = new Swiper(".mySwiper", {
+                loop: false,
+                speed: 800,
+                grabCursor: true,
+                pagination: {
+                    el: ".swiper-pagination",
+                    clickable: true,
+                },
+                navigation: {
+                    nextEl: ".swiper-button-next",
+                    prevEl: ".swiper-button-prev",
+                },
+                keyboard: {
+                    enabled: true,
+                },
+                on: {
+                    slideChange: function () {
+                        updateMobileIndicator(this.activeIndex + 1, this.slides.length);
+                    },
+                    init: function () {
+                        updateMobileIndicator(this.activeIndex + 1, this.slides.length);
+                    }
+                }
+            });
+        }
+
+        // Implement Mouse-wheel sliding with debounce logic (Unified)
+        let isScrolling = false;
+        document.addEventListener('wheel', (e) => {
+            const modal = document.getElementById('artModal');
+            if (!modal || modal.classList.contains('hidden') || !swiper) return;
+            
+            // Only trigger if scrolling over the swiper container
+            const isOverSwiper = e.target.closest('.mySwiper');
+            if (!isOverSwiper) return;
+
+            e.preventDefault();
+            if (isScrolling) return;
+            
+            isScrolling = true;
+            if (e.deltaY > 0) {
+                swiper.slideNext();
+            } else {
+                swiper.slidePrev();
+            }
+            
+            setTimeout(() => {
+                isScrolling = false;
+            }, 300); // Refined Debounce duration (300ms)
+        }, { passive: false });
+
+        function updateMobileIndicator(current, total) {
+            const indicator = document.getElementById('mobilePageIndicator');
+            const currentEl = document.getElementById('currentPage');
+            const totalEl = document.getElementById('totalPages');
+
+            if (!indicator || !currentEl || !totalEl) return;
+
+            currentEl.innerText = current;
+            totalEl.innerText = total;
+
+            // Show indicator
+            indicator.classList.remove('opacity-0');
+            indicator.classList.add('opacity-100');
+
+            // Reset timeout for fading out
+            if (mobileIndicatorTimeout) clearTimeout(mobileIndicatorTimeout);
+            
+            mobileIndicatorTimeout = setTimeout(() => {
+                indicator.classList.remove('opacity-100');
+                indicator.classList.add('opacity-0');
+            }, 2000); // Visible for 2 seconds
+        }
+
+        // --- LOGIKA MODAL UTAMA ---
+        function openModal(images, title, author, width, height, unit) {
+            const modal = document.getElementById('artModal');
+            const wrapper = document.getElementById('modalSwiperWrapper');
+            
+            // Clear existing slides
+            wrapper.innerHTML = '';
+            
+            // Inject new slides
+            const imagesArray = Array.isArray(images) ? images : [images];
+            imagesArray.forEach(imgUrl => {
+                const slide = document.createElement('div');
+                slide.className = 'swiper-slide flex items-center justify-center p-6 md:p-12';
+                slide.innerHTML = `
+                    <div class="relative overflow-hidden shadow-[0_30px_100px_rgba(0,0,0,0.8)] border border-white/5 bg-zinc-900 group/zoom">
+                        <img src="${imgUrl}" alt="${title}" 
+                            class="max-h-[70vh] md:max-h-[82vh] w-auto object-contain transition-transform duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] cursor-zoom-in scale-100"
+                            onmousemove="zoomIn(event)" 
+                            onmouseleave="zoomOut(event)">
+                    </div>
+                `;
+                wrapper.appendChild(slide);
+            });
+
+            // Set Metadata
             document.getElementById('modalTitle').innerText = title;
             document.getElementById('modalAuthor').innerText = author;
-            document.getElementById('modalCount').innerText = count + " High Resolution Artworks";
+            
+            // Refined Dimensions Display
+            const dimensionsText = (width && height) ? `${width} x ${height} ${unit}` : 'Dimensions not specified';
+            document.getElementById('modalDimensions').innerText = dimensionsText;
+
+            // Re-init Swiper
+            setTimeout(() => {
+                initSwiper();
+                updateMobileIndicator(1, imagesArray.length);
+            }, 100);
 
             // Tampilkan Modal
             modal.classList.remove('hidden');
             modal.classList.add('flex');
-            document.body.style.overflow = 'hidden'; // Lock scroll body
+            document.body.style.overflow = 'hidden'; 
         }
 
         function closeModal() {
             const modal = document.getElementById('artModal');
             const commentOverlay = document.getElementById('commentOverlay');
-            const modalImg = document.getElementById('modalImage');
 
-            // Sembunyikan Modal Utama
             modal.classList.add('hidden');
             modal.classList.remove('flex');
             
-            // Reset Zoom Gambar agar saat buka gambar lain tidak miring
-            if (modalImg) modalImg.style.transform = "scale(1)";
-
-            // Pastikan Overlay Komentar juga ikut tertutup
             if (commentOverlay) {
                 commentOverlay.classList.add('hidden');
                 commentOverlay.classList.remove('flex');
             }
             
-            document.body.style.overflow = 'auto'; // Unlock scroll body
+            document.body.style.overflow = 'auto'; 
         }
 
         // --- LOGIKA KOMENTAR ---
@@ -745,6 +872,74 @@
 
         document.getElementById('backToTop').addEventListener('click', function() {
             window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // --- ARTWORK CARD HOVER SLIDER ---
+        document.addEventListener('DOMContentLoaded', function() {
+            const artworkContainers = document.querySelectorAll('.artwork-card-container');
+            const intervals = new Map();
+
+            // Preload images for instant appearance
+            const preloadImages = () => {
+                const allImages = document.querySelectorAll('.artwork-image');
+                allImages.forEach(img => {
+                    if (!img.classList.contains('active')) {
+                        const preloader = new Image();
+                        preloader.src = img.src;
+                    }
+                });
+            };
+            
+            // Execute preloading
+            if (window.performance && window.performance.mark) {
+                window.addEventListener('load', preloadImages);
+            } else {
+                setTimeout(preloadImages, 1000);
+            }
+
+            artworkContainers.forEach(container => {
+                const slider = container.querySelector('.artwork-slider');
+                const images = slider.querySelectorAll('img');
+                if (images.length <= 1) return;
+
+                const parentLink = container.closest('a');
+                
+                parentLink.addEventListener('mouseenter', () => {
+                    // Pre-clear any existing sessions to prevent collisions
+                    if (intervals.has(container)) {
+                        const session = intervals.get(container);
+                        clearTimeout(session.timeout);
+                        clearInterval(session.interval);
+                    }
+
+                    // Start 800ms delay before sliding
+                    const timeout = setTimeout(() => {
+                        let currentIndex = 0;
+                        const interval = setInterval(() => {
+                            currentIndex = (currentIndex + 1) % images.length;
+                            slider.style.transform = `translateX(-${currentIndex * 100}%)`;
+                        }, 1500);
+                        
+                        // Update the session with the active interval
+                        intervals.set(container, { timeout, interval });
+                    }, 800);
+
+                    // Initial session state (timeout active, interval pending)
+                    intervals.set(container, { timeout, interval: null });
+                });
+
+                parentLink.addEventListener('mouseleave', () => {
+                    if (intervals.has(container)) {
+                        const session = intervals.get(container);
+                        clearTimeout(session.timeout);
+                        if (session.interval) clearInterval(session.interval);
+                        intervals.delete(container);
+                    }
+                    
+                    // Slide back to the first image immediately
+                    slider.style.transform = `translateX(0)`;
+                });
+            });
         });
     </script>
 </body>

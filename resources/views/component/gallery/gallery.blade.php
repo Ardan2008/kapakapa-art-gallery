@@ -42,34 +42,6 @@
     
     @include('component.layout.navbar')
 
-    @php 
-        $gallery = [
-            [
-                'title' => 'Surealisme', 
-                'author' => 'Johanna', 
-                'count' => 45, 
-                'main_img' => 'https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?auto=format&fit=crop&q=80&w=800', 
-                'sub_img1' => 'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&q=80&w=400', 
-                'sub_img2' => 'https://images.unsplash.com/photo-1549490349-8643362247b5?auto=format&fit=crop&q=80&w=400'
-            ],
-            [
-                'title' => 'Romantisme', 
-                'author' => 'Barnowl88', 
-                'count' => 209, 
-                'main_img' => 'https://images.unsplash.com/photo-1598928506311-c55ded91a20c?auto=format&fit=crop&q=80&w=400', 
-                'sub_img1' => 'https://images.unsplash.com/photo-1598928506311-c55ded91a20c?auto=format&fit=crop&q=80&w=400', 
-                'sub_img2' => 'https://images.unsplash.com/photo-1553095066-5014bc7b7f2d?auto=format&fit=crop&q=80&w=400'
-            ],
-            [
-                'title' => 'Klasikisme', 
-                'author' => 'Koza', 
-                'count' => 103, 
-                'main_img' => 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&q=80&w=800', 
-                'sub_img1' => 'https://images.unsplash.com/photo-1459908676235-d5f02a50184b?auto=format&fit=crop&q=80&w=400', 
-                'sub_img2' => 'https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?auto=format&fit=crop&q=80&w=400'
-            ],
-        ];
-    @endphp
 
     <div class="min-h-screen selection:bg-[#c9a74e]/30">
         <main class="max-w-[1600px] mx-auto px-8 pt-10 pb-20 lg:pt-14">
@@ -87,9 +59,9 @@
             </header>
 
             <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-20">
-                @foreach($gallery as $item)
+                @foreach($styles as $item)
                 <div class="group block relative" data-aos="fade-up">
-                    <a href="/review_gallery" class="absolute inset-0 z-10" aria-label="View Gallery"></a>
+                    <a href="{{ route('gallery', ['style' => $item['title']]) }}" class="absolute inset-0 z-10" aria-label="View Gallery"></a>
 
                     <div class="relative flex gap-2 h-[450px] overflow-hidden mb-8 transition-all duration-700 group-hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,1)]">
                         <div class="w-2/3 h-full overflow-hidden bg-zinc-950 grayscale group-hover:grayscale-0 transition-all duration-1000 ease-in-out">
@@ -121,9 +93,9 @@
                         </div>
                         <div class="flex justify-between items-center text-[10px] uppercase tracking-[0.4em] text-zinc-500 pl-0 group-hover:pl-4 transition-all duration-700">
                             
-                            <a href="/artists_profile" class="relative z-20 group/author inline-block hover:text-white transition-colors">
-                                <span>By {{ $item['author'] }}</span>
-                            </a>
+                            <div class="relative z-20 group/author inline-block hover:text-white transition-colors">
+                                <span>{{ $item['author'] }}</span>
+                            </div>
 
                             <span class="text-[#c9a74e]/40 group-hover:text-[#c9a74e] transition-colors relative z-20">{{ $item['count'] }} pieces</span>
                         </div>
@@ -138,7 +110,7 @@
                         01
                     </div>
                     <span class="text-gray-700 font-light">/</span>
-                    <span class="text-[11px] uppercase tracking-[0.2em] font-medium text-gray-300">12</span>
+                    <span class="text-[11px] uppercase tracking-[0.2em] font-medium text-gray-300">{{ sprintf('%02d', count($styles)) }}</span>
                 </div>
 
                 <a href="#" class="group">

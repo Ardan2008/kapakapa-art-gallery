@@ -20,5 +20,9 @@ class DatabaseSeeder extends Seeder
             'username' => 'admin',
             'password' => Hash::make('admin123'),
         ]);
+
+        $this->call([
+            ArtWorkSeeder::class,
+        ]);
     }
 }

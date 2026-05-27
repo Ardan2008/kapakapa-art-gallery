@@ -159,14 +159,14 @@
         <header class="max-w-7xl mx-auto pl-4 md:pl-6 pt-32 pb-20" data-aos="fade-right">
             <div class="relative">
                 <h1 class="relative z-10 text-8xl md:text-9xl font-serif text-gray-300 tracking-tighter leading-none">
-                    Surealisme<span class="text-gold">.</span>
+                    Gallery: {{ $styleName }}<span class="text-gold">.</span>
                 </h1>
 
                 <div class="mt-12 flex items-center gap-6 group">
                     <div class="flex items-center gap-4">
-                        <span class="text-2xl font-light text-[#C9A74E] font-serif italic">03</span>
+                        <span class="text-2xl font-light text-[#C9A74E] font-serif italic">{{ (isset($artworks) && count($artworks) > 0) ? sprintf('%02d', count($artworks)) : '00' }}</span>
                         <div class="h-[1px] w-8 bg-zinc-700 group-hover:w-12 transition-all duration-500"></div>
-                        <span class="text-[12px] text-zinc-400 font-medium uppercase tracking-[0.4em]">Collections</span>
+                        <span class="text-[12px] text-zinc-400 font-medium uppercase tracking-[0.4em]">Pieces</span>
                     </div>
                 </div>
             </div>
@@ -192,39 +192,19 @@
             </div>
         </section>
 
-        @php 
-            $gallery = [
-                [
-                    'title' => 'The Stary Night', 
-                    'author' => 'Johanna', 
-                    'count' => 45, 
-                    'main_img' => 'https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?auto=format&fit=crop&q=80&w=800', 
-                    'sub_img1' => 'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&q=80&w=400', 
-                    'sub_img2' => 'https://images.unsplash.com/photo-1549490349-8643362247b5?auto=format&fit=crop&q=80&w=400'
-                ],
-                [
-                    'title' => 'Monalisa', 
-                    'author' => 'Barnowl88', 
-                    'count' => 209, 
-                    'main_img' => 'https://images.unsplash.com/photo-1598928506311-c55ded91a20c?q=80&w=800', 
-                    'sub_img1' => 'https://plus.unsplash.com/premium_photo-1668918112206-fc300eb16edb?w=500&auto=format&fit=crop&q=60', 
-                    'sub_img2' => 'https://images.unsplash.com/photo-1600715151005-e6d44b9ef840?w=500&auto=format&fit=crop&q=60'
-                ],
-                [
-                    'title' => 'Primitiv', 
-                    'author' => 'Koza', 
-                    'count' => 103, 
-                    'main_img' => 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&q=80&w=800', 
-                    'sub_img1' => 'https://images.unsplash.com/photo-1459908676235-d5f02a50184b?auto=format&fit=crop&q=80&w=400', 
-                    'sub_img2' => 'https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?auto=format&fit=crop&q=80&w=400'
-                ],
-            ];
-        @endphp
 
         <section class="px-8 md:px-20 pb-20">
             <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-20">
-                @foreach($gallery as $item)
-                <div onclick="openModal('{{ $item['main_img'] }}', '{{ $item['title'] }}', '{{ $item['author'] }}', '{{ $item['count'] }}')" 
+                @forelse($artworks ?? [] as $item)
+                @php
+                    $images = is_array($item->images) ? $item->images : json_decode($item->images, true);
+                    $main_img = (is_array($images) && count($images) > 0) ? $images[0] : ($item->image_url ?? 'https://via.placeholder.com/800');
+                    $sub_img1 = (is_array($images) && count($images) > 1) ? $images[1] : $main_img;
+                    $sub_img2 = (is_array($images) && count($images) > 2) ? $images[2] : $main_img;
+                    $author = $item->artist ?? 'Unknown Artist';
+                    $dimensions = ($item->width && $item->height) ? $item->width . ' x ' . $item->height . ' ' . $item->unit : 'N/A';
+                @endphp
+                <div onclick="openModal('{{ $main_img }}', '{{ addslashes($item->title) }}', '{{ addslashes($author) }}', '{{ $dimensions }}')" 
                     class="group block cursor-pointer" 
                     data-aos="fade-up">
                     
@@ -233,18 +213,18 @@
                         
                         {{-- Gambar Utama (Besar) --}}
                         <div class="w-2/3 h-full overflow-hidden bg-zinc-900 grayscale group-hover:grayscale-0 transition-all duration-1000 ease-in-out">
-                            <img src="{{ $item['main_img'] }}" alt="{{ $item['title'] }}" class="w-full h-full object-cover scale-110 group-hover:scale-100 transition-transform duration-1000">
+                            <img src="{{ $main_img }}" alt="{{ $item->title }}" class="w-full h-full object-cover scale-110 group-hover:scale-100 transition-transform duration-1000">
                         </div>
 
                         {{-- Gambar Samping (Kecil) --}}
                         <div class="w-1/3 flex flex-col gap-2">
                             <div class="h-1/2 overflow-hidden bg-zinc-900 grayscale group-hover:grayscale-0 transition-all duration-1000 delay-75">
-                                <img src="{{ $item['sub_img1'] }}" class="w-full h-full object-cover">
+                                <img src="{{ $sub_img1 }}" class="w-full h-full object-cover">
                             </div>
                             <div class="h-1/2 overflow-hidden bg-zinc-900 relative grayscale group-hover:grayscale-0 transition-all duration-1000 delay-150">
-                                <img src="{{ $item['sub_img2'] }}" class="w-full h-full object-cover opacity-30 group-hover:opacity-100 transition-opacity">
+                                <img src="{{ $sub_img2 }}" class="w-full h-full object-cover opacity-30 group-hover:opacity-100 transition-opacity">
                                 <div class="absolute inset-0 flex items-center justify-center bg-dark/60 group-hover:bg-transparent transition-all duration-500">
-                                    <span class="text-gold font-serif italic text-2xl group-hover:scale-110 transition-transform">+{{ $item['count'] }}</span>
+                                    <span class="text-gold font-serif italic text-2xl group-hover:scale-110 transition-transform">+{{ is_array($images) ? count($images) : 0 }}</span>
                                 </div>
                             </div>
                         </div>
@@ -258,16 +238,21 @@
                         <div class="flex items-center gap-4">
                             <div class="h-[1px] w-0 group-hover:w-16 bg-gold transition-all duration-700 ease-out"></div>
                             <h3 class="text-3xl font-serif text-gray-300 group-hover:text-gold transition-colors duration-500 italic tracking-tight">
-                                {{ $item['title'] }}
+                                {{ $item->title }}
                             </h3>
                         </div>
                         <div class="flex justify-between items-center text-[10px] uppercase tracking-[0.4em] text-gray-500 pl-0 group-hover:pl-4 transition-all duration-700">
-                            <span>By {{ $item['author'] }}</span>
-                            <span class="text-gold/40 group-hover:text-gold">{{ $item['count'] }} pieces</span>
+                            <span>By {{ $author }}</span>
+                            <span class="text-gold/40 group-hover:text-gold">{{ $dimensions }}</span>
                         </div>
                     </div>
                 </div>
-                @endforeach
+                @empty
+                    <div class="col-span-full py-20 text-center">
+                        <p class="text-gold/60 font-serif italic text-2xl">No artworks found for this style yet.</p>
+                        <a href="{{ route('gallery') }}" class="mt-8 inline-block text-[10px] uppercase tracking-[0.4em] text-gray-400 hover:text-gold transition-colors border-b border-white/10 pb-2">Return to All Collections</a>
+                    </div>
+                @endforelse
             </div>
 
             <div class="max-w-7xl mx-auto mt-12 flex items-center gap-6">

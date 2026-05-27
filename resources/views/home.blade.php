@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500&display=swap" rel="stylesheet">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <style>
         html {
             scroll-behavior: smooth;
@@ -237,25 +238,7 @@
     </section>
 
     {{-- Artists Section --}}
-    <?php
-        $featured_artists = [
-            [
-                "name" => "Debora Lee",
-                "origin" => "South Korea",
-                "image" => "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=800",
-            ],
-            [
-                "name" => "Marcus Chen",
-                "origin" => "Singapore",
-                "image" => "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=800",
-            ],
-            [
-                "name" => "Sarah Johnson",
-                "origin" => "United Kingdom",
-                "image" => "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=800",
-            ]
-        ];
-    ?>
+
 
     <div class="bg-[#0a0a0a] min-h-screen">
         <section class="relative py-32 bg-[#0a0a0a] overflow-hidden text-gray-400">
@@ -278,7 +261,7 @@
                         </p>
                         
                         <div class="pl-10"> 
-                            <a href="/artists" class="group inline-flex items-center gap-3 text-[#C9A74E] text-[10px] uppercase tracking-[0.3em] font-bold transition-all">
+                            <a href="{{ route('artists') }}" class="group inline-flex items-center gap-3 text-[#C9A74E] text-[10px] uppercase tracking-[0.3em] font-bold transition-all">
                                 <span>Explore Full Artists</span>
                                 <span class="w-12 h-[1px] bg-[#C9A74E]/30 transition-all group-hover:w-20 group-hover:bg-[#C9A74E]"></span>
                             </a>
@@ -286,54 +269,47 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-20 md:gap-10">
-                    <?php foreach ($featured_artists as $index => $artist): ?>
-                        <div class="group" 
-                            data-aos="fade-up" 
-                            data-aos-delay="<?php echo ($index + 1) * 200; ?>" 
-                            data-aos-duration="1000">
-                            
-                            <a href="/profile_art" class="block cursor-pointer">
-                                
-                                <div class="relative aspect-[4/5] overflow-hidden bg-[#1a1a1a] mb-8 shadow-2xl">
-                                    <img src="<?php echo $artist['image']; ?>" 
-                                        class="w-full h-full object-cover transition-all duration-[1.5s] ease-out grayscale group-hover:grayscale-0 group-hover:scale-105" 
-                                        alt="<?php echo $artist['name']; ?>">
+                <div class="swiper artistSwiper">
+                    <div class="swiper-wrapper">
+                        @foreach ($featured_artists as $index => $artist)
+                            <div class="swiper-slide pb-20">
+                                <div class="group" 
+                                    data-aos="fade-up" 
+                                    data-aos-delay="{{ ($index % 3 + 1) * 200 }}" 
+                                    data-aos-duration="1000">
                                     
-                                    <div class="absolute inset-0 bg-black/40 group-hover:bg-transparent transition-colors duration-500"></div>
-                                </div>
+                                    <a href="{{ route('profile_art', $artist->id) }}" class="block cursor-pointer">
+                                        
+                                        <div class="relative aspect-[4/5] overflow-hidden bg-[#1a1a1a] mb-8 shadow-2xl">
+                                            <img src="{{ $artist->profile_url ?? 'https://api.dicebear.com/8.x/notionists/svg?seed=' . urlencode($artist->name) }}" 
+                                                class="w-full h-full object-cover transition-all duration-[1.5s] ease-out grayscale group-hover:grayscale-0 group-hover:scale-105" 
+                                                alt="{{ $artist->name }}">
+                                            
+                                            <div class="absolute inset-0 bg-black/40 group-hover:bg-transparent transition-colors duration-500"></div>
+                                        </div>
 
-                                <div class="relative text-center md:text-left">
-                                    <h4 class="text-3xl font-serif text-gray-300 mb-2 group-hover:text-[#C9A74E] transition-colors duration-500 italic">
-                                        <?php echo $artist['name']; ?>
-                                    </h4>
-                                    <div class="flex items-center justify-center md:justify-start gap-3">
-                                        <span class="w-4 h-[1px] bg-[#C9A74E]/50 transition-all group-hover:w-8 group-hover:bg-[#C9A74E]"></span>
-                                        <span class="text-[10px] uppercase tracking-[0.4em] text-[#C9A74E] font-medium">
-                                            <?php echo $artist['origin']; ?>
-                                        </span>
-                                    </div>
+                                        <div class="relative text-center md:text-left">
+                                            <h4 class="text-3xl font-serif text-gray-300 mb-2 group-hover:text-[#C9A74E] transition-colors duration-500 italic">
+                                                {{ $artist->name }}
+                                            </h4>
+                                            <div class="flex items-center justify-center md:justify-start gap-3">
+                                                <span class="w-4 h-[1px] bg-[#C9A74E]/50 transition-all group-hover:w-8 group-hover:bg-[#C9A74E]"></span>
+                                                <span class="text-[10px] uppercase tracking-[0.4em] text-[#C9A74E] font-medium">
+                                                    {{ $artist->birthplace }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </a>
                                 </div>
-
-                            </a>
-                        </div>
-                    <?php endforeach; ?>
+                            </div>
+                        @endforeach
+                    </div>
                 </div>
             </div>
         </section>
     </div>
 
     {{-- Gallery --}}
-    <?php
-    $featured_arts = [
-        ["title" => "Realisme", "medium" => "By Debora Lee", "year" => "2024", "price" => "$4,200", "image" => "https://images.unsplash.com/photo-1549490349-8643362247b5?auto=format&fit=crop&q=80&w=800"],
-        ["title" => "Naturalisme", "medium" => "By Marcus Chen", "year" => "2025", "price" => "$12,500", "image" => "https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?auto=format&fit=crop&q=80&w=800"],
-        ["title" => "Impresionisme", "medium" => "By Alex Rivera", "year" => "2026", "price" => "$1,850", "image" => "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&q=80&w=800"],
-        ["title" => "Ekspresionisme", "medium" => "By Jordan Smith", "year" => "2023", "price" => "$3,100", "image" => "https://images.unsplash.com/photo-1541963463532-d68292c34b19?q=80&w=800&auto=format&fit=crop"],
-        ["title" => "Abstrak", "medium" => "By Sarah Johnson", "year" => "2025", "price" => "$950", "image" => "https://images.unsplash.com/photo-1576769267415-9642010aa962?auto=format&fit=crop&q=80&w=800"],
-        ["title" => "Kubisme", "medium" => "By Michael Brown", "year" => "2024", "price" => "$2,400", "image" => "https://images.unsplash.com/photo-1541963463532-d68292c34b19?auto=format&fit=crop&q=80&w=800"]
-    ];
-    ?>
 
     <section class="max-w-full bg-[#0a0a0a] py-32 px-8 overflow-hidden">
         <div class="max-w-[1440px] mx-auto">
@@ -360,21 +336,21 @@
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-24 items-start">
-                <?php foreach ($featured_arts as $index => $art): ?>
+                @foreach ($featured_categories as $index => $art)
                     <div class="group" 
                         data-aos="fade-up" 
-                        data-aos-delay="<?php echo ($index % 3) * 150; ?>">
+                        data-aos-delay="{{ ($index % 3) * 150 }}">
                         
                         <div class="relative overflow-hidden mb-10 bg-[#0f0f0f] p-4 shadow-2xl transition-all duration-700 group-hover:shadow-[#C9A74E]/5 group-hover:-translate-y-3">
                             
                             <div class="overflow-hidden aspect-[4/5] relative">
-                                <img src="<?php echo $art['image']; ?>" 
+                                <img src="{{ $art['image'] }}" 
                                     class="w-full h-full object-cover grayscale-[0.6] group-hover:grayscale-0 transition-all duration-[2s] ease-out group-hover:scale-105" 
-                                    alt="<?php echo $art['title']; ?>">
+                                    alt="{{ $art['title'] }}">
                                 
                                 <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-center justify-center backdrop-blur-[2px]">
                                     <div class="transform translate-y-10 group-hover:translate-y-0 transition-all duration-500">
-                                        <a href="/review_gallery" class="px-10 py-4 border border-[#C9A74E] text-[#C9A74E] text-[9px] uppercase tracking-[0.5em] hover:bg-[#C9A74E] hover:text-black transition-colors duration-300 cursor-pointer font-bold inline-block">
+                                        <a href="{{ $art['link'] }}" class="px-10 py-4 border border-[#C9A74E] text-[#C9A74E] text-[9px] uppercase tracking-[0.5em] hover:bg-[#C9A74E] hover:text-black transition-colors duration-300 cursor-pointer font-bold inline-block">
                                             View Work
                                         </a>
                                     </div>
@@ -387,28 +363,28 @@
                         <div class="px-1">
                             <div class="flex justify-between items-baseline mb-4">
                                 <h3 class="font-serif text-2xl text-gray-300 group-hover:text-[#C9A74E] transition-colors duration-500 italic">
-                                    <?php echo $art['title']; ?>
+                                    {{ $art['title'] }}
                                 </h3>
                                 <span class="h-[1px] flex-grow mx-6 bg-white/10 group-hover:bg-[#C9A74E]/30 transition-all"></span>
                                 <span class="text-[#C9A74E] font-serif italic text-lg">
-                                    <?php echo $art['price']; ?>
+                                    {{ $art['price'] }}
                                 </span>
                             </div>
                             
                             <div class="flex justify-between items-center opacity-60 group-hover:opacity-100 transition-opacity">
                                 <a href="/artists_profile" class="group inline-block">
                                     <p class="text-[9px] text-gray-300 uppercase tracking-[0.3em] font-medium transition-colors group-hover:text-white">
-                                        <?php echo $art['medium']; ?>
+                                        {{ $art['medium'] }}
                                     </p>
                                 </a>
                                 <p class="text-[15px] text-gray-300 italic font-serif">
-                                    <?php echo $art['year']; ?>
+                                    {{ $art['year'] }}
                                 </p>
                             </div>
                         </div>
 
                     </div>
-                <?php endforeach; ?>
+                @endforeach
             </div>
         </div>
     </section>
@@ -445,6 +421,7 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
     <script>
         window.addEventListener('load', () => {
@@ -458,6 +435,26 @@
             setTimeout(() => {
                 AOS.refresh();
             }, 2000); 
+
+            // Initialize Artist Carousel
+            new Swiper('.artistSwiper', {
+                slidesPerView: 1,
+                spaceBetween: 40,
+                loop: true,
+                autoplay: {
+                    delay: 3500,
+                    disableOnInteraction: false,
+                    pauseOnMouseEnter: true,
+                },
+                breakpoints: {
+                    768: {
+                        slidesPerView: 2,
+                    },
+                    1024: {
+                        slidesPerView: 3,
+                    },
+                }
+            });
         });
 
         // Scroll Effect untuk Hero Section
