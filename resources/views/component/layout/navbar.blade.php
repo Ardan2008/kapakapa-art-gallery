@@ -6,7 +6,7 @@
         <div class="flex items-center">
             <a href="/">
                 <div class="text-xl md:text-2xl font-bold tracking-[0.15em] uppercase font-serif text-gray-300 leading-none">
-                    Kuthoadem<span class="font-light italic ml-1 text-[#C9A74E]">Gallery</span>
+                    Kapakapa<span class="font-light italic ml-2 text-[#C9A74E]">Art Gallery</span>
                 </div>
             </a>
         </div>
@@ -32,9 +32,7 @@
                 
                 <div class="relative w-7 h-5 flex flex-col justify-between items-center">
                     <span id="line-1" class="w-full h-[2px] bg-white transition-all duration-500 ease-in-out"></span>
-                    
                     <span id="line-2" class="w-full h-[2px] bg-[#C9A74E] transition-all duration-500 ease-in-out shadow-[0_0_8px_rgba(201,167,78,0.4)]"></span>
-                    
                     <span id="line-3" class="w-full h-[2px] bg-slate-500 transition-all duration-500 ease-in-out"></span>
                 </div>
             </button>
@@ -73,7 +71,6 @@
         const l3 = document.getElementById('line-3');
 
         menuBtn.addEventListener('click', function () {
-            // Cek apakah menu sedang tertutup (punya class 'hidden')
             const isClosed = mobileMenu.classList.contains('hidden');
 
             if (isClosed) {
@@ -91,7 +88,7 @@
                     });
                 }, 50);
 
-                // Animasi ke "X"
+                // Animasi Hamburger ke "X"
                 l1.style.transform = "translateY(9px) rotate(45deg)";
                 l1.classList.add('bg-[#C9A74E]');
                 l1.classList.remove('bg-white');

@@ -18,7 +18,7 @@
             }
         }
     </script>
-    <title>Kuthoadem Gallery | Gallery</title>
+    <title>Kapakapa Art Gallery | Gallery</title>
     <style>
         html, body {
             background-color: #0a0a0a !important;

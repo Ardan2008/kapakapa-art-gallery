@@ -9,15 +9,15 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    <title>Kuthoadem Gallery | Private Access</title>
+    <title>Kapakapa Art Gallery | Private Access</title>
     <style>
         :root {
-            --gold: #C9A74E;
-            --dark-bg: #0a0a0a;
+            var(--gold): #C9A74E;
+            var(--dark-bg): #0a0a0a;
         }
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: var(--dark-bg);
+            background-color: #0a0a0a;
             color: #d1d5db;
         }
         
@@ -30,9 +30,9 @@
         }
         
         .input-field:focus {
-            border-color: var(--gold);
+            border-color: #C9A74E;
             outline: none;
-            box-shadow: 0 0 0 1px var(--gold);
+            box-shadow: 0 0 0 1px #C9A74E;
         }
 
         /* Container untuk ikon dan garis */
@@ -68,16 +68,16 @@
 
         /* Efek Fokus: Ikon dan Garis berubah jadi emas */
         .input-group:focus-within .input-icon {
-            color: var(--gold);
+            color: #C9A74E;
         }
         
         .input-group:focus-within .icon-wrapper::after {
-            background-color: var(--gold);
+            background-color: #C9A74E;
             opacity: 0.5; /* Emas yang sedikit transparan agar tidak terlalu mencolok */
         }
 
         .btn-gold {
-            background-color: var(--gold);
+            background-color: #C9A74E;
             color: black;
             transition: all 0.3s ease;
         }
@@ -132,7 +132,7 @@
         
         <div class="absolute bottom-10 left-10 lg:bottom-16 lg:left-16 z-10" data-aos="fade-up" data-aos-delay="800">
             <h1 class="text-4xl lg:text-5xl font-light text-gray-300 tracking-tighter">
-                Kutho<span class="font-bold italic">adem.</span>
+                Kapakapa<span class="font-bold italic"> Art.</span>
             </h1>
             <div class="w-12 h-[2px] bg-[#C9A74E] mt-4 mb-4"></div>
             <p class="text-gray-300 text-[10px] lg:text-sm uppercase tracking-[0.3em]">Private Collection Portal</p>
@@ -198,7 +198,7 @@
             <div class="mt-20 flex flex-col items-center opacity-40" data-aos="fade-in" data-aos-delay="1600">
                 <div class="flex items-center gap-4 w-full">
                     <div class="h-[1px] bg-gray-600 flex-1"></div>
-                    <span class="text-[9px] uppercase tracking-[0.5em] text-gray-300 whitespace-nowrap">Kuthoadem Gallery</span>
+                    <span class="text-[9px] uppercase tracking-[0.5em] text-gray-300 whitespace-nowrap">Kapakapa Art Gallery</span>
                     <div class="h-[1px] bg-gray-600 flex-1"></div>
                 </div>
                 <p class="mt-4 text-[8px] uppercase tracking-[0.2em] text-gray-400">Secure Environment • 2026</p>

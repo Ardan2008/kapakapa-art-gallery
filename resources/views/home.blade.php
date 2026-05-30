@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kuthoadem Gallery</title>
+    <title>Kapakapa Art Gallery</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500&display=swap" rel="stylesheet">
@@ -88,9 +88,15 @@
         <div id="loader-content-wrap" class="relative w-full h-full flex items-center justify-center">
             
             <div class="absolute inset-0 flex flex-col justify-around opacity-[0.04] select-none pointer-events-none skew-y-[-12deg] scale-110">
-                <h2 class="text-[15vw] font-black text-white whitespace-nowrap leading-none marquee-left">KUTHOADEM KUTHOADEM KUTHOADEM</h2>
-                <h2 class="text-[15vw] font-black text-white whitespace-nowrap leading-none marquee-right">KUTHOADEM KUTHOADEM KUTHOADEM</h2>
-                <h2 class="text-[15vw] font-black text-white whitespace-nowrap leading-none marquee-left">KUTHOADEM KUTHOADEM KUTHOADEM</h2>
+                <h2 class="text-[15vw] font-black text-white whitespace-nowrap leading-none marquee-left">
+                    KAPAKAPA ART GALLERY KAPAKAPA ART GALLERY KAPAKAPA ART GALLERY
+                </h2>
+                <h2 class="text-[15vw] font-black text-white whitespace-nowrap leading-none marquee-right">
+                    KAPAKAPA ART GALLERY KAPAKAPA ART GALLERY KAPAKAPA ART GALLERY
+                </h2>
+                <h2 class="text-[15vw] font-black text-white whitespace-nowrap leading-none marquee-left">
+                    KAPAKAPA ART GALLERY KAPAKAPA ART GALLERY KAPAKAPA ART GALLERY
+                </h2>
             </div>
 
             <svg class="absolute inset-0 w-full h-full opacity-20 pointer-events-none" viewBox="0 0 1000 1000">
@@ -102,13 +108,13 @@
 
             <div class="relative z-10 text-center">
                 <div class="overflow-hidden">
-                    <h1 id="main-brand" class="text-gray-300 font-serif italic text-[16vw] md:text-[12vw] leading-none tracking-tighter opacity-0 translate-y-full">
-                        Kuthoadem
+                    <h1 id="main-brand" class="text-gray-300 font-serif italic text-[12vw] md:text-[8vw] leading-none tracking-tighter opacity-0 translate-y-full">
+                        Kapakapa
                     </h1>
                 </div>
                 <div id="sub-brand" class="flex items-center justify-center gap-4 mt-8 opacity-0">
                     <div class="w-12 h-[1px] bg-[#C9A74E]"></div>
-                    <p class="text-[#C9A74E] tracking-[1.2em] text-[10px] md:text-sm uppercase font-light">Gallery</p>
+                    <p class="text-[#C9A74E] tracking-[1.2em] text-[10px] md:text-sm uppercase font-light ps-[1.2em]">Art Gallery</p>
                     <div class="w-12 h-[1px] bg-[#C9A74E]"></div>
                 </div>
             </div>
@@ -126,7 +132,7 @@
         <nav class="relative z-50 flex items-center justify-between px-6 md:px-16 py-8 text-gray-300">
             <a href="/">
                 <div class="text-2xl md:text-3xl font-bold tracking-[0.1em] uppercase font-serif text-gray-300">
-                    Kuthoadem<span class="font-light italic opacity-70 ml-1 text-amber-400">Gallery</span>
+                    Kapakapa<span class="font-light italic opacity-70 ml-2 text-amber-400">Art Gallery</span>
                 </div>
             </a>
 

@@ -42,8 +42,8 @@
             <div class="md:col-span-12 lg:col-span-4 flex flex-col justify-between space-y-12 border-r border-white/5 pr-8">
                 <div class="group cursor-default">
                     <h2 class="text-4xl font-serif font-bold tracking-[0.2em] uppercase leading-none text-gray-300 transition-all duration-500">
-                        Kuthoadem
-                        <span class="text-[#C9A74E] font-light italic block text-2xl tracking-[0.1em] mt-4 group-hover:translate-x-3 transition-transform duration-500">Fine Art Gallery</span>
+                        Kapakapa
+                        <span class="text-[#C9A74E] font-light italic block text-2xl tracking-[0.1em] mt-4 group-hover:translate-x-3 transition-transform duration-500">Art Gallery</span>
                     </h2>
                 </div>
                 
@@ -123,8 +123,8 @@
                     <div class="space-y-12">
                         <div class="group">
                             <span class="text-[10px] font-bold tracking-[0.3em] text-slate-600 uppercase block mb-3">Email</span>
-                            <a href="mailto:hello@kuthoadem.art" class="text-xl font-light text-gray-300 hover:text-[#C9A74E] transition-all duration-300">
-                                gallery@kuthoadem.art
+                            <a href="mailto:gallery@kapakapa.art" class="text-xl font-light text-gray-300 hover:text-[#C9A74E] transition-all duration-300">
+                                gallery@kapakapa.art
                             </a>
                         </div>
                         <div class="group border-t border-white/5 pt-8">
@@ -153,7 +153,7 @@
                 <div class="space-y-4">
                     <div class="flex items-center gap-4">
                         <p class="text-[11px] md:text-[13px] uppercase tracking-[0.4em] text-slate-500 font-medium">
-                            &copy; 2026 <span class="text-gray-300 font-bold">Kuthoadem Gallery</span> 
+                            &copy; 2026 <span class="text-gray-300 font-bold">Kapakapa Art Gallery</span> 
                         </p>
                         <span class="h-4 w-[1px] bg-white/20 hidden md:block"></span> 
                         <p class="text-[11px] md:text-[12px] uppercase tracking-[0.3em] text-slate-600 italic">
@@ -164,7 +164,7 @@
             </div>
 
             <div class="absolute bottom-0 right-0 opacity-[0.02] pointer-events-none select-none hidden lg:block">
-                <h2 class="text-9xl font-serif font-bold -mb-6 tracking-tighter text-white uppercase">Kuthoadem</h2>
+                <h2 class="text-9xl font-serif font-bold -mb-6 tracking-tighter text-white uppercase">Kapakapa</h2>
             </div>
         </div>
     </div>
