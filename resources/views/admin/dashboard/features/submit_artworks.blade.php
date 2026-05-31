@@ -1399,6 +1399,9 @@
             }
         }
     </script>
+
+    <script src="{{ asset('js/batch-validation.js') }}"></script>
+
     <style>
         .d-none { display: none !important; }
     </style>

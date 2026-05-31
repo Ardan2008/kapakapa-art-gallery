@@ -353,7 +353,7 @@
                             // Ambil 6 besar saja untuk tampilan di widget luar
                             $previewCountries = array_slice($countries, 0, 6);
                         @endphp
-                        <div class="lg:col-span-1 border border-white/5 rounded-[2.5rem] p-8 shadow-2xl flex flex-col relative overflow-hidden group">
+                        <div class="lg:col-span-1 border border-white/5 rounded-[2.5rem] p-8 shadow-2xl flex flex-col relative overflow-hidden group" id="customerWidget">
                             <div class="absolute -top-24 -right-24 w-48 h-48 bg-[#C9A74E]/10 blur-[80px] rounded-full group-hover:bg-[#C9A74E]/20 transition-all duration-700"></div>
 
                             <div class="flex justify-between items-start mb-10 relative z-10">
@@ -364,44 +364,35 @@
                                 
                                 <div class="relative group/select">
                                     <select id="timeFilter" 
-                                            onchange="filterData(this.value)" 
+                                            onchange="fetchCustomerCountries(this.value)" 
                                             class="appearance-none bg-neutral-900/40 backdrop-blur-md border border-white/5 text-neutral-400 text-[10px] sm:text-[11px] font-black uppercase tracking-[0.2em] rounded-full px-6 py-3 outline-none cursor-pointer 
                                                 focus:border-[#C9A74E]/50 focus:text-white focus:ring-4 focus:ring-[#C9A74E]/5
                                                 hover:bg-neutral-800/80 hover:border-white/10 hover:text-neutral-200
                                                 transition-all duration-300 pr-12 shadow-lg">
-                                        <option value="today" class="bg-[#1a1a1a] text-white">Today</option>
+                                        <option value="today"     class="bg-[#1a1a1a] text-white">Today</option>
                                         <option value="yesterday" class="bg-[#1a1a1a] text-white">Yesterday</option>
-                                        <option value="7days" class="bg-[#1a1a1a] text-white">7 Days</option>
+                                        <option value="7days"     class="bg-[#1a1a1a] text-white">7 Days</option>
                                     </select>
                                     
                                     <div class="absolute inset-0 rounded-full bg-gradient-to-tr from-[#C9A74E]/10 to-transparent opacity-0 group-hover/select:opacity-100 pointer-events-none transition-opacity duration-500"></div>
-
                                     <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none flex items-center gap-2 border-l border-white/10 pl-3">
-                                        <svg class="w-3 h-3 text-neutral-500 group-hover/select:text-[#C9A74E] group-hover/select:translate-y-0.5 transition-all duration-300" 
-                                            fill="none" 
-                                            stroke="currentColor" 
-                                            viewBox="0 0 24 24">
+                                        <svg class="w-3 h-3 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7" />
                                         </svg>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-3 gap-y-10 gap-x-4 mb-10 relative z-10">
-                                @foreach($previewCountries as $country)
-                                    <div class="flex flex-col items-center group/item cursor-default">
-                                        <div class="relative mb-3">
-                                            <div class="absolute inset-0 bg-[#C9A74E]/20 rounded-full blur-md opacity-0 group-hover/item:opacity-100 transition-opacity duration-500"></div>
-                                            
-                                            <div class="relative w-16 h-16 rounded-full border-[3px] border-neutral-800 p-1 bg-neutral-900 overflow-hidden transition-transform duration-500 group-hover/item:scale-110 group-hover/item:border-[#C9A74E]">
-                                                <img src="https://flagcdn.com/w160/{{ $country['code'] }}.png" alt="{{ $country['name'] }}" class="w-full h-full object-cover rounded-full grayscale-[0.3] group-hover/item:grayscale-0 transition-all">
-                                            </div>
-                                        </div>
-                                        
-                                        <span class="text-[10px] text-neutral-500 uppercase font-black tracking-[0.15em] mb-1 group-hover/item:text-neutral-300 transition-colors">{{ $country['name'] }}</span>
-                                        <span class="text-xl font-bold text-white tabular-nums">{{ number_format($country['count']) }}</span>
-                                    </div>
-                                @endforeach
+                            {{-- Grid preview 6 negara — diisi JS --}}
+                            <div id="countryPreviewGrid" class="grid grid-cols-3 gap-y-10 gap-x-4 mb-10 relative z-10 transition-all duration-300">
+                                {{-- skeleton loading --}}
+                                @for ($i = 0; $i < 6; $i++)
+                                <div class="flex flex-col items-center animate-pulse">
+                                    <div class="w-16 h-16 rounded-full bg-neutral-800 mb-3"></div>
+                                    <div class="w-12 h-2 bg-neutral-800 rounded mb-2"></div>
+                                    <div class="w-8 h-4 bg-neutral-700 rounded"></div>
+                                </div>
+                                @endfor
                             </div>
 
                             <button onclick="toggleCountriesModal()" class="group/btn relative w-full py-4 bg-gradient-to-b from-neutral-800 to-neutral-900 hover:from-neutral-700 hover:to-neutral-800 border border-white/5 rounded-2xl transition-all duration-300 active:scale-[0.98] overflow-hidden">
@@ -509,17 +500,7 @@
             </div>
 
             <div id="modalCountryGrid" class="max-h-[55vh] overflow-y-auto pr-4 custom-scrollbar grid grid-cols-1 sm:grid-cols-2 gap-4">
-                @foreach($countries as $country)
-                    <div class="country-item group flex items-center justify-between bg-neutral-900/30 hover:bg-[#C9A74E]/5 border border-white/5 hover:border-[#C9A74E]/20 p-5 rounded-[1.5rem] transition-all">
-                        <div class="flex items-center gap-4">
-                            <img src="https://flagcdn.com/w80/{{ $country['code'] }}.png" class="w-12 h-12 rounded-2xl object-cover">
-                            <div>
-                                <p class="text-xs text-neutral-500 font-bold uppercase tracking-widest">{{ $country['name'] }}</p>
-                                <p class="text-xl font-bold text-white group-hover:text-[#C9A74E] transition-colors">{{ number_format($country['count']) }}</p>
-                            </div>
-                        </div>
-                    </div>
-                @endforeach
+                {{-- diisi JS --}}
             </div>
         </div>
     </div>
@@ -527,762 +508,852 @@
     <form id="logout-form" action="/" method="GET" class="hidden">@csrf</form>
 
     <script>
-    // ═══════════════════════════════════════════════════════════
-    // STATE GLOBAL
-    // ═══════════════════════════════════════════════════════════
-    let isDrawerVisible = false;
-    const menuStates = {
-        'main-menu-content': true,
-        'features-content': true,
-        'tools-content': true
-    };
-
-    // Variabel chart — deklarasi di scope global, inisialisasi di DOMContentLoaded
-    let visitorChart = null;
-    let artSalesChart = null;
-    let visitorOnlineInterval = null;
-    let visitorLiveInterval = null;
-
-    const VISITOR_MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    function getVisitorFallback(year) {
-        const seed = parseInt(year) % 100;
-        const curMonth = new Date().getMonth(); // 0-based
-        return Array.from({ length: 12 }, (_, i) => {
-            // Bulan yang belum terjadi = 0
-            if (i > curMonth) return 0;
-            return Math.round(200 + (seed * 3) + (Math.sin((i + seed) * 0.8) * 150) + (i % 3 * 80));
-        });
-    }
-
-    // ═══════════════════════════════════════════════════════════
-    // DOM CONTENT LOADED — satu blok saja
-    // ═══════════════════════════════════════════════════════════
-    document.addEventListener('DOMContentLoaded', () => {
-
-        // ── 1. ANIMASI COUNTER ──────────────────────────────────
-        fetchDashboardStats();
-        setInterval(fetchDashboardStats, 60000);
-
-        // ── 1b. FETCH STATS DARI API — update counter cards ────
-        async function fetchDashboardStats() {
-            try {
-                const res = await fetch('/api/dashboard/stats', {
-                    headers: { 'Accept': 'application/json' }
-                });
-
-                if (!res.ok) throw new Error('HTTP ' + res.status);
-
-                const json = await res.json();
-                console.log('[Dashboard Stats] Data dari API:', json);
-
-                // Update setiap counter card yang punya data-key
-                document.querySelectorAll('.counter-value[data-key]').forEach(el => {
-                    const key = el.getAttribute('data-key');
-                    if (json[key] !== undefined) {
-                        animateCounter(el, json[key]);
-                    }
-                });
-
-            } catch (err) {
-                console.warn('[Dashboard Stats] API gagal, tetap pakai nilai default dari blade:', err.message);
-                // Fallback: animasikan saja nilai default yang sudah ada di data-target
-                document.querySelectorAll('.counter-value').forEach(el => {
-                    animateCounter(el, +el.getAttribute('data-target'));
-                });
-            }
-        }
-
-        // Fungsi animasi counter yang bisa dipanggil ulang dengan nilai baru
-        function animateCounter(el, targetValue) {
-            const startTime = performance.now();
-            const duration = 2000;
-
-            const update = (currentTime) => {
-                const progress = Math.min((currentTime - startTime) / duration, 1);
-                const easeOut = 1 - Math.pow(1 - progress, 3);
-                el.innerText = Math.floor(easeOut * targetValue).toLocaleString('en-US');
-                if (progress < 1) requestAnimationFrame(update);
-                else el.innerText = targetValue.toLocaleString('en-US');
-            };
-            requestAnimationFrame(update);
-        }
-
-        // ── 2. SALES ANALYTICS CHART (Line) ────────────────────
-        const salesCanvas = document.getElementById('artSalesChart');
-        if (salesCanvas) {
-            const ctx = salesCanvas.getContext('2d');
-            const dataSets = {
-                monthly: {
-                    labels: VISITOR_MONTHS,
-                    data: [45, 52, 48, 70, 65, 85, 78, 92, 110, 95, 105, 120]
-                },
-                yearly: {
-                    labels: ['2021', '2022', '2023', '2024', '2025', '2026'],
-                    data: [450, 620, 890, 1100, 1400, 1850]
-                }
-            };
-
-            const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-            gradient.addColorStop(0, 'rgba(201, 167, 78, 0.25)');
-            gradient.addColorStop(1, 'rgba(201, 167, 78, 0)');
-
-            artSalesChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: dataSets.monthly.labels,
-                    datasets: [{
-                        label: 'Market Value',
-                        data: dataSets.monthly.data,
-                        borderColor: '#C9A74E',
-                        borderWidth: 3,
-                        tension: 0.4,
-                        fill: true,
-                        backgroundColor: gradient,
-                        pointRadius: 6,
-                        pointBackgroundColor: '#C9A74E',
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#737373' } },
-                        x: { grid: { display: false }, ticks: { color: '#a3a3a3' } }
-                    }
-                }
-            });
-
-            document.getElementById('btn-monthly')?.addEventListener('click', () => {
-                artSalesChart.data.labels = dataSets.monthly.labels;
-                artSalesChart.data.datasets[0].data = dataSets.monthly.data;
-                artSalesChart.update();
-            });
-            document.getElementById('btn-yearly')?.addEventListener('click', () => {
-                artSalesChart.data.labels = dataSets.yearly.labels;
-                artSalesChart.data.datasets[0].data = dataSets.yearly.data;
-                artSalesChart.update();
-            });
-        }
-
-        // ── 3. BUILD YEAR DROPDOWN — otomatis dari tahun sekarang ──
-        async function buildYearDropdown() {
-            const select = document.getElementById('yearFilter');
-            if (!select) return;
-
-            const currentYear = new Date().getFullYear();
-
-            try {
-                const res = await fetch('/api/dashboard/visitors/years', {
-                    headers: { 'Accept': 'application/json' }
-                });
-
-                if (!res.ok) throw new Error('HTTP ' + res.status);
-
-                const json = await res.json();
-                const years = json.years; // Array dari server, sudah desc
-
-                select.innerHTML = '';
-                years.forEach(y => {
-                    const opt = document.createElement('option');
-                    opt.value = y;
-                    opt.textContent = y;
-                    opt.className = 'bg-[#1a1a1a] text-white';
-                    if (parseInt(y) === currentYear) opt.selected = true;
-                    select.appendChild(opt);
-                });
-
-            } catch (err) {
-                // Fallback: generate dari tahun sekarang mundur 3 tahun
-                console.warn('[Year Dropdown] API gagal, pakai fallback:', err.message);
-                select.innerHTML = '';
-                for (let y = currentYear; y >= currentYear - 2; y--) {
-                    const opt = document.createElement('option');
-                    opt.value = y;
-                    opt.textContent = y;
-                    opt.className = 'bg-[#1a1a1a] text-white';
-                    if (y === currentYear) opt.selected = true;
-                    select.appendChild(opt);
-                }
-            }
-
-            // Setelah dropdown selesai dibangun, fetch data tahun aktif
-            const activeYear = select.value ?? currentYear.toString();
-            fetchVisitorStats(activeYear);
-        }
-
-        // ── 3. VISITOR BAR CHART — inisialisasi sekali ─────────
-        const barCanvas = document.getElementById('visitorBarChart');
-        if (barCanvas) {
-            visitorChart = new Chart(barCanvas.getContext('2d'), {
-                type: 'bar',
-                data: {
-                    labels: VISITOR_MONTHS,
-                    datasets: [{
-                        label: 'Visitors',
-                        data: new Array(12).fill(0),
-                        backgroundColor: new Array(12).fill('#C9A74E'),
-                        hoverBackgroundColor: '#A88C3F',
-                        borderRadius: 6,
-                        barThickness: 25,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    animation: { duration: 500 },
-                    plugins: { 
-                        legend: { display: false }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: { stepSize: 250, color: '#6b7280' },
-                            grid: { color: 'rgba(255,255,255,0.05)', drawBorder: false }
-                        },
-                        x: {
-                            grid: { display: false },
-                            ticks: { color: '#6b7280' }
-                        }
-                    }
-                }
-            });
-
-            // Build dropdown dulu, baru fetch data tahun aktif
-            buildYearDropdown();
-
-            const defaultYear = new Date().getFullYear().toString();
-            fetchVisitorStats(defaultYear);
-
-            // Polling: refresh data tiap 30 detik
-            visitorLiveInterval = setInterval(() => {
-                const y = document.getElementById('yearFilter')?.value ?? new Date().getFullYear().toString();
-                fetchVisitorStats(y);
-            }, 30000);
-
-            // Polling: online count tiap 10 detik
-            visitorOnlineInterval = setInterval(fetchOnlineCount, 10000);
-        }
-
-        // Init Lucide icons
-        lucide.createIcons();
-    });
-
-    // ═══════════════════════════════════════════════════════════
-    // VISITOR CHART — FUNGSI API
-    // ═══════════════════════════════════════════════════════════
-
-    async function fetchVisitorStats(year) {
-        try {
-            const res = await fetch(`/api/dashboard/visitors?year=${year}`, {
-                headers: {
-                    'Accept': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? ''
-                }
-            });
-
-            if (!res.ok) throw new Error('HTTP ' + res.status);
-
-            const json = await res.json();
-            console.log('[Visitor Chart] Data dari API:', json);
-            applyVisitorData(json.monthly, json.online ?? null);
-
-        } catch (err) {
-            console.warn('[Visitor Chart] API gagal, pakai fallback. Error:', err.message);
-            applyVisitorData(getVisitorFallback(year)); // ← pakai fungsi, bukan objek statis
-        }
-    }
-
-    async function fetchOnlineCount() {
-        try {
-            const res = await fetch('/api/dashboard/visitors/online', {
-                headers: { 'Accept': 'application/json' }
-            });
-            if (!res.ok) return;
-            const json = await res.json();
-            renderOnlineCount(json.online);
-        } catch (_) {}
-    }
-
-    function applyVisitorData(monthly, online = null) {
-        if (!visitorChart) return;
-
-        const curMonth = new Date().getMonth();
-        // Hitung max hanya dari bulan yang sudah terjadi
-        const relevantData = monthly.slice(0, curMonth + 1);
-        const maxVal = Math.max(...relevantData, 500);
-
-        visitorChart.data.datasets[0].data = monthly;
-        visitorChart.data.datasets[0].backgroundColor = monthly.map((_, i) =>
-            i === curMonth ? '#E8C46A' : '#C9A74E'
-        );
-        visitorChart.options.scales.y.max = Math.ceil(maxVal * 1.2 / 250) * 250;
-        visitorChart.update();
-
-        if (online !== null) renderOnlineCount(online);
-    }
-
-    function renderOnlineCount(count) {
-        const el = document.getElementById('visitorOnlineCount');
-        if (el) el.textContent = Number(count).toLocaleString('id-ID');
-    }
-
-    // Handler select tahun — dipanggil dari onchange di HTML
-    function updateYearlyData(year) {
-        fetchVisitorStats(year);
-    }
-
-    // ═══════════════════════════════════════════════════════════
-    // SIDEBAR & ACCORDION
-    // ═══════════════════════════════════════════════════════════
-    function handleNavDrawer(open, event) {
-        if (event) event.stopPropagation();
-        const sidebar = document.getElementById('mainSidebar') || document.getElementById('main-sidebar');
-        const overlay = document.getElementById('sidebarOverlay');
-        const path1 = document.getElementById('path1');
-        const path2 = document.getElementById('path2');
-        const path3 = document.getElementById('path3');
-
-        isDrawerVisible = open;
-
-        if (open) {
-            sidebar?.classList.remove('-translate-x-full');
-            overlay?.classList.remove('hidden');
-            setTimeout(() => overlay?.classList.add('opacity-100'), 10);
-            path1?.setAttribute('d', 'M6 18L18 6');
-            if (path2) path2.style.opacity = '0';
-            path3?.setAttribute('d', 'M6 6l12 12');
-            document.body.style.overflow = 'hidden';
-        } else {
-            sidebar?.classList.add('-translate-x-full');
-            overlay?.classList.remove('opacity-100');
-            setTimeout(() => overlay?.classList.add('hidden'), 300);
-            path1?.setAttribute('d', 'M4 6h16');
-            if (path2) path2.style.opacity = '1';
-            path3?.setAttribute('d', 'M4 18h16');
-            document.body.style.overflow = '';
-        }
-    }
-
-    function switchMenuAccordion(contentId, arrowId) {
-        const content = document.getElementById(contentId);
-        const arrow = document.getElementById(arrowId);
-        if (!content) return;
-
-        menuStates[contentId] = !menuStates[contentId];
-
-        if (menuStates[contentId]) {
-            content.classList.replace('grid-rows-[0fr]', 'grid-rows-[1fr]');
-            content.classList.replace('opacity-0', 'opacity-100');
-            if (arrow) arrow.style.transform = 'rotate(0deg)';
-        } else {
-            content.classList.replace('grid-rows-[1fr]', 'grid-rows-[0fr]');
-            content.classList.replace('opacity-100', 'opacity-0');
-            if (arrow) arrow.style.transform = 'rotate(-90deg)';
-        }
-    }
-
-    // ═══════════════════════════════════════════════════════════
-    // MODAL & DROPDOWN
-    // ═══════════════════════════════════════════════════════════
-    function toggleProfileDropdown(event) {
-        if (event) event.stopPropagation();
-        document.getElementById('profileDropdown').classList.toggle('hidden-modal');
-    }
-
-    window.onclick = function(event) {
-        if (event.target.id === 'sidebarOverlay') handleNavDrawer(false);
-        if (!event.target.closest('#profileButton')) {
-            document.getElementById('profileDropdown')?.classList.add('hidden-modal');
-        }
-    };
-
-    function openWidgetMenu(buttonElement) {
-        const targetMenu = buttonElement.nextElementSibling;
-        document.querySelectorAll('.dropdown-menu').forEach(menu => {
-            if (menu !== targetMenu) menu.classList.add('hidden');
-        });
-        targetMenu.classList.toggle('hidden');
-    }
-
-    window.addEventListener('click', function(event) {
-        if (!event.target.closest('.custom-dropdown')) {
-            document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.add('hidden'));
-        }
-    });
-
-    function switchTab(type) {
-        const btnMonthly = document.getElementById('btn-monthly');
-        const btnYearly = document.getElementById('btn-yearly');
-        [btnMonthly, btnYearly].forEach(btn => {
-            btn.classList.remove('bg-[#C9A74E]', 'text-black');
-            btn.classList.add('text-neutral-500', 'hover:text-white');
-        });
-        if (type === 'monthly') {
-            btnMonthly.classList.add('bg-[#C9A74E]', 'text-black');
-            btnMonthly.classList.remove('text-neutral-500', 'hover:text-white');
-        } else {
-            btnYearly.classList.add('bg-[#C9A74E]', 'text-black');
-            btnYearly.classList.remove('text-neutral-500', 'hover:text-white');
-        }
-    }
-
-    function openSettings() {
-        const modal = document.getElementById('settingsModal');
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-        setTimeout(() => {
-            document.getElementById('settingsModalContent').classList.remove('scale-95');
-            document.getElementById('settingsModalContent').classList.add('scale-100');
-        }, 10);
-    }
-
-    function closeSettings() {
-        document.getElementById('settingsModalContent').classList.add('scale-95');
-        setTimeout(() => {
-            const modal = document.getElementById('settingsModal');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-        }, 200);
-    }
-
-    function openLogoutModal() {
-        document.getElementById('profileDropdown').classList.add('hidden-modal');
-        document.getElementById('logoutModal').classList.remove('hidden-modal');
-    }
-
-    function closeLogoutModal() {
-        document.getElementById('logoutModal').classList.add('hidden-modal');
-    }
-
-    function toggleCountriesModal() {
-        const modal = document.getElementById('countriesModal');
-        const backdrop = document.getElementById('modalBackdrop');
-        const container = document.getElementById('modalContainer');
-
-        if (modal.classList.contains('hidden')) {
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                backdrop.classList.add('opacity-100');
-                container.classList.remove('scale-95', 'opacity-0');
-                container.classList.add('scale-100', 'opacity-100');
-            }, 10);
-            document.body.style.overflow = 'hidden';
-        } else {
-            backdrop.classList.remove('opacity-100');
-            container.classList.remove('scale-100', 'opacity-100');
-            container.classList.add('scale-95', 'opacity-0');
-            setTimeout(() => {
-                modal.classList.add('hidden');
-                document.body.style.overflow = 'auto';
-            }, 500);
-        }
-    }
-
-    function searchCountry(query) {
-        const items = document.querySelectorAll('.country-item');
-        query = query.toLowerCase();
-        items.forEach(item => {
-            item.style.display = item.innerText.toLowerCase().includes(query) ? 'flex' : 'none';
-        });
-    }
-
-    function filterData(val) {
-        const grid = document.querySelector('.grid-cols-3');
-        if (!grid) return;
-        grid.style.transform = 'translateY(10px)';
-        grid.style.opacity = '0';
-        setTimeout(() => {
-            grid.style.transform = 'translateY(0)';
-            grid.style.opacity = '1';
-        }, 400);
-    }
-
-    function exportVisitorData() {
-        if (!visitorChart) return;
-
-        const year   = document.getElementById('yearFilter')?.value ?? new Date().getFullYear();
-        const data   = visitorChart.data.datasets[0].data;
-        const labels = visitorChart.data.labels;
-        const total  = data.reduce((a, b) => a + b, 0);
-        const maxVal = Math.max(...data);
-        const maxMonth = labels[data.indexOf(maxVal)];
-
-        // ── Style helpers ────────────────────────────────────────
-        const GOLD   = 'FFC9A74E';
-        const DARK   = 'FF1A1A1A';
-        const DARK2  = 'FF2A2A2A';
-        const DARK3  = 'FF222222';
-        const WHITE  = 'FFFFFFFF';
-        const GRAY   = 'FF9CA3AF';
-        const LIGHT  = 'FFF5F0E8';
-
-        const borderThin = {
-            top:    { style: 'thin', color: { rgb: 'FF444444' } },
-            bottom: { style: 'thin', color: { rgb: 'FF444444' } },
-            left:   { style: 'thin', color: { rgb: 'FF444444' } },
-            right:  { style: 'thin', color: { rgb: 'FF444444' } },
+        // ═══════════════════════════════════════════════════════════
+        // STATE GLOBAL
+        // ═══════════════════════════════════════════════════════════
+        let isDrawerVisible = false;
+        const menuStates = {
+            'main-menu-content': true,
+            'features-content': true,
+            'tools-content': true
         };
 
-        const cell = (v, opts = {}) => ({
-            v,
-            t: typeof v === 'number' ? 'n' : 's',
-            s: {
-                font:      { name: 'Calibri', sz: opts.sz ?? 11, bold: opts.bold ?? false, color: { rgb: opts.color ?? WHITE } },
-                fill:      { fgColor: { rgb: opts.bg ?? DARK } },
-                alignment: { horizontal: opts.align ?? 'left', vertical: 'center', wrapText: false },
-                border:    opts.border ? borderThin : {},
-            }
-        });
+        // Variabel chart — deklarasi di scope global, inisialisasi di DOMContentLoaded
+        let visitorChart = null;
+        let artSalesChart = null;
+        let visitorOnlineInterval = null;
+        let visitorLiveInterval = null;
 
-        // ── Susun baris ──────────────────────────────────────────
-        const ws_data = [];
-
-        // Row 0 — judul besar
-        ws_data.push([
-            { v: `KAPAKAPA ART GALLERY`, t: 's', s: {
-                font: { name: 'Calibri', sz: 16, bold: true, color: { rgb: GOLD } },
-                fill: { fgColor: { rgb: DARK } },
-                alignment: { horizontal: 'left', vertical: 'center' }
-            }},
-            cell(''), cell(''), cell('')
-        ]);
-
-        // Row 1 — sub judul
-        ws_data.push([
-            { v: `Visitor Analytics Report — ${year}`, t: 's', s: {
-                font: { name: 'Calibri', sz: 12, bold: false, color: { rgb: GRAY } },
-                fill: { fgColor: { rgb: DARK } },
-                alignment: { horizontal: 'left', vertical: 'center' }
-            }},
-            cell(''), cell(''), cell('')
-        ]);
-
-        // Row 2 — generated date
-        ws_data.push([
-            { v: `Generated: ${new Date().toLocaleDateString('id-ID', { dateStyle: 'long' })}`, t: 's', s: {
-                font: { name: 'Calibri', sz: 9, color: { rgb: 'FF6B7280' } },
-                fill: { fgColor: { rgb: DARK } },
-                alignment: { horizontal: 'left', vertical: 'center' }
-            }},
-            cell(''), cell(''), cell('')
-        ]);
-
-        // Row 3 — spacer
-        ws_data.push([cell(''), cell(''), cell(''), cell('')]);
-
-        // Row 4 — header kolom
-        const headerStyle = (label) => ({
-            v: label, t: 's', s: {
-                font: { name: 'Calibri', sz: 11, bold: true, color: { rgb: DARK } },
-                fill: { fgColor: { rgb: GOLD } },
-                alignment: { horizontal: 'center', vertical: 'center' },
-                border: borderThin,
-            }
-        });
-        ws_data.push([
-            headerStyle('No.'),
-            headerStyle('Month'),
-            headerStyle('Visitors'),
-            headerStyle('Share (%)'),
-        ]);
-
-        // Row 5–16 — data bulan
-        labels.forEach((month, i) => {
-            const isCurrentMonth = i === new Date().getMonth();
-            const isPeak = data[i] === maxVal && maxVal > 0;
-            const rowBg  = isPeak ? 'FF2D2510' : (i % 2 === 0 ? DARK2 : DARK3);
-            const txtCol = isPeak ? GOLD : WHITE;
-            const share  = total > 0 ? +((data[i] / total) * 100).toFixed(1) : 0;
-
-            ws_data.push([
-                cell(i + 1,   { bg: rowBg, color: txtCol, align: 'center', border: true }),
-                cell(month,   { bg: rowBg, color: isPeak ? GOLD : (isCurrentMonth ? 'FFE8C46A' : WHITE), bold: isPeak, border: true }),
-                cell(data[i], { bg: rowBg, color: txtCol, align: 'right',  border: true }),
-                cell(share,   { bg: rowBg, color: txtCol, align: 'right',  border: true, sz: 10 }),
-            ]);
-        });
-
-        // Row 17 — spacer
-        ws_data.push([cell('', { bg: DARK }), cell('', { bg: DARK }), cell('', { bg: DARK }), cell('', { bg: DARK })]);
-
-        // Row 18 — TOTAL
-        ws_data.push([
-            cell('',       { bg: 'FF111111' }),
-            { v: 'TOTAL', t: 's', s: {
-                font: { name: 'Calibri', sz: 12, bold: true, color: { rgb: GOLD } },
-                fill: { fgColor: { rgb: 'FF111111' } },
-                alignment: { horizontal: 'left', vertical: 'center' },
-                border: borderThin,
-            }},
-            { v: total, t: 'n', s: {
-                font: { name: 'Calibri', sz: 12, bold: true, color: { rgb: GOLD } },
-                fill: { fgColor: { rgb: 'FF111111' } },
-                alignment: { horizontal: 'right', vertical: 'center' },
-                border: borderThin,
-            }},
-            { v: '100%', t: 's', s: {
-                font: { name: 'Calibri', sz: 11, bold: true, color: { rgb: GOLD } },
-                fill: { fgColor: { rgb: 'FF111111' } },
-                alignment: { horizontal: 'right', vertical: 'center' },
-                border: borderThin,
-            }},
-        ]);
-
-        // Row 19 — Peak Month
-        ws_data.push([
-            cell('',         { bg: 'FF111111' }),
-            cell('Peak Month', { bg: 'FF111111', color: GRAY, sz: 10 }),
-            cell(maxMonth,   { bg: 'FF111111', color: 'FFE8C46A', bold: true }),
-            cell(`${maxVal} visitors`, { bg: 'FF111111', color: GRAY, sz: 10 }),
-        ]);
-
-        // ── Buat worksheet ───────────────────────────────────────
-        const ws = XLSX.utils.aoa_to_sheet(ws_data);
-
-        ws['!cols'] = [
-            { wch: 6  },
-            { wch: 16 },
-            { wch: 14 },
-            { wch: 14 },
-        ];
-
-        ws['!rows'] = [
-            { hpt: 28 }, // judul
-            { hpt: 20 }, // sub
-            { hpt: 16 }, // date
-            { hpt: 10 }, // spacer
-            { hpt: 22 }, // header
-            ...Array(12).fill({ hpt: 20 }),
-            { hpt: 8  },
-            { hpt: 22 },
-            { hpt: 18 },
-        ];
-
-        ws['!merges'] = [
-            { s: { r: 0, c: 0 }, e: { r: 0, c: 3 } },
-            { s: { r: 1, c: 0 }, e: { r: 1, c: 3 } },
-            { s: { r: 2, c: 0 }, e: { r: 2, c: 3 } },
-        ];
-
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, `Visitors ${year}`);
-        XLSX.writeFile(wb, `Kapakapa_Visitors_${year}.xlsx`);
-
-        document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.add('hidden'));
-
-        Swal.fire({
-            icon: 'success', title: 'Exported!',
-            text: `Kapakapa_Visitors_${year}.xlsx berhasil diunduh.`,
-            background: '#151515', color: '#fff',
-            confirmButtonColor: '#C9A74E',
-            iconColor: '#C9A74E', 
-            timer: 2500, showConfirmButton: false
-        });
-    }
-
-    // ═══════════════════════════════════════════════════════════
-    // AUTH — LOGOUT & SETTINGS
-    // ═══════════════════════════════════════════════════════════
-    async function handleLogout() {
-        const csrfTokenElement = document.querySelector('meta[name="csrf-token"]');
-        const token = csrfTokenElement ? csrfTokenElement.getAttribute('content') : null;
-
-        if (!token) {
-            return Swal.fire({
-                title: 'SYSTEM ERROR',
-                text: 'Security token (CSRF) was not found. Please refresh the page (F5).',
-                icon: 'error', background: '#151515', color: '#ffffff', confirmButtonColor: '#C9A74E'
+        const VISITOR_MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        function getVisitorFallback(year) {
+            const seed = parseInt(year) % 100;
+            const curMonth = new Date().getMonth(); // 0-based
+            return Array.from({ length: 12 }, (_, i) => {
+                // Bulan yang belum terjadi = 0
+                if (i > curMonth) return 0;
+                return Math.round(200 + (seed * 3) + (Math.sin((i + seed) * 0.8) * 150) + (i % 3 * 80));
             });
         }
 
-        const result = await Swal.fire({
-            title: 'LOGOUT',
-            text: 'Are you sure you want to end your current session?',
-            icon: 'warning', showCancelButton: true,
-            confirmButtonColor: '#C9A74E', cancelButtonColor: '#333333',
-            confirmButtonText: 'Yes, Sign Out', cancelButtonText: 'Cancel',
-            background: '#151515', color: '#ffffff',
-            customClass: { popup: 'border border-zinc-800' }
+        // ═══════════════════════════════════════════════════════════
+        // DOM CONTENT LOADED — satu blok saja
+        // ═══════════════════════════════════════════════════════════
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // ── 1. ANIMASI COUNTER ──────────────────────────────────
+            fetchDashboardStats();
+            setInterval(fetchDashboardStats, 60000);
+
+            // ── 1b. FETCH STATS DARI API — update counter cards ────
+            async function fetchDashboardStats() {
+                try {
+                    const res = await fetch('/api/dashboard/stats', {
+                        headers: { 'Accept': 'application/json' }
+                    });
+
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
+
+                    const json = await res.json();
+                    console.log('[Dashboard Stats] Data dari API:', json);
+
+                    // Update setiap counter card yang punya data-key
+                    document.querySelectorAll('.counter-value[data-key]').forEach(el => {
+                        const key = el.getAttribute('data-key');
+                        if (json[key] !== undefined) {
+                            animateCounter(el, json[key]);
+                        }
+                    });
+
+                } catch (err) {
+                    console.warn('[Dashboard Stats] API gagal, tetap pakai nilai default dari blade:', err.message);
+                    // Fallback: animasikan saja nilai default yang sudah ada di data-target
+                    document.querySelectorAll('.counter-value').forEach(el => {
+                        animateCounter(el, +el.getAttribute('data-target'));
+                    });
+                }
+            }
+
+            // Fungsi animasi counter yang bisa dipanggil ulang dengan nilai baru
+            function animateCounter(el, targetValue) {
+                const startTime = performance.now();
+                const duration = 2000;
+
+                const update = (currentTime) => {
+                    const progress = Math.min((currentTime - startTime) / duration, 1);
+                    const easeOut = 1 - Math.pow(1 - progress, 3);
+                    el.innerText = Math.floor(easeOut * targetValue).toLocaleString('en-US');
+                    if (progress < 1) requestAnimationFrame(update);
+                    else el.innerText = targetValue.toLocaleString('en-US');
+                };
+                requestAnimationFrame(update);
+            }
+
+            // ── SALES ANALYTICS CHART (Line) ────────────────────
+            const salesCanvas = document.getElementById('artSalesChart');
+            if (salesCanvas) {
+                const ctx = salesCanvas.getContext('2d');
+                const dataSets = {
+                    monthly: {
+                        labels: VISITOR_MONTHS,
+                        data: [45, 52, 48, 70, 65, 85, 78, 92, 110, 95, 105, 120]
+                    },
+                    yearly: {
+                        labels: ['2021', '2022', '2023', '2024', '2025', '2026'],
+                        data: [450, 620, 890, 1100, 1400, 1850]
+                    }
+                };
+
+                const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+                gradient.addColorStop(0, 'rgba(201, 167, 78, 0.25)');
+                gradient.addColorStop(1, 'rgba(201, 167, 78, 0)');
+
+                artSalesChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: dataSets.monthly.labels,
+                        datasets: [{
+                            label: 'Market Value',
+                            data: dataSets.monthly.data,
+                            borderColor: '#C9A74E',
+                            borderWidth: 3,
+                            tension: 0.4,
+                            fill: true,
+                            backgroundColor: gradient,
+                            pointRadius: 6,
+                            pointBackgroundColor: '#C9A74E',
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#737373' } },
+                            x: { grid: { display: false }, ticks: { color: '#a3a3a3' } }
+                        }
+                    }
+                });
+
+                document.getElementById('btn-monthly')?.addEventListener('click', () => {
+                    artSalesChart.data.labels = dataSets.monthly.labels;
+                    artSalesChart.data.datasets[0].data = dataSets.monthly.data;
+                    artSalesChart.update();
+                });
+                document.getElementById('btn-yearly')?.addEventListener('click', () => {
+                    artSalesChart.data.labels = dataSets.yearly.labels;
+                    artSalesChart.data.datasets[0].data = dataSets.yearly.data;
+                    artSalesChart.update();
+                });
+            }
+
+            // ── BUILD YEAR DROPDOWN — otomatis dari tahun sekarang ──
+            async function buildYearDropdown() {
+                const select = document.getElementById('yearFilter');
+                if (!select) return;
+
+                const currentYear = new Date().getFullYear();
+
+                try {
+                    const res = await fetch('/api/dashboard/visitors/years', {
+                        headers: { 'Accept': 'application/json' }
+                    });
+
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
+
+                    const json = await res.json();
+                    const years = json.years; // Array dari server, sudah desc
+
+                    select.innerHTML = '';
+                    years.forEach(y => {
+                        const opt = document.createElement('option');
+                        opt.value = y;
+                        opt.textContent = y;
+                        opt.className = 'bg-[#1a1a1a] text-white';
+                        if (parseInt(y) === currentYear) opt.selected = true;
+                        select.appendChild(opt);
+                    });
+
+                } catch (err) {
+                    // Fallback: generate dari tahun sekarang mundur 3 tahun
+                    console.warn('[Year Dropdown] API gagal, pakai fallback:', err.message);
+                    select.innerHTML = '';
+                    for (let y = currentYear; y >= currentYear - 2; y--) {
+                        const opt = document.createElement('option');
+                        opt.value = y;
+                        opt.textContent = y;
+                        opt.className = 'bg-[#1a1a1a] text-white';
+                        if (y === currentYear) opt.selected = true;
+                        select.appendChild(opt);
+                    }
+                }
+
+                // Setelah dropdown selesai dibangun, fetch data tahun aktif
+                const activeYear = select.value ?? currentYear.toString();
+                fetchVisitorStats(activeYear);
+            }
+
+            // ── VISITOR BAR CHART — inisialisasi sekali ─────────
+            const barCanvas = document.getElementById('visitorBarChart');
+            if (barCanvas) {
+                visitorChart = new Chart(barCanvas.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: VISITOR_MONTHS,
+                        datasets: [{
+                            label: 'Visitors',
+                            data: new Array(12).fill(0),
+                            backgroundColor: new Array(12).fill('#C9A74E'),
+                            hoverBackgroundColor: '#A88C3F',
+                            borderRadius: 6,
+                            barThickness: 25,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        animation: { duration: 500 },
+                        plugins: { 
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: { stepSize: 250, color: '#6b7280' },
+                                grid: { color: 'rgba(255,255,255,0.05)', drawBorder: false }
+                            },
+                            x: {
+                                grid: { display: false },
+                                ticks: { color: '#6b7280' }
+                            }
+                        }
+                    }
+                });
+
+                // Build dropdown dulu, baru fetch data tahun aktif
+                buildYearDropdown();
+
+                const defaultYear = new Date().getFullYear().toString();
+                fetchVisitorStats(defaultYear);
+
+                // Polling: refresh data tiap 30 detik
+                visitorLiveInterval = setInterval(() => {
+                    const y = document.getElementById('yearFilter')?.value ?? new Date().getFullYear().toString();
+                    fetchVisitorStats(y);
+                }, 30000);
+
+                // Polling: online count tiap 10 detik
+                visitorOnlineInterval = setInterval(fetchOnlineCount, 10000);
+            }
+
+            // Init Lucide icons
+            lucide.createIcons();
+
+            // Fetch customer countries saat load
+            fetchCustomerCountries('today');
+
+            // Polling tiap 60 detik
+            customerCountryInterval = setInterval(() => {
+                const period = document.getElementById('timeFilter')?.value ?? 'today';
+                fetchCustomerCountries(period);
+            }, 60000);
         });
 
-        if (result.isConfirmed) {
-            Swal.fire({
-                title: 'Signing out...', allowOutsideClick: false, showConfirmButton: false,
-                background: '#151515', color: '#ffffff', didOpen: () => Swal.showLoading()
+        // ═══════════════════════════════════════════════════════════
+        // VISITOR CHART — FUNGSI API
+        // ═══════════════════════════════════════════════════════════
+
+        async function fetchVisitorStats(year) {
+            try {
+                const res = await fetch(`/api/dashboard/visitors?year=${year}`, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? ''
+                    }
+                });
+
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+
+                const json = await res.json();
+                console.log('[Visitor Chart] Data dari API:', json);
+                applyVisitorData(json.monthly, json.online ?? null);
+
+            } catch (err) {
+                console.warn('[Visitor Chart] API gagal, pakai fallback. Error:', err.message);
+                applyVisitorData(getVisitorFallback(year)); // ← pakai fungsi, bukan objek statis
+            }
+        }
+
+        async function fetchOnlineCount() {
+            try {
+                const res = await fetch('/api/dashboard/visitors/online', {
+                    headers: { 'Accept': 'application/json' }
+                });
+                if (!res.ok) return;
+                const json = await res.json();
+                renderOnlineCount(json.online);
+            } catch (_) {}
+        }
+
+        function applyVisitorData(monthly, online = null) {
+            if (!visitorChart) return;
+
+            const curMonth = new Date().getMonth();
+            // Hitung max hanya dari bulan yang sudah terjadi
+            const relevantData = monthly.slice(0, curMonth + 1);
+            const maxVal = Math.max(...relevantData, 500);
+
+            visitorChart.data.datasets[0].data = monthly;
+            visitorChart.data.datasets[0].backgroundColor = monthly.map((_, i) =>
+                i === curMonth ? '#E8C46A' : '#C9A74E'
+            );
+            visitorChart.options.scales.y.max = Math.ceil(maxVal * 1.2 / 250) * 250;
+            visitorChart.update();
+
+            if (online !== null) renderOnlineCount(online);
+        }
+
+        function renderOnlineCount(count) {
+            const el = document.getElementById('visitorOnlineCount');
+            if (el) el.textContent = Number(count).toLocaleString('id-ID');
+        }
+
+        // Handler select tahun — dipanggil dari onchange di HTML
+        function updateYearlyData(year) {
+            fetchVisitorStats(year);
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // SIDEBAR & ACCORDION
+        // ═══════════════════════════════════════════════════════════
+        function handleNavDrawer(open, event) {
+            if (event) event.stopPropagation();
+            const sidebar = document.getElementById('mainSidebar') || document.getElementById('main-sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            const path1 = document.getElementById('path1');
+            const path2 = document.getElementById('path2');
+            const path3 = document.getElementById('path3');
+
+            isDrawerVisible = open;
+
+            if (open) {
+                sidebar?.classList.remove('-translate-x-full');
+                overlay?.classList.remove('hidden');
+                setTimeout(() => overlay?.classList.add('opacity-100'), 10);
+                path1?.setAttribute('d', 'M6 18L18 6');
+                if (path2) path2.style.opacity = '0';
+                path3?.setAttribute('d', 'M6 6l12 12');
+                document.body.style.overflow = 'hidden';
+            } else {
+                sidebar?.classList.add('-translate-x-full');
+                overlay?.classList.remove('opacity-100');
+                setTimeout(() => overlay?.classList.add('hidden'), 300);
+                path1?.setAttribute('d', 'M4 6h16');
+                if (path2) path2.style.opacity = '1';
+                path3?.setAttribute('d', 'M4 18h16');
+                document.body.style.overflow = '';
+            }
+        }
+
+        function switchMenuAccordion(contentId, arrowId) {
+            const content = document.getElementById(contentId);
+            const arrow = document.getElementById(arrowId);
+            if (!content) return;
+
+            menuStates[contentId] = !menuStates[contentId];
+
+            if (menuStates[contentId]) {
+                content.classList.replace('grid-rows-[0fr]', 'grid-rows-[1fr]');
+                content.classList.replace('opacity-0', 'opacity-100');
+                if (arrow) arrow.style.transform = 'rotate(0deg)';
+            } else {
+                content.classList.replace('grid-rows-[1fr]', 'grid-rows-[0fr]');
+                content.classList.replace('opacity-100', 'opacity-0');
+                if (arrow) arrow.style.transform = 'rotate(-90deg)';
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // MODAL & DROPDOWN
+        // ═══════════════════════════════════════════════════════════
+        function toggleProfileDropdown(event) {
+            if (event) event.stopPropagation();
+            document.getElementById('profileDropdown').classList.toggle('hidden-modal');
+        }
+
+        window.onclick = function(event) {
+            if (event.target.id === 'sidebarOverlay') handleNavDrawer(false);
+            if (!event.target.closest('#profileButton')) {
+                document.getElementById('profileDropdown')?.classList.add('hidden-modal');
+            }
+        };
+
+        function openWidgetMenu(buttonElement) {
+            const targetMenu = buttonElement.nextElementSibling;
+            document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                if (menu !== targetMenu) menu.classList.add('hidden');
             });
+            targetMenu.classList.toggle('hidden');
+        }
+
+        window.addEventListener('click', function(event) {
+            if (!event.target.closest('.custom-dropdown')) {
+                document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.add('hidden'));
+            }
+        });
+
+        function switchTab(type) {
+            const btnMonthly = document.getElementById('btn-monthly');
+            const btnYearly = document.getElementById('btn-yearly');
+            [btnMonthly, btnYearly].forEach(btn => {
+                btn.classList.remove('bg-[#C9A74E]', 'text-black');
+                btn.classList.add('text-neutral-500', 'hover:text-white');
+            });
+            if (type === 'monthly') {
+                btnMonthly.classList.add('bg-[#C9A74E]', 'text-black');
+                btnMonthly.classList.remove('text-neutral-500', 'hover:text-white');
+            } else {
+                btnYearly.classList.add('bg-[#C9A74E]', 'text-black');
+                btnYearly.classList.remove('text-neutral-500', 'hover:text-white');
+            }
+        }
+
+        function openSettings() {
+            const modal = document.getElementById('settingsModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => {
+                document.getElementById('settingsModalContent').classList.remove('scale-95');
+                document.getElementById('settingsModalContent').classList.add('scale-100');
+            }, 10);
+        }
+
+        function closeSettings() {
+            document.getElementById('settingsModalContent').classList.add('scale-95');
+            setTimeout(() => {
+                const modal = document.getElementById('settingsModal');
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }, 200);
+        }
+
+        function openLogoutModal() {
+            document.getElementById('profileDropdown').classList.add('hidden-modal');
+            document.getElementById('logoutModal').classList.remove('hidden-modal');
+        }
+
+        function closeLogoutModal() {
+            document.getElementById('logoutModal').classList.add('hidden-modal');
+        }
+
+        function toggleCountriesModal() {
+            const modal = document.getElementById('countriesModal');
+            const backdrop = document.getElementById('modalBackdrop');
+            const container = document.getElementById('modalContainer');
+
+            if (modal.classList.contains('hidden')) {
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    backdrop.classList.add('opacity-100');
+                    container.classList.remove('scale-95', 'opacity-0');
+                    container.classList.add('scale-100', 'opacity-100');
+                }, 10);
+                document.body.style.overflow = 'hidden';
+            } else {
+                backdrop.classList.remove('opacity-100');
+                container.classList.remove('scale-100', 'opacity-100');
+                container.classList.add('scale-95', 'opacity-0');
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                    document.body.style.overflow = 'auto';
+                }, 500);
+            }
+        }
+
+        function searchCountry(query) {
+            const items = document.querySelectorAll('.country-item');
+            query = query.toLowerCase();
+            items.forEach(item => {
+                item.style.display = item.innerText.toLowerCase().includes(query) ? 'flex' : 'none';
+            });
+        }
+
+        function filterData(val) {
+            const grid = document.querySelector('.grid-cols-3');
+            if (!grid) return;
+            grid.style.transform = 'translateY(10px)';
+            grid.style.opacity = '0';
+            setTimeout(() => {
+                grid.style.transform = 'translateY(0)';
+                grid.style.opacity = '1';
+            }, 400);
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // CUSTOMER COUNTRIES — DINAMIS
+        // ═══════════════════════════════════════════════════════════
+        let customerCountriesData = [];
+        let customerCountryInterval = null;
+
+        async function fetchCustomerCountries(period = 'today') {
+            try {
+                const res = await fetch(`/api/dashboard/customers?period=${period}`, {
+                    headers: { 'Accept': 'application/json' }
+                });
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const json = await res.json();
+                customerCountriesData = json.countries;
+                renderCountryPreview(customerCountriesData);
+                renderCountryModal(customerCountriesData);
+            } catch (err) {
+                console.warn('[Customer Countries] API gagal:', err.message);
+            }
+        }
+
+        function renderCountryPreview(countries) {
+            const grid = document.getElementById('countryPreviewGrid');
+            if (!grid) return;
+
+            const preview = countries.slice(0, 6);
+
+            grid.style.opacity = '0';
+            grid.style.transform = 'translateY(8px)';
+
+            setTimeout(() => {
+                grid.innerHTML = preview.map(c => `
+                    <div class="flex flex-col items-center group/item cursor-default">
+                        <div class="relative mb-3">
+                            <div class="absolute inset-0 bg-[#C9A74E]/20 rounded-full blur-md opacity-0 group-hover/item:opacity-100 transition-opacity duration-500"></div>
+                            <div class="relative w-16 h-16 rounded-full border-[3px] border-neutral-800 p-1 bg-neutral-900 overflow-hidden transition-transform duration-500 group-hover/item:scale-110 group-hover/item:border-[#C9A74E]">
+                                <img src="https://flagcdn.com/w160/${c.country_code}.png" 
+                                    alt="${c.country_name}" 
+                                    class="w-full h-full object-cover rounded-full grayscale-[0.3] group-hover/item:grayscale-0 transition-all"
+                                    onerror="this.src='https://flagcdn.com/w160/un.png'">
+                            </div>
+                        </div>
+                        <span class="text-[10px] text-neutral-500 uppercase font-black tracking-[0.15em] mb-1 group-hover/item:text-neutral-300 transition-colors text-center leading-tight">${c.country_name}</span>
+                        <span class="text-xl font-bold text-white tabular-nums">${Number(c.count).toLocaleString()}</span>
+                    </div>
+                `).join('');
+
+                grid.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                grid.style.opacity = '1';
+                grid.style.transform = 'translateY(0)';
+            }, 150);
+        }
+
+        function renderCountryModal(countries) {
+            const grid = document.getElementById('modalCountryGrid');
+            if (!grid) return;
+
+            grid.innerHTML = countries.map(c => `
+                <div class="country-item group flex items-center justify-between bg-neutral-900/30 hover:bg-[#C9A74E]/5 border border-white/5 hover:border-[#C9A74E]/20 p-5 rounded-[1.5rem] transition-all">
+                    <div class="flex items-center gap-4">
+                        <img src="https://flagcdn.com/w80/${c.country_code}.png" 
+                            class="w-12 h-12 rounded-2xl object-cover"
+                            onerror="this.src='https://flagcdn.com/w80/un.png'">
+                        <div>
+                            <p class="text-xs text-neutral-500 font-bold uppercase tracking-widest">${c.country_name}</p>
+                            <p class="text-xl font-bold text-white group-hover:text-[#C9A74E] transition-colors">${Number(c.count).toLocaleString()}</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Override searchCountry agar pakai data dinamis
+        function searchCountry(query) {
+            const items = document.querySelectorAll('.country-item');
+            query = query.toLowerCase();
+            items.forEach(item => {
+                item.style.display = item.innerText.toLowerCase().includes(query) ? 'flex' : 'none';
+            });
+        }
+
+        function exportVisitorData() {
+            if (!visitorChart) return;
+
+            const year   = document.getElementById('yearFilter')?.value ?? new Date().getFullYear();
+            const data   = visitorChart.data.datasets[0].data;
+            const labels = visitorChart.data.labels;
+            const total  = data.reduce((a, b) => a + b, 0);
+            const maxVal = Math.max(...data);
+            const maxMonth = labels[data.indexOf(maxVal)];
+
+            // ── Style helpers ────────────────────────────────────────
+            const GOLD   = 'FFC9A74E';
+            const DARK   = 'FF1A1A1A';
+            const DARK2  = 'FF2A2A2A';
+            const DARK3  = 'FF222222';
+            const WHITE  = 'FFFFFFFF';
+            const GRAY   = 'FF9CA3AF';
+            const LIGHT  = 'FFF5F0E8';
+
+            const borderThin = {
+                top:    { style: 'thin', color: { rgb: 'FF444444' } },
+                bottom: { style: 'thin', color: { rgb: 'FF444444' } },
+                left:   { style: 'thin', color: { rgb: 'FF444444' } },
+                right:  { style: 'thin', color: { rgb: 'FF444444' } },
+            };
+
+            const cell = (v, opts = {}) => ({
+                v,
+                t: typeof v === 'number' ? 'n' : 's',
+                s: {
+                    font:      { name: 'Calibri', sz: opts.sz ?? 11, bold: opts.bold ?? false, color: { rgb: opts.color ?? WHITE } },
+                    fill:      { fgColor: { rgb: opts.bg ?? DARK } },
+                    alignment: { horizontal: opts.align ?? 'left', vertical: 'center', wrapText: false },
+                    border:    opts.border ? borderThin : {},
+                }
+            });
+
+            // ── Susun baris ──────────────────────────────────────────
+            const ws_data = [];
+
+            // Row 0 — judul besar
+            ws_data.push([
+                { v: `KAPAKAPA ART GALLERY`, t: 's', s: {
+                    font: { name: 'Calibri', sz: 16, bold: true, color: { rgb: GOLD } },
+                    fill: { fgColor: { rgb: DARK } },
+                    alignment: { horizontal: 'left', vertical: 'center' }
+                }},
+                cell(''), cell(''), cell('')
+            ]);
+
+            // Row 1 — sub judul
+            ws_data.push([
+                { v: `Visitor Analytics Report — ${year}`, t: 's', s: {
+                    font: { name: 'Calibri', sz: 12, bold: false, color: { rgb: GRAY } },
+                    fill: { fgColor: { rgb: DARK } },
+                    alignment: { horizontal: 'left', vertical: 'center' }
+                }},
+                cell(''), cell(''), cell('')
+            ]);
+
+            // Row 2 — generated date
+            ws_data.push([
+                { v: `Generated: ${new Date().toLocaleDateString('id-ID', { dateStyle: 'long' })}`, t: 's', s: {
+                    font: { name: 'Calibri', sz: 9, color: { rgb: 'FF6B7280' } },
+                    fill: { fgColor: { rgb: DARK } },
+                    alignment: { horizontal: 'left', vertical: 'center' }
+                }},
+                cell(''), cell(''), cell('')
+            ]);
+
+            // Row 3 — spacer
+            ws_data.push([cell(''), cell(''), cell(''), cell('')]);
+
+            // Row 4 — header kolom
+            const headerStyle = (label) => ({
+                v: label, t: 's', s: {
+                    font: { name: 'Calibri', sz: 11, bold: true, color: { rgb: DARK } },
+                    fill: { fgColor: { rgb: GOLD } },
+                    alignment: { horizontal: 'center', vertical: 'center' },
+                    border: borderThin,
+                }
+            });
+            ws_data.push([
+                headerStyle('No.'),
+                headerStyle('Month'),
+                headerStyle('Visitors'),
+                headerStyle('Share (%)'),
+            ]);
+
+            // Row 5–16 — data bulan
+            labels.forEach((month, i) => {
+                const isCurrentMonth = i === new Date().getMonth();
+                const isPeak = data[i] === maxVal && maxVal > 0;
+                const rowBg  = isPeak ? 'FF2D2510' : (i % 2 === 0 ? DARK2 : DARK3);
+                const txtCol = isPeak ? GOLD : WHITE;
+                const share  = total > 0 ? +((data[i] / total) * 100).toFixed(1) : 0;
+
+                ws_data.push([
+                    cell(i + 1,   { bg: rowBg, color: txtCol, align: 'center', border: true }),
+                    cell(month,   { bg: rowBg, color: isPeak ? GOLD : (isCurrentMonth ? 'FFE8C46A' : WHITE), bold: isPeak, border: true }),
+                    cell(data[i], { bg: rowBg, color: txtCol, align: 'right',  border: true }),
+                    cell(share,   { bg: rowBg, color: txtCol, align: 'right',  border: true, sz: 10 }),
+                ]);
+            });
+
+            // Row 17 — spacer
+            ws_data.push([cell('', { bg: DARK }), cell('', { bg: DARK }), cell('', { bg: DARK }), cell('', { bg: DARK })]);
+
+            // Row 18 — TOTAL
+            ws_data.push([
+                cell('',       { bg: 'FF111111' }),
+                { v: 'TOTAL', t: 's', s: {
+                    font: { name: 'Calibri', sz: 12, bold: true, color: { rgb: GOLD } },
+                    fill: { fgColor: { rgb: 'FF111111' } },
+                    alignment: { horizontal: 'left', vertical: 'center' },
+                    border: borderThin,
+                }},
+                { v: total, t: 'n', s: {
+                    font: { name: 'Calibri', sz: 12, bold: true, color: { rgb: GOLD } },
+                    fill: { fgColor: { rgb: 'FF111111' } },
+                    alignment: { horizontal: 'right', vertical: 'center' },
+                    border: borderThin,
+                }},
+                { v: '100%', t: 's', s: {
+                    font: { name: 'Calibri', sz: 11, bold: true, color: { rgb: GOLD } },
+                    fill: { fgColor: { rgb: 'FF111111' } },
+                    alignment: { horizontal: 'right', vertical: 'center' },
+                    border: borderThin,
+                }},
+            ]);
+
+            // Row 19 — Peak Month
+            ws_data.push([
+                cell('',         { bg: 'FF111111' }),
+                cell('Peak Month', { bg: 'FF111111', color: GRAY, sz: 10 }),
+                cell(maxMonth,   { bg: 'FF111111', color: 'FFE8C46A', bold: true }),
+                cell(`${maxVal} visitors`, { bg: 'FF111111', color: GRAY, sz: 10 }),
+            ]);
+
+            // ── Buat worksheet ───────────────────────────────────────
+            const ws = XLSX.utils.aoa_to_sheet(ws_data);
+
+            ws['!cols'] = [
+                { wch: 6  },
+                { wch: 16 },
+                { wch: 14 },
+                { wch: 14 },
+            ];
+
+            ws['!rows'] = [
+                { hpt: 28 }, // judul
+                { hpt: 20 }, // sub
+                { hpt: 16 }, // date
+                { hpt: 10 }, // spacer
+                { hpt: 22 }, // header
+                ...Array(12).fill({ hpt: 20 }),
+                { hpt: 8  },
+                { hpt: 22 },
+                { hpt: 18 },
+            ];
+
+            ws['!merges'] = [
+                { s: { r: 0, c: 0 }, e: { r: 0, c: 3 } },
+                { s: { r: 1, c: 0 }, e: { r: 1, c: 3 } },
+                { s: { r: 2, c: 0 }, e: { r: 2, c: 3 } },
+            ];
+
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, `Visitors ${year}`);
+            XLSX.writeFile(wb, `Kapakapa_Visitors_${year}.xlsx`);
+
+            document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.add('hidden'));
+
+            Swal.fire({
+                icon: 'success', title: 'Exported!',
+                text: `Kapakapa_Visitors_${year}.xlsx berhasil diunduh.`,
+                background: '#151515', color: '#fff',
+                confirmButtonColor: '#C9A74E',
+                iconColor: '#C9A74E', 
+                timer: 2500, showConfirmButton: false
+            });
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // AUTH — LOGOUT & SETTINGS
+        // ═══════════════════════════════════════════════════════════
+        async function handleLogout() {
+            const csrfTokenElement = document.querySelector('meta[name="csrf-token"]');
+            const token = csrfTokenElement ? csrfTokenElement.getAttribute('content') : null;
+
+            if (!token) {
+                return Swal.fire({
+                    title: 'SYSTEM ERROR',
+                    text: 'Security token (CSRF) was not found. Please refresh the page (F5).',
+                    icon: 'error', background: '#151515', color: '#ffffff', confirmButtonColor: '#C9A74E'
+                });
+            }
+
+            const result = await Swal.fire({
+                title: 'LOGOUT',
+                text: 'Are you sure you want to end your current session?',
+                icon: 'warning', showCancelButton: true,
+                confirmButtonColor: '#C9A74E', cancelButtonColor: '#333333',
+                confirmButtonText: 'Yes, Sign Out', cancelButtonText: 'Cancel',
+                background: '#151515', color: '#ffffff',
+                customClass: { popup: 'border border-zinc-800' }
+            });
+
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'Signing out...', allowOutsideClick: false, showConfirmButton: false,
+                    background: '#151515', color: '#ffffff', didOpen: () => Swal.showLoading()
+                });
+
+                try {
+                    const response = await fetch('/api/logout', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': token }
+                    });
+
+                    if (response.ok) {
+                        window.location.href = '/';
+                    } else {
+                        const contentType = response.headers.get('content-type');
+                        let errorMessage = 'Logout failed. Please try again.';
+                        if (contentType?.includes('application/json')) {
+                            const data = await response.json();
+                            errorMessage = data.message || errorMessage;
+                        }
+                        throw new Error(errorMessage);
+                    }
+                } catch (error) {
+                    Swal.fire({
+                        title: 'ERROR', text: error.message || 'An unexpected server error occurred.',
+                        icon: 'error', background: '#1a1a1a', color: '#ffffff', confirmButtonColor: '#C9A74E'
+                    });
+                }
+            }
+        }
+
+        async function handleUpdateSettings() {
+            const newPassword = document.getElementById('newPasswordInput').value;
+            if (!newPassword) {
+                return Swal.fire({ icon: 'error', title: 'Empty Field', text: 'Please enter a new password', background: '#1a1a1a', color: '#fff' });
+            }
+
+            Swal.fire({ title: 'Updating...', didOpen: () => Swal.showLoading(), background: '#151515', color: '#fff', allowOutsideClick: false });
 
             try {
-                const response = await fetch('/api/logout', {
+                const response = await fetch('/api/update-password', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': token }
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({ password: newPassword }),
+                    credentials: 'same-origin'
                 });
+
+                const data = await response.json();
 
                 if (response.ok) {
-                    window.location.href = '/';
+                    await Swal.fire({ icon: 'success', title: 'SUCCESS', text: 'Password updated successfully!', background: '#151515', color: '#fff', confirmButtonColor: '#C9A74E' });
+                    closeSettings();
+                    document.getElementById('newPasswordInput').value = '';
                 } else {
-                    const contentType = response.headers.get('content-type');
-                    let errorMessage = 'Logout failed. Please try again.';
-                    if (contentType?.includes('application/json')) {
-                        const data = await response.json();
-                        errorMessage = data.message || errorMessage;
-                    }
-                    throw new Error(errorMessage);
+                    throw new Error(data.message || 'Failed to update');
                 }
             } catch (error) {
-                Swal.fire({
-                    title: 'ERROR', text: error.message || 'An unexpected server error occurred.',
-                    icon: 'error', background: '#1a1a1a', color: '#ffffff', confirmButtonColor: '#C9A74E'
-                });
+                Swal.fire({ icon: 'error', title: 'ERROR', text: error.message, background: '#151515', color: '#fff' });
             }
         }
-    }
 
-    async function handleUpdateSettings() {
-        const newPassword = document.getElementById('newPasswordInput').value;
-        if (!newPassword) {
-            return Swal.fire({ icon: 'error', title: 'Empty Field', text: 'Please enter a new password', background: '#1a1a1a', color: '#fff' });
-        }
-
-        Swal.fire({ title: 'Updating...', didOpen: () => Swal.showLoading(), background: '#151515', color: '#fff', allowOutsideClick: false });
-
-        try {
-            const response = await fetch('/api/update-password', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
-                body: JSON.stringify({ password: newPassword }),
-                credentials: 'same-origin'
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                await Swal.fire({ icon: 'success', title: 'SUCCESS', text: 'Password updated successfully!', background: '#151515', color: '#fff', confirmButtonColor: '#C9A74E' });
-                closeSettings();
-                document.getElementById('newPasswordInput').value = '';
+        function togglePassword(inputId, btn) {
+            const input = document.getElementById(inputId);
+            const icon = btn.querySelector('svg');
+            const isPassword = input.type === 'password';
+            input.type = isPassword ? 'text' : 'password';
+            if (isPassword) {
+                icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.822 7.822L21 21m-2.278-2.278L15.07 15.07m-4.414-4.414L12 12m0 0l.93-.93M12 12l.93.93" />`;
             } else {
-                throw new Error(data.message || 'Failed to update');
+                icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />`;
             }
-        } catch (error) {
-            Swal.fire({ icon: 'error', title: 'ERROR', text: error.message, background: '#151515', color: '#fff' });
         }
-    }
-
-    function togglePassword(inputId, btn) {
-        const input = document.getElementById(inputId);
-        const icon = btn.querySelector('svg');
-        const isPassword = input.type === 'password';
-        input.type = isPassword ? 'text' : 'password';
-        if (isPassword) {
-            icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.822 7.822L21 21m-2.278-2.278L15.07 15.07m-4.414-4.414L12 12m0 0l.93-.93M12 12l.93.93" />`;
-        } else {
-            icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />`;
-        }
-    }
-</script>
+    </script>
 </body>
 </html>

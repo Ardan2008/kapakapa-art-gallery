@@ -5,10 +5,13 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController; 
 use Illuminate\Session\Middleware\StartSession;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Api\CustomerCountryController;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::get('/dashboard/customers', [CustomerCountryController::class, 'index']);
 
 Route::prefix('dashboard')->group(function () {
     Route::get('/stats', [DashboardController::class, 'getStats']);           // ← baru
