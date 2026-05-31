@@ -9,6 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
     <style>
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
@@ -161,29 +162,29 @@
                         @php
                             $stats = [
                                 [
-                                    'label' => 'Total Income', 
-                                    'value' => '82600',
-                                    'display' => '$82,600', 
-                                    'prefix' => '$',
-                                    'trend' => 'Growing', 
-                                    'icon' => 'M20 22H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2zM9 6c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h6c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2H9zm3 2a2 2 0 0 1 2 2v1h-4v-1a2 2 0 0 1 2-2zm0 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2z'
+                                    'label'    => 'Total Income',
+                                    'value'    => '82600',
+                                    'prefix'   => '$',
+                                    'trend'    => 'Growing',
+                                    'key'      => 'total_income',    
+                                    'icon'     => 'M20 22H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2zM9 6c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h6c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2H9zm3 2a2 2 0 0 1 2 2v1h-4v-1a2 2 0 0 1 2-2zm0 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2z'
                                 ],
                                 [
-                                    'label' => 'Total Orders', 
-                                    'value' => '1240', 
-                                    'display' => '1,240',
-                                    'prefix' => '',
-                                    'trend' => 'Active', 
-                                    'icon' => 'M21 8l-9-4-9 4v8l9 4 9-4V8zm-9 11.5V12L4 8.5v7l8 4zm1-7.5v7.5l8-4v-7l-8 3.5z'
+                                    'label'    => 'Total Orders',
+                                    'value'    => '1240',
+                                    'prefix'   => '',
+                                    'trend'    => 'Active',
+                                    'key'      => 'total_orders',   
+                                    'icon'     => 'M21 8l-9-4-9 4v8l9 4 9-4V8zm-9 11.5V12L4 8.5v7l8 4zm1-7.5v7.5l8-4v-7l-8 3.5z'
                                 ],
                                 [
-                                    'label' => 'Total Visitors', 
-                                    'value' => '42800', 
-                                    'display' => '42.8K',
-                                    'prefix' => '',
-                                    'trend' => 'High Traffic', 
-                                    'icon' => 'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2m8-10a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm14 10v-2a4 4 0 0 0-3-3.87m-4-12a4 4 0 0 1 0 7.75'
-                                ]
+                                    'label'    => 'Total Visitors',
+                                    'value'    => '42800',
+                                    'prefix'   => '',
+                                    'trend'    => 'High Traffic',
+                                    'key'      => 'total_visitors',  
+                                    'icon'     => 'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2m8-10a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm14 10v-2a4 4 0 0 0-3-3.87m-4-12a4 4 0 0 1 0 7.75'
+                                ],
                             ];
                         @endphp
 
@@ -198,9 +199,13 @@
                                 <span class="text-[10px] font-bold tracking-widest text-yellow-500/50 uppercase">{{ $stat['trend'] }}</span>
                             </div>
                             <p class="text-xs font-medium text-neutral-500 uppercase tracking-widest mb-1">{{ $stat['label'] }}</p>
-                            
+
                             <h3 class="text-4xl font-light text-white tracking-tighter">
-                                <span>{{ $stat['prefix'] }}</span><span class="counter-value" data-target="{{ $stat['value'] }}">0</span>
+                                <span class="stat-prefix">{{ $stat['prefix'] }}</span>
+                                {{-- data-key dipakai JS untuk update dari API --}}
+                                <span class="counter-value" 
+                                    data-target="{{ $stat['value'] }}" 
+                                    data-key="{{ $stat['key'] }}">0</span>
                             </h3>
                         </div>
                         @endforeach
@@ -272,9 +277,7 @@
                                     <div class="relative group/select">
                                         <select id="yearFilter" onchange="updateYearlyData(this.value)" 
                                             class="appearance-none bg-white/[0.03] border border-white/10 text-neutral-300 text-[10px] font-black uppercase tracking-[0.15em] rounded-full px-6 py-2.5 outline-none cursor-pointer hover:bg-white/[0.08] hover:border-white/20 hover:text-white focus:border-[#C9A74E]/60 transition-all duration-300 pr-10 backdrop-blur-md">
-                                            <option value="2026" class="bg-[#1a1a1a] text-white">2026</option>
-                                            <option value="2025" class="bg-[#1a1a1a] text-white">2025</option>
-                                            <option value="2024" class="bg-[#1a1a1a] text-white">2024</option>
+                                            {{-- Dikosongkan — diisi JS otomatis --}}
                                         </select>
 
                                         <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none transition-transform duration-300 group-hover/select:translate-y-[-40%]">
@@ -299,7 +302,7 @@
                                             <div class="py-2">
                                                 <div class="px-4 py-2 text-[10px] font-black text-gray-600 uppercase tracking-[0.2em] mb-1">Options</div>
 
-                                                <button class="w-full text-left px-4 py-3 text-sm text-gray-400 hover:bg-neutral-800 hover:text-[#C9A74E] transition-colors flex items-center gap-3 group">
+                                                <button onclick="exportVisitorData()" class="w-full text-left px-4 py-3 text-sm text-gray-400 hover:bg-neutral-800 hover:text-[#C9A74E] transition-colors flex items-center gap-3 group">
                                                     <svg class="w-4 h-4 text-gray-500 group-hover:text-[#C9A74E] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                                                     </svg>
@@ -524,96 +527,119 @@
     <form id="logout-form" action="/" method="GET" class="hidden">@csrf</form>
 
     <script>
-        function toggleCountriesModal() {
-            const modal = document.getElementById('countriesModal');
-            const backdrop = document.getElementById('modalBackdrop');
-            const container = document.getElementById('modalContainer');
+    // ═══════════════════════════════════════════════════════════
+    // STATE GLOBAL
+    // ═══════════════════════════════════════════════════════════
+    let isDrawerVisible = false;
+    const menuStates = {
+        'main-menu-content': true,
+        'features-content': true,
+        'tools-content': true
+    };
 
-            if (modal.classList.contains('hidden')) {
-                modal.classList.remove('hidden');
-                setTimeout(() => {
-                    backdrop.classList.add('opacity-100');
-                    container.classList.remove('scale-95', 'opacity-0');
-                    container.classList.add('scale-100', 'opacity-100');
-                }, 10);
-                document.body.style.overflow = 'hidden';
-            } else {
-                backdrop.classList.remove('opacity-100');
-                container.classList.remove('scale-100', 'opacity-100');
-                container.classList.add('scale-95', 'opacity-0');
-                setTimeout(() => {
-                    modal.classList.add('hidden');
-                    document.body.style.overflow = 'auto';
-                }, 500);
-            }
-        }
+    // Variabel chart — deklarasi di scope global, inisialisasi di DOMContentLoaded
+    let visitorChart = null;
+    let artSalesChart = null;
+    let visitorOnlineInterval = null;
+    let visitorLiveInterval = null;
 
-        function searchCountry(query) {
-            const items = document.querySelectorAll('.country-item');
-            query = query.toLowerCase();
-            items.forEach(item => {
-                const text = item.innerText.toLowerCase();
-                item.style.display = text.includes(query) ? 'flex' : 'none';
-            });
-        }
+    const VISITOR_MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    function getVisitorFallback(year) {
+        const seed = parseInt(year) % 100;
+        const curMonth = new Date().getMonth(); // 0-based
+        return Array.from({ length: 12 }, (_, i) => {
+            // Bulan yang belum terjadi = 0
+            if (i > curMonth) return 0;
+            return Math.round(200 + (seed * 3) + (Math.sin((i + seed) * 0.8) * 150) + (i % 3 * 80));
+        });
+    }
 
-        function filterData(val) {
-            // Efek transisi saat filter diubah
-            const grid = document.querySelector('.grid-cols-3');
-            grid.style.transform = 'translateY(10px)';
-            grid.style.opacity = '0';
-            
-            setTimeout(() => {
-                grid.style.transform = 'translateY(0)';
-                grid.style.opacity = '1';
-                console.log('Data filtered by:', val);
-            }, 400);
-        }
+    // ═══════════════════════════════════════════════════════════
+    // DOM CONTENT LOADED — satu blok saja
+    // ═══════════════════════════════════════════════════════════
+    document.addEventListener('DOMContentLoaded', () => {
 
-        // logic untuk dropdown menu pada widget
-        function openWidgetMenu(buttonElement) {
-            // Mencari elemen menu yang berada tepat setelah button
-            const targetMenu = buttonElement.nextElementSibling;
-            
-            // Amankan: Tutup semua menu lain yang mungkin terbuka agar tidak numpuk
-            document.querySelectorAll('.dropdown-menu').forEach(menu => {
-                if (menu !== targetMenu) {
-                    menu.classList.add('hidden');
-                }
-            });
+        // ── 1. ANIMASI COUNTER ──────────────────────────────────
+        fetchDashboardStats();
+        setInterval(fetchDashboardStats, 60000);
 
-            // Toggle (Munculkan/Sembunyikan) menu yang diklik
-            targetMenu.classList.toggle('hidden');
-        }
+        // ── 1b. FETCH STATS DARI API — update counter cards ────
+        async function fetchDashboardStats() {
+            try {
+                const res = await fetch('/api/dashboard/stats', {
+                    headers: { 'Accept': 'application/json' }
+                });
 
-        // Logika klik di luar elemen untuk menutup menu
-        window.addEventListener('click', function(event) {
-            // Jika yang diklik bukan bagian dari dropdown, sembunyikan semua menu
-            if (!event.target.closest('.custom-dropdown')) {
-                document.querySelectorAll('.dropdown-menu').forEach(menu => {
-                    menu.classList.add('hidden');
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+
+                const json = await res.json();
+                console.log('[Dashboard Stats] Data dari API:', json);
+
+                // Update setiap counter card yang punya data-key
+                document.querySelectorAll('.counter-value[data-key]').forEach(el => {
+                    const key = el.getAttribute('data-key');
+                    if (json[key] !== undefined) {
+                        animateCounter(el, json[key]);
+                    }
+                });
+
+            } catch (err) {
+                console.warn('[Dashboard Stats] API gagal, tetap pakai nilai default dari blade:', err.message);
+                // Fallback: animasikan saja nilai default yang sudah ada di data-target
+                document.querySelectorAll('.counter-value').forEach(el => {
+                    animateCounter(el, +el.getAttribute('data-target'));
                 });
             }
-        });
+        }
 
-        // chart Visitor Bar Chart
-        let visitorChart; // Variabel global untuk menyimpan instance chart
+        // Fungsi animasi counter yang bisa dipanggil ulang dengan nilai baru
+        function animateCounter(el, targetValue) {
+            const startTime = performance.now();
+            const duration = 2000;
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const ctxBar = document.getElementById('visitorBarChart').getContext('2d');
-            
-            // Inisialisasi Chart
-            visitorChart = new Chart(ctxBar, {
-                type: 'bar',
+            const update = (currentTime) => {
+                const progress = Math.min((currentTime - startTime) / duration, 1);
+                const easeOut = 1 - Math.pow(1 - progress, 3);
+                el.innerText = Math.floor(easeOut * targetValue).toLocaleString('en-US');
+                if (progress < 1) requestAnimationFrame(update);
+                else el.innerText = targetValue.toLocaleString('en-US');
+            };
+            requestAnimationFrame(update);
+        }
+
+        // ── 2. SALES ANALYTICS CHART (Line) ────────────────────
+        const salesCanvas = document.getElementById('artSalesChart');
+        if (salesCanvas) {
+            const ctx = salesCanvas.getContext('2d');
+            const dataSets = {
+                monthly: {
+                    labels: VISITOR_MONTHS,
+                    data: [45, 52, 48, 70, 65, 85, 78, 92, 110, 95, 105, 120]
+                },
+                yearly: {
+                    labels: ['2021', '2022', '2023', '2024', '2025', '2026'],
+                    data: [450, 620, 890, 1100, 1400, 1850]
+                }
+            };
+
+            const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(201, 167, 78, 0.25)');
+            gradient.addColorStop(1, 'rgba(201, 167, 78, 0)');
+
+            artSalesChart = new Chart(ctx, {
+                type: 'line',
                 data: {
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                    labels: dataSets.monthly.labels,
                     datasets: [{
-                        label: 'Visitors',
-                        data: [920, 480, 510, 940, 500, 800, 960, 220, 530, 260, 470, 620], // Data awal (2026)
-                        backgroundColor: '#C9A74E', 
-                        hoverBackgroundColor: '#A88C3F', 
-                        borderRadius: 6,
-                        barThickness: 25,
+                        label: 'Market Value',
+                        data: dataSets.monthly.data,
+                        borderColor: '#C9A74E',
+                        borderWidth: 3,
+                        tension: 0.4,
+                        fill: true,
+                        backgroundColor: gradient,
+                        pointRadius: 6,
+                        pointBackgroundColor: '#C9A74E',
                     }]
                 },
                 options: {
@@ -621,11 +647,98 @@
                     maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
                     scales: {
+                        y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#737373' } },
+                        x: { grid: { display: false }, ticks: { color: '#a3a3a3' } }
+                    }
+                }
+            });
+
+            document.getElementById('btn-monthly')?.addEventListener('click', () => {
+                artSalesChart.data.labels = dataSets.monthly.labels;
+                artSalesChart.data.datasets[0].data = dataSets.monthly.data;
+                artSalesChart.update();
+            });
+            document.getElementById('btn-yearly')?.addEventListener('click', () => {
+                artSalesChart.data.labels = dataSets.yearly.labels;
+                artSalesChart.data.datasets[0].data = dataSets.yearly.data;
+                artSalesChart.update();
+            });
+        }
+
+        // ── 3. BUILD YEAR DROPDOWN — otomatis dari tahun sekarang ──
+        async function buildYearDropdown() {
+            const select = document.getElementById('yearFilter');
+            if (!select) return;
+
+            const currentYear = new Date().getFullYear();
+
+            try {
+                const res = await fetch('/api/dashboard/visitors/years', {
+                    headers: { 'Accept': 'application/json' }
+                });
+
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+
+                const json = await res.json();
+                const years = json.years; // Array dari server, sudah desc
+
+                select.innerHTML = '';
+                years.forEach(y => {
+                    const opt = document.createElement('option');
+                    opt.value = y;
+                    opt.textContent = y;
+                    opt.className = 'bg-[#1a1a1a] text-white';
+                    if (parseInt(y) === currentYear) opt.selected = true;
+                    select.appendChild(opt);
+                });
+
+            } catch (err) {
+                // Fallback: generate dari tahun sekarang mundur 3 tahun
+                console.warn('[Year Dropdown] API gagal, pakai fallback:', err.message);
+                select.innerHTML = '';
+                for (let y = currentYear; y >= currentYear - 2; y--) {
+                    const opt = document.createElement('option');
+                    opt.value = y;
+                    opt.textContent = y;
+                    opt.className = 'bg-[#1a1a1a] text-white';
+                    if (y === currentYear) opt.selected = true;
+                    select.appendChild(opt);
+                }
+            }
+
+            // Setelah dropdown selesai dibangun, fetch data tahun aktif
+            const activeYear = select.value ?? currentYear.toString();
+            fetchVisitorStats(activeYear);
+        }
+
+        // ── 3. VISITOR BAR CHART — inisialisasi sekali ─────────
+        const barCanvas = document.getElementById('visitorBarChart');
+        if (barCanvas) {
+            visitorChart = new Chart(barCanvas.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: VISITOR_MONTHS,
+                    datasets: [{
+                        label: 'Visitors',
+                        data: new Array(12).fill(0),
+                        backgroundColor: new Array(12).fill('#C9A74E'),
+                        hoverBackgroundColor: '#A88C3F',
+                        borderRadius: 6,
+                        barThickness: 25,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: { duration: 500 },
+                    plugins: { 
+                        legend: { display: false }
+                    },
+                    scales: {
                         y: {
                             beginAtZero: true,
-                            max: 1000,
                             ticks: { stepSize: 250, color: '#6b7280' },
-                            grid: { color: 'rgba(255, 255, 255, 0.05)', drawBorder: false }
+                            grid: { color: 'rgba(255,255,255,0.05)', drawBorder: false }
                         },
                         x: {
                             grid: { display: false },
@@ -634,422 +747,542 @@
                     }
                 }
             });
-        });
 
-        // Fungsi untuk update data chart berdasarkan tahun
-        function updateYearlyData(year) {
-            // Simulasi data per tahun
-            const yearlyData = {
-                '2026': [920, 480, 510, 940, 500, 800, 960, 220, 530, 260, 470, 620],
-                '2025': [400, 300, 600, 800, 450, 700, 850, 320, 600, 400, 550, 900],
-                '2024': [200, 450, 300, 500, 250, 400, 600, 150, 300, 200, 350, 500]
-            };
+            // Build dropdown dulu, baru fetch data tahun aktif
+            buildYearDropdown();
 
-            if (visitorChart) {
-                // Update data pada dataset pertama
-                visitorChart.data.datasets[0].data = yearlyData[year];
-                
-                // Animasi transisi smooth
-                visitorChart.update();
-                
-                console.log(`Chart updated for year: ${year}`);
-            }
+            const defaultYear = new Date().getFullYear().toString();
+            fetchVisitorStats(defaultYear);
+
+            // Polling: refresh data tiap 30 detik
+            visitorLiveInterval = setInterval(() => {
+                const y = document.getElementById('yearFilter')?.value ?? new Date().getFullYear().toString();
+                fetchVisitorStats(y);
+            }, 30000);
+
+            // Polling: online count tiap 10 detik
+            visitorOnlineInterval = setInterval(fetchOnlineCount, 10000);
         }
 
-        // 1. STATE GLOBAL
-        let isDrawerVisible = false;
-        const menuStates = {
-            'main-menu-content': true,
-            'features-content': true,
-            'tools-content': true
-        };
+        // Init Lucide icons
+        lucide.createIcons();
+    });
 
-        // 2. FUNGSI NAVIGASI (SIDEBAR) - SATU FUNGSI SAJA
-        // Gunakan ini untuk tombol hamburger: onclick="handleNavDrawer(true, event)"
-        function handleNavDrawer(open, event) {
-            if (event) event.stopPropagation();
-            
-            // Pastikan ID ini sama dengan yang ada di HTML Anda
-            const sidebar = document.getElementById('mainSidebar') || document.getElementById('main-sidebar');
-            const overlay = document.getElementById('sidebarOverlay');
-            
-            // Elemen Path Icon (Hamburger animation)
-            const path1 = document.getElementById('path1');
-            const path2 = document.getElementById('path2');
-            const path3 = document.getElementById('path3');
+    // ═══════════════════════════════════════════════════════════
+    // VISITOR CHART — FUNGSI API
+    // ═══════════════════════════════════════════════════════════
 
-            isDrawerVisible = open;
-
-            if (isDrawerVisible) {
-                sidebar?.classList.remove('-translate-x-full');
-                overlay?.classList.remove('hidden');
-                setTimeout(() => overlay?.classList.add('opacity-100'), 10);
-                
-                // Animasi Icon ke "X"
-                path1?.setAttribute('d', 'M6 18L18 6');
-                if(path2) path2.style.opacity = '0';
-                path3?.setAttribute('d', 'M6 6l12 12');
-                
-                document.body.style.overflow = 'hidden'; // Lock scroll
-            } else {
-                sidebar?.classList.add('-translate-x-full');
-                overlay?.classList.remove('opacity-100');
-                setTimeout(() => overlay?.classList.add('hidden'), 300);
-                
-                // Animasi Icon ke Hamburger
-                path1?.setAttribute('d', 'M4 6h16');
-                if(path2) path2.style.opacity = '1';
-                path3?.setAttribute('d', 'M4 18h16');
-                
-                document.body.style.overflow = ''; // Unlock scroll
-            }
-        }
-
-        // 3. FUNGSI ACCORDION
-        function switchMenuAccordion(contentId, arrowId) {
-            const content = document.getElementById(contentId);
-            const arrow = document.getElementById(arrowId);
-            if(!content) return;
-
-            menuStates[contentId] = !menuStates[contentId];
-
-            if (menuStates[contentId]) {
-                content.classList.replace('grid-rows-[0fr]', 'grid-rows-[1fr]');
-                content.classList.replace('opacity-0', 'opacity-100');
-                if(arrow) arrow.style.transform = 'rotate(0deg)';
-            } else {
-                content.classList.replace('grid-rows-[1fr]', 'grid-rows-[0fr]');
-                content.classList.replace('opacity-100', 'opacity-0');
-                if(arrow) arrow.style.transform = 'rotate(-90deg)';
-            }
-        }
-
-        // 4. COUNTER & CHART (DOM CONTENT LOADED)
-        document.addEventListener('DOMContentLoaded', () => {
-            
-            // --- ANIMASI COUNTER ---
-            const counters = document.querySelectorAll('.counter-value');
-            const duration = 3000;
-
-            counters.forEach(counter => {
-                const target = +counter.getAttribute('data-target');
-                const startTime = performance.now();
-
-                const updateCount = (currentTime) => {
-                    const elapsedTime = currentTime - startTime;
-                    const progress = Math.min(elapsedTime / duration, 1);
-                    const easeOutCubic = 1 - Math.pow(1 - progress, 3);
-                    const currentNumber = Math.floor(easeOutCubic * target);
-                    
-                    counter.innerText = currentNumber.toLocaleString('en-US');
-                    if (progress < 1) requestAnimationFrame(updateCount);
-                    else counter.innerText = target.toLocaleString('en-US');
-                };
-                requestAnimationFrame(updateCount);
+    async function fetchVisitorStats(year) {
+        try {
+            const res = await fetch(`/api/dashboard/visitors?year=${year}`, {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? ''
+                }
             });
 
-            // --- CHART ---
-            const canvas = document.getElementById('artSalesChart');
-            if (canvas) {
-                const ctx = canvas.getContext('2d');
-                const dataSets = {
-                    monthly: {
-                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-                        data: [45, 52, 48, 70, 65, 85, 78, 92, 110, 95, 105, 120]
-                    },
-                    yearly: {
-                        labels: ['2021', '2022', '2023', '2024', '2025', '2026'],
-                        data: [450, 620, 890, 1100, 1400, 1850]
-                    }
-                };
+            if (!res.ok) throw new Error('HTTP ' + res.status);
 
-                const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-                gradient.addColorStop(0, 'rgba(201, 167, 78, 0.25)');
-                gradient.addColorStop(1, 'rgba(201, 167, 78, 0)');
+            const json = await res.json();
+            console.log('[Visitor Chart] Data dari API:', json);
+            applyVisitorData(json.monthly, json.online ?? null);
 
-                const myChart = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: dataSets.monthly.labels,
-                        datasets: [{
-                            label: 'Market Value',
-                            data: dataSets.monthly.data,
-                            borderColor: '#C9A74E',
-                            borderWidth: 3,
-                            tension: 0.4,
-                            fill: true,
-                            backgroundColor: gradient,
-                            pointRadius: 6,
-                            pointBackgroundColor: '#C9A74E',
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { legend: { display: false } },
-                        scales: {
-                            y: { grid: { color: 'rgba(255, 255, 255, 0.04)' }, ticks: { color: '#737373' } },
-                            x: { grid: { display: false }, ticks: { color: '#a3a3a3' } }
-                        }
-                    }
-                });
-
-                // Tab Switcher
-                document.getElementById('btn-monthly')?.addEventListener('click', () => {
-                    myChart.data.labels = dataSets.monthly.labels;
-                    myChart.data.datasets[0].data = dataSets.monthly.data;
-                    myChart.update();
-                });
-                document.getElementById('btn-yearly')?.addEventListener('click', () => {
-                    myChart.data.labels = dataSets.yearly.labels;
-                    myChart.data.datasets[0].data = dataSets.yearly.data;
-                    myChart.update();
-                });
-            }
-        });
-
-        // 5. MODAL & DROPDOWN HANDLERS
-        function toggleProfileDropdown(event) {
-            if (event) event.stopPropagation();
-            document.getElementById('profileDropdown').classList.toggle('hidden-modal');
+        } catch (err) {
+            console.warn('[Visitor Chart] API gagal, pakai fallback. Error:', err.message);
+            applyVisitorData(getVisitorFallback(year)); // ← pakai fungsi, bukan objek statis
         }
+    }
 
-        // Klik di luar untuk menutup
-        window.onclick = function(event) {
-            // Tutup Sidebar jika klik overlay
-            if (event.target.id === 'sidebarOverlay') {
-                handleNavDrawer(false);
-            }
-            // Tutup Profile Dropdown
-            if (!event.target.closest('#profileButton')) {
-                const drop = document.getElementById('profileDropdown');
-                if(drop) drop.classList.add('hidden-modal');
-            }
-        }
-
-        function switchTab(type) {
-            const btnMonthly = document.getElementById('btn-monthly');
-            const btnYearly = document.getElementById('btn-yearly');
-
-            // Reset Style Kedua Tombol (Kembalikan ke tampilan default/tidak aktif)
-            [btnMonthly, btnYearly].forEach(btn => {
-                btn.classList.remove('bg-[#C9A74E]', 'text-black');
-                btn.classList.add('text-neutral-500', 'hover:text-white');
+    async function fetchOnlineCount() {
+        try {
+            const res = await fetch('/api/dashboard/visitors/online', {
+                headers: { 'Accept': 'application/json' }
             });
+            if (!res.ok) return;
+            const json = await res.json();
+            renderOnlineCount(json.online);
+        } catch (_) {}
+    }
 
-            // Berikan Style Aktif ke tombol yang dipilih
-            if (type === 'monthly') {
-                btnMonthly.classList.add('bg-[#C9A74E]', 'text-black');
-                btnMonthly.classList.remove('text-neutral-500', 'hover:text-white');
-            } else {
-                btnYearly.classList.add('bg-[#C9A74E]', 'text-black');
-                btnYearly.classList.remove('text-neutral-500', 'hover:text-white');
-            }
+    function applyVisitorData(monthly, online = null) {
+        if (!visitorChart) return;
+
+        const curMonth = new Date().getMonth();
+        // Hitung max hanya dari bulan yang sudah terjadi
+        const relevantData = monthly.slice(0, curMonth + 1);
+        const maxVal = Math.max(...relevantData, 500);
+
+        visitorChart.data.datasets[0].data = monthly;
+        visitorChart.data.datasets[0].backgroundColor = monthly.map((_, i) =>
+            i === curMonth ? '#E8C46A' : '#C9A74E'
+        );
+        visitorChart.options.scales.y.max = Math.ceil(maxVal * 1.2 / 250) * 250;
+        visitorChart.update();
+
+        if (online !== null) renderOnlineCount(online);
+    }
+
+    function renderOnlineCount(count) {
+        const el = document.getElementById('visitorOnlineCount');
+        if (el) el.textContent = Number(count).toLocaleString('id-ID');
+    }
+
+    // Handler select tahun — dipanggil dari onchange di HTML
+    function updateYearlyData(year) {
+        fetchVisitorStats(year);
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // SIDEBAR & ACCORDION
+    // ═══════════════════════════════════════════════════════════
+    function handleNavDrawer(open, event) {
+        if (event) event.stopPropagation();
+        const sidebar = document.getElementById('mainSidebar') || document.getElementById('main-sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        const path1 = document.getElementById('path1');
+        const path2 = document.getElementById('path2');
+        const path3 = document.getElementById('path3');
+
+        isDrawerVisible = open;
+
+        if (open) {
+            sidebar?.classList.remove('-translate-x-full');
+            overlay?.classList.remove('hidden');
+            setTimeout(() => overlay?.classList.add('opacity-100'), 10);
+            path1?.setAttribute('d', 'M6 18L18 6');
+            if (path2) path2.style.opacity = '0';
+            path3?.setAttribute('d', 'M6 6l12 12');
+            document.body.style.overflow = 'hidden';
+        } else {
+            sidebar?.classList.add('-translate-x-full');
+            overlay?.classList.remove('opacity-100');
+            setTimeout(() => overlay?.classList.add('hidden'), 300);
+            path1?.setAttribute('d', 'M4 6h16');
+            if (path2) path2.style.opacity = '1';
+            path3?.setAttribute('d', 'M4 18h16');
+            document.body.style.overflow = '';
         }
+    }
 
-        // Modal Handlers dengan Scroll Lock
-        function openSettings() {
+    function switchMenuAccordion(contentId, arrowId) {
+        const content = document.getElementById(contentId);
+        const arrow = document.getElementById(arrowId);
+        if (!content) return;
+
+        menuStates[contentId] = !menuStates[contentId];
+
+        if (menuStates[contentId]) {
+            content.classList.replace('grid-rows-[0fr]', 'grid-rows-[1fr]');
+            content.classList.replace('opacity-0', 'opacity-100');
+            if (arrow) arrow.style.transform = 'rotate(0deg)';
+        } else {
+            content.classList.replace('grid-rows-[1fr]', 'grid-rows-[0fr]');
+            content.classList.replace('opacity-100', 'opacity-0');
+            if (arrow) arrow.style.transform = 'rotate(-90deg)';
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // MODAL & DROPDOWN
+    // ═══════════════════════════════════════════════════════════
+    function toggleProfileDropdown(event) {
+        if (event) event.stopPropagation();
+        document.getElementById('profileDropdown').classList.toggle('hidden-modal');
+    }
+
+    window.onclick = function(event) {
+        if (event.target.id === 'sidebarOverlay') handleNavDrawer(false);
+        if (!event.target.closest('#profileButton')) {
+            document.getElementById('profileDropdown')?.classList.add('hidden-modal');
+        }
+    };
+
+    function openWidgetMenu(buttonElement) {
+        const targetMenu = buttonElement.nextElementSibling;
+        document.querySelectorAll('.dropdown-menu').forEach(menu => {
+            if (menu !== targetMenu) menu.classList.add('hidden');
+        });
+        targetMenu.classList.toggle('hidden');
+    }
+
+    window.addEventListener('click', function(event) {
+        if (!event.target.closest('.custom-dropdown')) {
+            document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.add('hidden'));
+        }
+    });
+
+    function switchTab(type) {
+        const btnMonthly = document.getElementById('btn-monthly');
+        const btnYearly = document.getElementById('btn-yearly');
+        [btnMonthly, btnYearly].forEach(btn => {
+            btn.classList.remove('bg-[#C9A74E]', 'text-black');
+            btn.classList.add('text-neutral-500', 'hover:text-white');
+        });
+        if (type === 'monthly') {
+            btnMonthly.classList.add('bg-[#C9A74E]', 'text-black');
+            btnMonthly.classList.remove('text-neutral-500', 'hover:text-white');
+        } else {
+            btnYearly.classList.add('bg-[#C9A74E]', 'text-black');
+            btnYearly.classList.remove('text-neutral-500', 'hover:text-white');
+        }
+    }
+
+    function openSettings() {
+        const modal = document.getElementById('settingsModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        setTimeout(() => {
+            document.getElementById('settingsModalContent').classList.remove('scale-95');
+            document.getElementById('settingsModalContent').classList.add('scale-100');
+        }, 10);
+    }
+
+    function closeSettings() {
+        document.getElementById('settingsModalContent').classList.add('scale-95');
+        setTimeout(() => {
             const modal = document.getElementById('settingsModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }, 200);
+    }
+
+    function openLogoutModal() {
+        document.getElementById('profileDropdown').classList.add('hidden-modal');
+        document.getElementById('logoutModal').classList.remove('hidden-modal');
+    }
+
+    function closeLogoutModal() {
+        document.getElementById('logoutModal').classList.add('hidden-modal');
+    }
+
+    function toggleCountriesModal() {
+        const modal = document.getElementById('countriesModal');
+        const backdrop = document.getElementById('modalBackdrop');
+        const container = document.getElementById('modalContainer');
+
+        if (modal.classList.contains('hidden')) {
             modal.classList.remove('hidden');
-            modal.classList.add('flex');
-            // Beri sedikit delay agar transisi scale terlihat
             setTimeout(() => {
-                document.getElementById('settingsModalContent').classList.remove('scale-95');
-                document.getElementById('settingsModalContent').classList.add('scale-100');
+                backdrop.classList.add('opacity-100');
+                container.classList.remove('scale-95', 'opacity-0');
+                container.classList.add('scale-100', 'opacity-100');
             }, 10);
-        }
-
-        function closeSettings() {
-            const modal = document.getElementById('settingsModal');
-            document.getElementById('settingsModalContent').classList.add('scale-95');
+            document.body.style.overflow = 'hidden';
+        } else {
+            backdrop.classList.remove('opacity-100');
+            container.classList.remove('scale-100', 'opacity-100');
+            container.classList.add('scale-95', 'opacity-0');
             setTimeout(() => {
                 modal.classList.add('hidden');
-                modal.classList.remove('flex');
-            }, 200);
+                document.body.style.overflow = 'auto';
+            }, 500);
         }
+    }
 
-        function openLogoutModal() { 
-            document.getElementById('profileDropdown').classList.add('hidden-modal');
-            document.getElementById('logoutModal').classList.remove('hidden-modal'); 
-            lockScroll(true);
-        }
+    function searchCountry(query) {
+        const items = document.querySelectorAll('.country-item');
+        query = query.toLowerCase();
+        items.forEach(item => {
+            item.style.display = item.innerText.toLowerCase().includes(query) ? 'flex' : 'none';
+        });
+    }
 
-        function closeLogoutModal() { 
-            document.getElementById('logoutModal').classList.add('hidden-modal'); 
-            lockScroll(false);
-        }
+    function filterData(val) {
+        const grid = document.querySelector('.grid-cols-3');
+        if (!grid) return;
+        grid.style.transform = 'translateY(10px)';
+        grid.style.opacity = '0';
+        setTimeout(() => {
+            grid.style.transform = 'translateY(0)';
+            grid.style.opacity = '1';
+        }, 400);
+    }
 
-        lucide.createIcons();
+    function exportVisitorData() {
+        if (!visitorChart) return;
 
-        async function handleLogout() {
-            // Locate the CSRF meta tag
-            const csrfTokenElement = document.querySelector('meta[name="csrf-token"]');
-            const token = csrfTokenElement ? csrfTokenElement.getAttribute('content') : null;
+        const year   = document.getElementById('yearFilter')?.value ?? new Date().getFullYear();
+        const data   = visitorChart.data.datasets[0].data;
+        const labels = visitorChart.data.labels;
+        const total  = data.reduce((a, b) => a + b, 0);
+        const maxVal = Math.max(...data);
+        const maxMonth = labels[data.indexOf(maxVal)];
 
-            // Initial Validation: If token is missing, stop process and alert the user
-            if (!token) {
-                console.error("CSRF token meta tag is missing!");
-                return Swal.fire({
-                    title: 'SYSTEM ERROR',
-                    text: 'Security token (CSRF) was not found. Please refresh the page (F5).',
-                    icon: 'error',
-                    background: '#151515',
-                    color: '#ffffff',
-                    confirmButtonColor: '#C9A74E'
-                });
+        // ── Style helpers ────────────────────────────────────────
+        const GOLD   = 'FFC9A74E';
+        const DARK   = 'FF1A1A1A';
+        const DARK2  = 'FF2A2A2A';
+        const DARK3  = 'FF222222';
+        const WHITE  = 'FFFFFFFF';
+        const GRAY   = 'FF9CA3AF';
+        const LIGHT  = 'FFF5F0E8';
+
+        const borderThin = {
+            top:    { style: 'thin', color: { rgb: 'FF444444' } },
+            bottom: { style: 'thin', color: { rgb: 'FF444444' } },
+            left:   { style: 'thin', color: { rgb: 'FF444444' } },
+            right:  { style: 'thin', color: { rgb: 'FF444444' } },
+        };
+
+        const cell = (v, opts = {}) => ({
+            v,
+            t: typeof v === 'number' ? 'n' : 's',
+            s: {
+                font:      { name: 'Calibri', sz: opts.sz ?? 11, bold: opts.bold ?? false, color: { rgb: opts.color ?? WHITE } },
+                fill:      { fgColor: { rgb: opts.bg ?? DARK } },
+                alignment: { horizontal: opts.align ?? 'left', vertical: 'center', wrapText: false },
+                border:    opts.border ? borderThin : {},
             }
+        });
 
-            // Logout Confirmation Dialog
-            const result = await Swal.fire({
-                title: 'LOGOUT',
-                text: 'Are you sure you want to end your current session?',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#C9A74E',
-                cancelButtonColor: '#333333',
-                confirmButtonText: 'Yes, Sign Out',
-                cancelButtonText: 'Cancel',
-                background: '#151515',
-                color: '#ffffff',
-                customClass: {
-                    popup: 'border border-zinc-800'
-                }
+        // ── Susun baris ──────────────────────────────────────────
+        const ws_data = [];
+
+        // Row 0 — judul besar
+        ws_data.push([
+            { v: `KAPAKAPA ART GALLERY`, t: 's', s: {
+                font: { name: 'Calibri', sz: 16, bold: true, color: { rgb: GOLD } },
+                fill: { fgColor: { rgb: DARK } },
+                alignment: { horizontal: 'left', vertical: 'center' }
+            }},
+            cell(''), cell(''), cell('')
+        ]);
+
+        // Row 1 — sub judul
+        ws_data.push([
+            { v: `Visitor Analytics Report — ${year}`, t: 's', s: {
+                font: { name: 'Calibri', sz: 12, bold: false, color: { rgb: GRAY } },
+                fill: { fgColor: { rgb: DARK } },
+                alignment: { horizontal: 'left', vertical: 'center' }
+            }},
+            cell(''), cell(''), cell('')
+        ]);
+
+        // Row 2 — generated date
+        ws_data.push([
+            { v: `Generated: ${new Date().toLocaleDateString('id-ID', { dateStyle: 'long' })}`, t: 's', s: {
+                font: { name: 'Calibri', sz: 9, color: { rgb: 'FF6B7280' } },
+                fill: { fgColor: { rgb: DARK } },
+                alignment: { horizontal: 'left', vertical: 'center' }
+            }},
+            cell(''), cell(''), cell('')
+        ]);
+
+        // Row 3 — spacer
+        ws_data.push([cell(''), cell(''), cell(''), cell('')]);
+
+        // Row 4 — header kolom
+        const headerStyle = (label) => ({
+            v: label, t: 's', s: {
+                font: { name: 'Calibri', sz: 11, bold: true, color: { rgb: DARK } },
+                fill: { fgColor: { rgb: GOLD } },
+                alignment: { horizontal: 'center', vertical: 'center' },
+                border: borderThin,
+            }
+        });
+        ws_data.push([
+            headerStyle('No.'),
+            headerStyle('Month'),
+            headerStyle('Visitors'),
+            headerStyle('Share (%)'),
+        ]);
+
+        // Row 5–16 — data bulan
+        labels.forEach((month, i) => {
+            const isCurrentMonth = i === new Date().getMonth();
+            const isPeak = data[i] === maxVal && maxVal > 0;
+            const rowBg  = isPeak ? 'FF2D2510' : (i % 2 === 0 ? DARK2 : DARK3);
+            const txtCol = isPeak ? GOLD : WHITE;
+            const share  = total > 0 ? +((data[i] / total) * 100).toFixed(1) : 0;
+
+            ws_data.push([
+                cell(i + 1,   { bg: rowBg, color: txtCol, align: 'center', border: true }),
+                cell(month,   { bg: rowBg, color: isPeak ? GOLD : (isCurrentMonth ? 'FFE8C46A' : WHITE), bold: isPeak, border: true }),
+                cell(data[i], { bg: rowBg, color: txtCol, align: 'right',  border: true }),
+                cell(share,   { bg: rowBg, color: txtCol, align: 'right',  border: true, sz: 10 }),
+            ]);
+        });
+
+        // Row 17 — spacer
+        ws_data.push([cell('', { bg: DARK }), cell('', { bg: DARK }), cell('', { bg: DARK }), cell('', { bg: DARK })]);
+
+        // Row 18 — TOTAL
+        ws_data.push([
+            cell('',       { bg: 'FF111111' }),
+            { v: 'TOTAL', t: 's', s: {
+                font: { name: 'Calibri', sz: 12, bold: true, color: { rgb: GOLD } },
+                fill: { fgColor: { rgb: 'FF111111' } },
+                alignment: { horizontal: 'left', vertical: 'center' },
+                border: borderThin,
+            }},
+            { v: total, t: 'n', s: {
+                font: { name: 'Calibri', sz: 12, bold: true, color: { rgb: GOLD } },
+                fill: { fgColor: { rgb: 'FF111111' } },
+                alignment: { horizontal: 'right', vertical: 'center' },
+                border: borderThin,
+            }},
+            { v: '100%', t: 's', s: {
+                font: { name: 'Calibri', sz: 11, bold: true, color: { rgb: GOLD } },
+                fill: { fgColor: { rgb: 'FF111111' } },
+                alignment: { horizontal: 'right', vertical: 'center' },
+                border: borderThin,
+            }},
+        ]);
+
+        // Row 19 — Peak Month
+        ws_data.push([
+            cell('',         { bg: 'FF111111' }),
+            cell('Peak Month', { bg: 'FF111111', color: GRAY, sz: 10 }),
+            cell(maxMonth,   { bg: 'FF111111', color: 'FFE8C46A', bold: true }),
+            cell(`${maxVal} visitors`, { bg: 'FF111111', color: GRAY, sz: 10 }),
+        ]);
+
+        // ── Buat worksheet ───────────────────────────────────────
+        const ws = XLSX.utils.aoa_to_sheet(ws_data);
+
+        ws['!cols'] = [
+            { wch: 6  },
+            { wch: 16 },
+            { wch: 14 },
+            { wch: 14 },
+        ];
+
+        ws['!rows'] = [
+            { hpt: 28 }, // judul
+            { hpt: 20 }, // sub
+            { hpt: 16 }, // date
+            { hpt: 10 }, // spacer
+            { hpt: 22 }, // header
+            ...Array(12).fill({ hpt: 20 }),
+            { hpt: 8  },
+            { hpt: 22 },
+            { hpt: 18 },
+        ];
+
+        ws['!merges'] = [
+            { s: { r: 0, c: 0 }, e: { r: 0, c: 3 } },
+            { s: { r: 1, c: 0 }, e: { r: 1, c: 3 } },
+            { s: { r: 2, c: 0 }, e: { r: 2, c: 3 } },
+        ];
+
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, `Visitors ${year}`);
+        XLSX.writeFile(wb, `Kapakapa_Visitors_${year}.xlsx`);
+
+        document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.add('hidden'));
+
+        Swal.fire({
+            icon: 'success', title: 'Exported!',
+            text: `Kapakapa_Visitors_${year}.xlsx berhasil diunduh.`,
+            background: '#151515', color: '#fff',
+            confirmButtonColor: '#C9A74E',
+            iconColor: '#C9A74E', 
+            timer: 2500, showConfirmButton: false
+        });
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // AUTH — LOGOUT & SETTINGS
+    // ═══════════════════════════════════════════════════════════
+    async function handleLogout() {
+        const csrfTokenElement = document.querySelector('meta[name="csrf-token"]');
+        const token = csrfTokenElement ? csrfTokenElement.getAttribute('content') : null;
+
+        if (!token) {
+            return Swal.fire({
+                title: 'SYSTEM ERROR',
+                text: 'Security token (CSRF) was not found. Please refresh the page (F5).',
+                icon: 'error', background: '#151515', color: '#ffffff', confirmButtonColor: '#C9A74E'
             });
-
-            // If the user confirms logout
-            if (result.isConfirmed) {
-                // Show loading state to prevent double clicks
-                Swal.fire({
-                    title: 'Signing out...',
-                    allowOutsideClick: false,
-                    showConfirmButton: false,
-                    background: '#151515',
-                    color: '#ffffff',
-                    didOpen: () => {
-                        Swal.showLoading();
-                    }
-                });
-
-                try {
-                    const response = await fetch('/api/logout', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json',
-                            'X-CSRF-TOKEN': token
-                        }
-                    });
-
-                    // Check if response is successful (200-299)
-                    if (response.ok) {
-                        // Redirect to homepage or login page
-                        window.location.href = '/'; 
-                    } else {
-                        // Attempt to parse error message from server
-                        const contentType = response.headers.get("content-type");
-                        let errorMessage = 'Logout failed. Please try again.';
-                        
-                        if (contentType && contentType.includes("application/json")) {
-                            const data = await response.json();
-                            errorMessage = data.message || errorMessage;
-                        }
-
-                        throw new Error(errorMessage);
-                    }
-
-                } catch (error) {
-                    console.error("Logout Error:", error);
-                    
-                    // Show error alert if request fails
-                    Swal.fire({
-                        title: 'ERROR',
-                        text: error.message || 'An unexpected server error occurred.',
-                        icon: 'error',
-                        background: '#1a1a1a',
-                        color: '#ffffff',
-                        confirmButtonColor: '#C9A73E'
-                    });
-                }
-            }
         }
-        
-        // button update settings
-        async function handleUpdateSettings() {
-            const newPassword = document.getElementById('newPasswordInput').value;
 
-            // Validasi simpel
-            if (!newPassword) {
-                return Swal.fire({
-                    icon: 'error',
-                    title: 'Empty Field',
-                    text: 'Please enter a new password',
-                    background: '#1a1a1a',
-                    color: '#fff'
-                });
-            }
+        const result = await Swal.fire({
+            title: 'LOGOUT',
+            text: 'Are you sure you want to end your current session?',
+            icon: 'warning', showCancelButton: true,
+            confirmButtonColor: '#C9A74E', cancelButtonColor: '#333333',
+            confirmButtonText: 'Yes, Sign Out', cancelButtonText: 'Cancel',
+            background: '#151515', color: '#ffffff',
+            customClass: { popup: 'border border-zinc-800' }
+        });
 
-            // Tampilkan Loading
+        if (result.isConfirmed) {
             Swal.fire({
-                title: 'Updating...',
-                didOpen: () => Swal.showLoading(),
-                background: '#151515',
-                color: '#fff',
-                allowOutsideClick: false
+                title: 'Signing out...', allowOutsideClick: false, showConfirmButton: false,
+                background: '#151515', color: '#ffffff', didOpen: () => Swal.showLoading()
             });
 
             try {
-                const response = await fetch('/api/update-password', {
+                const response = await fetch('/api/logout', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json', // Memberitahu server kita minta JSON
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    },
-                    body: JSON.stringify({ password: newPassword }),
-                    credentials: 'same-origin' // Memastikan cookie session ikut terkirim
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': token }
                 });
 
-                const data = await response.json();
-
                 if (response.ok) {
-                    await Swal.fire({
-                        icon: 'success',
-                        title: 'SUCCESS',
-                        text: 'Password updated successfully!',
-                        background: '#151515',
-                        color: '#fff',
-                        confirmButtonColor: '#C9A74E'
-                    });
-                    closeSettings();
-                    document.getElementById('newPasswordInput').value = ''; // Reset input
+                    window.location.href = '/';
                 } else {
-                    throw new Error(data.message || 'Failed to update');
+                    const contentType = response.headers.get('content-type');
+                    let errorMessage = 'Logout failed. Please try again.';
+                    if (contentType?.includes('application/json')) {
+                        const data = await response.json();
+                        errorMessage = data.message || errorMessage;
+                    }
+                    throw new Error(errorMessage);
                 }
             } catch (error) {
                 Swal.fire({
-                    icon: 'error',
-                    title: 'ERROR',
-                    text: error.message,
-                    background: '#151515',
-                    color: '#fff'
+                    title: 'ERROR', text: error.message || 'An unexpected server error occurred.',
+                    icon: 'error', background: '#1a1a1a', color: '#ffffff', confirmButtonColor: '#C9A74E'
                 });
             }
         }
+    }
 
-        function togglePassword(inputId, btn) {
-            const input = document.getElementById(inputId);
-            const icon = btn.querySelector('svg');
-            const isPassword = input.type === 'password';
-            
-            input.type = isPassword ? 'text' : 'password';
-            
-            // Ganti icon mata (Eye vs Eye-off)
-            if (isPassword) {
-                icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.822 7.822L21 21m-2.278-2.278L15.07 15.07m-4.414-4.414L12 12m0 0l.93-.93M12 12l.93.93" />`;
-            } else {
-                icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />`;
-            }
+    async function handleUpdateSettings() {
+        const newPassword = document.getElementById('newPasswordInput').value;
+        if (!newPassword) {
+            return Swal.fire({ icon: 'error', title: 'Empty Field', text: 'Please enter a new password', background: '#1a1a1a', color: '#fff' });
         }
-    </script>
+
+        Swal.fire({ title: 'Updating...', didOpen: () => Swal.showLoading(), background: '#151515', color: '#fff', allowOutsideClick: false });
+
+        try {
+            const response = await fetch('/api/update-password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({ password: newPassword }),
+                credentials: 'same-origin'
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                await Swal.fire({ icon: 'success', title: 'SUCCESS', text: 'Password updated successfully!', background: '#151515', color: '#fff', confirmButtonColor: '#C9A74E' });
+                closeSettings();
+                document.getElementById('newPasswordInput').value = '';
+            } else {
+                throw new Error(data.message || 'Failed to update');
+            }
+        } catch (error) {
+            Swal.fire({ icon: 'error', title: 'ERROR', text: error.message, background: '#151515', color: '#fff' });
+        }
+    }
+
+    function togglePassword(inputId, btn) {
+        const input = document.getElementById(inputId);
+        const icon = btn.querySelector('svg');
+        const isPassword = input.type === 'password';
+        input.type = isPassword ? 'text' : 'password';
+        if (isPassword) {
+            icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.822 7.822L21 21m-2.278-2.278L15.07 15.07m-4.414-4.414L12 12m0 0l.93-.93M12 12l.93.93" />`;
+        } else {
+            icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />`;
+        }
+    }
+</script>
 </body>
 </html>

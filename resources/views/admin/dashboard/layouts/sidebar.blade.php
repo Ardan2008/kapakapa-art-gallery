@@ -50,7 +50,7 @@
 
                     <div class="text-center px-10">
                         <h1 class="text-xl font-black tracking-[0.2em] text-gray-300 uppercase leading-none">
-                            Kapakapa Art Gallery
+                            Kapakapa Art
                         </h1>
                         <div class="flex items-center justify-center gap-2 mt-2">
                             <div class="h-[1px] w-3 bg-neutral-700"></div>
@@ -216,7 +216,7 @@
                             <div class="w-6 h-[1px] bg-gradient-to-l from-transparent to-[#C9A74E]/50"></div>
                         </div>
                         <div class="text-center">
-                            <h4 class="text-[14px] font-bold tracking-[0.2em] text-gray-100 uppercase leading-none">Kapakapa Art Gallery</h4>
+                            <h4 class="text-[14px] font-bold tracking-[0.2em] text-gray-100 uppercase leading-none">Kapakapa Art</h4>
                             <p class="text-[9px] tracking-[0.4em] text-[#C9A74E] uppercase font-medium mt-1.5">Gallery</p>
                         </div>
                         <p class="text-[10px] text-gray-500 uppercase tracking-widest font-semibold opacity-80 group-hover:opacity-100 transition-opacity">&copy; 2026</p>

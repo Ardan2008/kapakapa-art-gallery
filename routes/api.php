@@ -4,9 +4,17 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController; 
 use Illuminate\Session\Middleware\StartSession;
+use App\Http\Controllers\DashboardController;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
+});
+
+Route::prefix('dashboard')->group(function () {
+    Route::get('/stats', [DashboardController::class, 'getStats']);           // ← baru
+    Route::get('/visitors', [DashboardController::class, 'getVisitorStats']);
+    Route::get('/visitors/online', [DashboardController::class, 'getOnlineVisitors']);
+    Route::get('/visitors/years', [DashboardController::class, 'getAvailableYears']);
 });
 
 // Gunakan format array secara konsisten
