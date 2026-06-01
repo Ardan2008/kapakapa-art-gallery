@@ -1,4 +1,5 @@
 @vite(['resources/css/app.css', 'resources/js/app.js'])
+<meta name="csrf-token" content="{{ csrf_token() }}">
 
 <nav class="bg-[#0a0a0a] border-b border-white/10 relative z-[50]">
     <div class="py-5 px-6 md:px-12 flex items-center justify-between">

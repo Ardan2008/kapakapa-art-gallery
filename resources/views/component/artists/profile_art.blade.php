@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Swiper.js CSS -->
@@ -177,7 +178,7 @@
                 <div class="relative group">
                     <div class="flex items-baseline gap-6 relative z-10">
                         <span class="text-6xl font-serif text-gray-300 leading-none tracking-tighter transition-all duration-700 group-hover:italic group-hover:text-gold">
-                            {{ count($artist->artworks) }}
+                            {{ $artworks->total() }}
                         </span>
                         <div class="flex flex-col">
                             <span class="text-gold text-[8px] uppercase tracking-[0.8em] font-bold mb-1">Archive</span>
@@ -204,85 +205,14 @@
                 </div>
             </div>
 
-            @php
-                $artworks = $artist->artworks;
-            @endphp
-
-            <div class="max-w-[1600px] mx-auto px-8 pt-10 pb-32 lg:pt-14 bg-[#0a0a0a]">
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-y-32 gap-x-12">
-                    @foreach($artworks as $index => $art)
-                        @php
-                            $artImages = is_array($art->images) ? $art->images : json_decode($art->images, true);
-                            $imagesJson = json_encode($artImages);
-                        @endphp
-                        <a href="javascript:void(0)" 
-                        onclick="openModal({{ $imagesJson }}, '{{ addslashes($art->title) }}', '{{ addslashes($art->category) }}', '{{ $art->width }}', '{{ $art->height }}', '{{ $art->unit }}')"
-                        data-aos="fade-up" 
-                        data-aos-delay="{{ ($index % 5) * 100 }}"
-                        data-aos-duration="1000"
-                        class="group cursor-pointer block {{ ($index % 2 == 1) ? 'lg:mt-24' : '' }} smooth-transition">
-                            
-                            <div class="relative aspect-[10/14] mb-10 bg-zinc-900 border border-white/5 group-hover:border-[#C9A74E]/20 overflow-visible smooth-transition">
-                                <div class="absolute -top-4 -left-4 flex items-center gap-3 opacity-0 group-hover:opacity-100 smooth-transition transform translate-y-2 group-hover:translate-y-0 z-10">
-                                    <div class="w-1.5 h-1.5 bg-[#C9A74E] rounded-full"></div>
-                                    <div class="w-12 h-[0.5px] bg-[#C9A74E]/40"></div>
-                                </div>
-                                
-                                <div class="w-full h-full overflow-hidden relative artwork-card-container">
-                                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60 group-hover:opacity-30 smooth-transition z-20 pointer-events-none"></div>
-                                    <div class="artwork-slider h-full">
-                                        @php
-                                            $artImages = is_array($art->images) ? $art->images : json_decode($art->images, true);
-                                            // Take only up to 3 images as per requirement
-                                            $displayImages = array_slice($artImages ?? [], 0, 3);
-                                        @endphp
-                                        @foreach($displayImages as $imgIndex => $imagePath)
-                                            <div class="artwork-slide">
-                                                <img src="{{ $imagePath }}" 
-                                                    class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[1.2s] ease-out" 
-                                                    alt="{{ $art->title }}">
-                                            </div>
-                                        @endforeach
-                                        @if(empty($displayImages))
-                                            <div class="artwork-slide">
-                                                <img src="https://via.placeholder.com/500x700?text=No+Image" class="w-full h-full object-cover">
-                                            </div>
-                                        @endif
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="px-1 text-center sm:text-left">
-                                <h3 class="text-lg md:text-xl font-serif text-gray-300 mb-5 tracking-wide smooth-transition group-hover:text-gold group-hover:italic group-hover:translate-x-2">
-                                    {{ $art->title }}
-                                </h3>
-                                <div class="flex items-center justify-center sm:justify-start gap-3 mb-4">
-                                    <div class="w-1 h-1 bg-gold rounded-full opacity-20 group-hover:opacity-100 smooth-transition"></div>
-                                    <div class="h-[1px] bg-[#C9A74E]/20 w-8 smooth-transition group-hover:w-16 group-hover:bg-[#C9A74E]/50"></div>
-                                </div>
-                                <p class="text-[9px] uppercase tracking-[0.6em] text-slate-500 font-medium group-hover:text-slate-200 smooth-transition">
-                                    {{ $art->category }} // {{ $art->width && $art->height ? $art->width . ' x ' . $art->height . ' ' . $art->unit : 'No Dimensions' }}
-                                </p>
-                            </div>
-                        </a>
-                    @endforeach
-                </div>
+            <div id="grid-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-y-32 gap-x-12">
+                @include('component.artists.partials.artworks-grid', compact('artworks', 'artist'))
             </div>
 
-            <div class="mt-6 flex items-center gap-6">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 flex items-center justify-center bg-black text-white text-sm font-bold border border-white/5">01</div>
-                    <span class="text-slate-700 font-light">/</span>
-                    <span class="text-[11px] uppercase tracking-[0.2em] font-medium text-slate-500">12</span>
-                </div>
-                <a href="#" class="group">
-                    <div class="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center bg-transparent group-hover:bg-[#C9A74E] group-hover:border-[#C9A74E] transition-all duration-500">
-                        <svg class="w-4 h-4 text-slate-300 group-hover:text-black transform group-hover:translate-x-0.5 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path d="M9 5l7 7-7 7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                    </div>
-                </a>
-            </div>
+            @include('component.partials.pagination-bar', [
+                'paginator'   => $artworks,
+                'containerId' => 'grid-container',
+            ])
         </div>
     </section>
 
@@ -660,7 +590,7 @@
         }
 
         // --- LOGIKA MODAL UTAMA ---
-        function openModal(images, title, author, width, height, unit) {
+        function openModal(images, title, author, width, height, unit, certificate) {
             const modal = document.getElementById('artModal');
             const wrapper = document.getElementById('modalSwiperWrapper');
             
@@ -687,9 +617,13 @@
             document.getElementById('modalTitle').innerText = title;
             document.getElementById('modalAuthor').innerText = author;
             
-            // Refined Dimensions Display
+            // Dimensions
             const dimensionsText = (width && height) ? `${width} x ${height} ${unit}` : 'Dimensions not specified';
             document.getElementById('modalDimensions').innerText = dimensionsText;
+
+            // ✅ Update Certificate dinamis
+            const certImg = document.getElementById('certImageActual');
+            certImg.src = (certificate && certificate.trim() !== '') ? certificate : '/img/sertif.png';
 
             // Re-init Swiper
             setTimeout(() => {
@@ -700,7 +634,7 @@
             // Tampilkan Modal
             modal.classList.remove('hidden');
             modal.classList.add('flex');
-            document.body.style.overflow = 'hidden'; 
+            document.body.style.overflow = 'hidden';
         }
 
         function closeModal() {
@@ -743,23 +677,6 @@
                     overlay.classList.add('invisible');
                 }, 500); // 500ms sesuai duration-500 di HTML
             }
-        }
-
-        // --- LOGIKA PENUTUPAN MODAL UTAMA JUGA MENUTUP OVERLAY KOMENTAR ---
-        function closeModal() {
-            const modal = document.getElementById('artModal');
-            const commentOverlay = document.getElementById('commentOverlay');
-
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-            
-            // Pastikan overlay komentar ikut tertutup saat modal utama ditutup
-            if (commentOverlay) {
-                commentOverlay.classList.add('hidden');
-                commentOverlay.classList.remove('flex');
-            }
-            
-            document.body.style.overflow = 'auto';
         }
 
         /**
@@ -940,6 +857,62 @@
                 });
             });
         });
+    </script>
+
+    <script>
+    const AJAX_URL     = "{{ route('profile_art', $artist->id) }}";
+    const EXTRA_PARAMS = {};
+    const GRID_ID      = 'grid-container';
+
+    async function changePage(page) {
+        if (page < 1 || page > lastPage || isFetching) return;
+        isFetching = true;
+        const grid = document.getElementById(GRID_ID);
+        grid.style.opacity = '0.3';
+        grid.style.pointerEvents = 'none';
+        try {
+            const params = new URLSearchParams({ page, ...EXTRA_PARAMS });
+            const res = await fetch(`${AJAX_URL}?${params}`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                }
+            });
+            const data = await res.json();
+            grid.innerHTML = data.html;
+            currentPage = data.current_page;
+            lastPage    = data.last_page;
+            updatePaginationUI();
+            if (typeof AOS !== 'undefined') AOS.refreshHard();
+            grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } catch (err) {
+            console.error('Pagination error:', err);
+        } finally {
+            grid.style.opacity = '1';
+            grid.style.pointerEvents = 'auto';
+            isFetching = false;
+        }
+    }
+
+    function updatePaginationUI() {
+        const bar  = document.getElementById('pagination-bar');
+        const prev = document.getElementById('btn-prev');
+        const next = document.getElementById('btn-next');
+
+        if (lastPage <= 1) {
+            bar.classList.add('opacity-0', 'pointer-events-none');
+        } else {
+            bar.classList.remove('opacity-0', 'pointer-events-none');
+        }
+
+        document.getElementById('page-current').textContent = String(currentPage).padStart(2, '0');
+        document.getElementById('page-total').textContent   = String(lastPage).padStart(2, '0');
+
+        prev.classList.toggle('opacity-30',          currentPage <= 1);
+        prev.classList.toggle('pointer-events-none', currentPage <= 1);
+        next.classList.toggle('opacity-30',          currentPage >= lastPage);
+        next.classList.toggle('pointer-events-none', currentPage >= lastPage);
+    }
     </script>
 </body>
 </html>

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Kapakapa Art Gallery | Artists</title>
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -45,7 +46,6 @@
 <body>
     @include('component.layout.navbar')
 
-
     <div class="min-h-screen selection:bg-gold/30">
         <main class="max-w-[1600px] mx-auto px-8 pt-10 pb-20 lg:pt-14">
             
@@ -61,58 +61,16 @@
                 </div>
             </header>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-y-20 gap-x-10">
-                @foreach($artists as $index => $artist)
-                    <a href="{{ route('profile_art', $artist->id) }}" 
-                    class="group cursor-pointer block {{ ($index % 5 == 1 || $index % 5 == 3) ? 'lg:mt-16' : '' }}"
-                    data-aos="fade-up" 
-                    data-aos-delay="{{ ($index % 5) * 100 }}"
-                    data-aos-duration="1000">
-                        
-                        <div class="relative overflow-hidden aspect-[10/14] mb-7 bg-zinc-900 border border-white/5 transition-luxury group-hover:border-gold/50">
-                            <img src="{{ $artist->profile_url ? asset($artist->profile_url) : 'https://api.dicebear.com/8.x/notionists/svg?seed=' . urlencode($artist->name) }}" 
-                                class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-luxury group-hover:scale-110"
-                                alt="{{ $artist->name }}">
-                            
-                            <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-luxury"></div>
-                        </div>
-
-                        <div class="px-1">
-                            <h3 class="text-2xl font-serif leading-tight text-gray-300 transition-luxury group-hover:italic group-hover:text-gold">
-                                {{ $artist->name }}
-                            </h3>
-                            
-                            <div class="flex items-center gap-4 mt-3">
-                                <div class="h-[1px] bg-gold/50 w-10 transition-all group-hover:w-16 group-hover:bg-gold"></div>
-                                <p class="text-[9px] uppercase tracking-[0.3em] text-gray-300 font-semibold group-hover:text-slate-300 transition-colors">
-                                    {{ $artist->birthplace }}
-                                </p>
-                            </div>
-                        </div>
-                    </a>
-                @endforeach
+            {{-- Ganti <div class="grid ..."> yang ada @foreach di dalamnya --}}
+            <div id="grid-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-y-20 gap-x-10">
+                @include('component.artists.partials.artists-grid', compact('artists'))
             </div>
 
-            <div class="mt-12 flex items-center gap-6">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 flex items-center justify-center bg-zinc-900 text-gray-300 text-sm font-bold border border-white/5">
-                        01
-                    </div>
-                    <span class="text-gray-700 font-light">/</span>
-                    <span class="text-[11px] uppercase tracking-[0.2em] font-medium text-gray-300">12</span>
-                </div>
-
-                <a href="#" class="group">
-                    <div class="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center 
-                                bg-transparent group-hover:bg-gold group-hover:border-gold 
-                                transition-all duration-500 ease-out">
-                        <svg class="w-4 h-4 text-gray-300 group-hover:text-black transform group-hover:translate-x-0.5 transition-all" 
-                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path d="M9 5l7 7-7 7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                    </div>
-                </a>
-            </div>
+            {{-- Ganti blok mt-12 lama --}}
+            @include('component.partials.pagination-bar', [
+                'paginator'   => $artists,
+                'containerId' => 'grid-container',
+            ])
         </main>
 
         @include('component.layout.footer')
@@ -155,6 +113,62 @@
         btn.addEventListener('click', function() {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });
+    </script>
+
+    <script>
+    const AJAX_URL     = "{{ route('artists') }}";
+    const EXTRA_PARAMS = {};
+    const GRID_ID      = 'grid-container';
+
+    async function changePage(page) {
+        if (page < 1 || page > lastPage || isFetching) return;
+        isFetching = true;
+        const grid = document.getElementById(GRID_ID);
+        grid.style.opacity = '0.3';
+        grid.style.pointerEvents = 'none';
+        try {
+            const params = new URLSearchParams({ page, ...EXTRA_PARAMS });
+            const res = await fetch(`${AJAX_URL}?${params}`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                }
+            });
+            const data = await res.json();
+            grid.innerHTML = data.html;
+            currentPage = data.current_page;
+            lastPage    = data.last_page;
+            updatePaginationUI();
+            if (typeof AOS !== 'undefined') AOS.refreshHard();
+            grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } catch (err) {
+            console.error('Pagination error:', err);
+        } finally {
+            grid.style.opacity = '1';
+            grid.style.pointerEvents = 'auto';
+            isFetching = false;
+        }
+    }
+
+    function updatePaginationUI() {
+        const bar  = document.getElementById('pagination-bar');
+        const prev = document.getElementById('btn-prev');
+        const next = document.getElementById('btn-next');
+
+        if (lastPage <= 1) {
+            bar.classList.add('opacity-0', 'pointer-events-none');
+        } else {
+            bar.classList.remove('opacity-0', 'pointer-events-none');
+        }
+
+        document.getElementById('page-current').textContent = String(currentPage).padStart(2, '0');
+        document.getElementById('page-total').textContent   = String(lastPage).padStart(2, '0');
+
+        prev.classList.toggle('opacity-30',          currentPage <= 1);
+        prev.classList.toggle('pointer-events-none', currentPage <= 1);
+        next.classList.toggle('opacity-30',          currentPage >= lastPage);
+        next.classList.toggle('pointer-events-none', currentPage >= lastPage);
+    }
     </script>
 </body>
 </html>

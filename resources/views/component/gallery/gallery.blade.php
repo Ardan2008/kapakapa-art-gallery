@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -42,7 +43,6 @@
     
     @include('component.layout.navbar')
 
-
     <div class="min-h-screen selection:bg-[#c9a74e]/30">
         <main class="max-w-[1600px] mx-auto px-8 pt-10 pb-20 lg:pt-14">
             
@@ -58,72 +58,14 @@
                 </div>
             </header>
 
-            <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-20">
-                @foreach($styles as $item)
-                <div class="group block relative" data-aos="fade-up">
-                    <a href="{{ route('gallery', ['style' => $item['title']]) }}" class="absolute inset-0 z-10" aria-label="View Gallery"></a>
-
-                    <div class="relative flex gap-2 h-[450px] overflow-hidden mb-8 transition-all duration-700 group-hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,1)]">
-                        <div class="w-2/3 h-full overflow-hidden bg-zinc-950 grayscale group-hover:grayscale-0 transition-all duration-1000 ease-in-out">
-                            <img src="{{ $item['main_img'] }}" alt="{{ $item['title'] }}" class="w-full h-full object-cover scale-110 group-hover:scale-100 transition-transform duration-1000">
-                        </div>
-                        
-                        <div class="w-1/3 flex flex-col gap-2">
-                            <div class="h-1/2 overflow-hidden bg-zinc-950 grayscale group-hover:grayscale-0 transition-all duration-1000 delay-75">
-                                <img src="{{ $item['sub_img1'] }}" class="w-full h-full object-cover">
-                            </div>
-                            <div class="h-1/2 overflow-hidden bg-zinc-950 relative grayscale group-hover:grayscale-0 transition-all duration-1000 delay-150">
-                                <img src="{{ $item['sub_img2'] }}" class="w-full h-full object-cover opacity-30 group-hover:opacity-100 transition-opacity">
-                                <div class="absolute inset-0 flex items-center justify-center bg-[#0a0a0a]/60 group-hover:bg-transparent transition-all duration-500">
-                                    <span class="text-[#c9a74e] font-serif italic text-2xl group-hover:scale-110 transition-transform">+{{ $item['count'] }}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="absolute inset-0 border border-[#c9a74e]/0 group-hover:border-[#c9a74e]/20 transition-all duration-700 pointer-events-none"></div>
-                        <div class="absolute inset-0 bg-gradient-to-t from-[#0a0a0a]/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                    </div>
-
-                    <div class="space-y-4 px-2">
-                        <div class="flex items-center gap-4">
-                            <div class="h-[1px] w-0 group-hover:w-16 bg-[#c9a74e] transition-all duration-700 ease-out"></div>
-                            <h3 class="text-3xl font-serif text-[#d1d5db] group-hover:text-[#c9a74e] transition-colors duration-500 italic tracking-tight">
-                                {{ $item['title'] }}
-                            </h3>
-                        </div>
-                        <div class="flex justify-between items-center text-[10px] uppercase tracking-[0.4em] text-zinc-500 pl-0 group-hover:pl-4 transition-all duration-700">
-                            
-                            <div class="relative z-20 group/author inline-block hover:text-white transition-colors">
-                                <span>{{ $item['author'] }}</span>
-                            </div>
-
-                            <span class="text-[#c9a74e]/40 group-hover:text-[#c9a74e] transition-colors relative z-20">{{ $item['count'] }} pieces</span>
-                        </div>
-                    </div>
-                </div>
-                @endforeach
+            <section id="grid-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-20">
+                @include('component.gallery.partials.gallery-grid', compact('styles'))
             </section>
 
-            <div class="mt-12 flex items-center gap-6">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 flex items-center justify-center bg-zinc-900 text-gray-300 text-sm font-bold border border-white/5">
-                        01
-                    </div>
-                    <span class="text-gray-700 font-light">/</span>
-                    <span class="text-[11px] uppercase tracking-[0.2em] font-medium text-gray-300">{{ sprintf('%02d', count($styles)) }}</span>
-                </div>
-
-                <a href="#" class="group">
-                    <div class="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center 
-                                bg-transparent group-hover:bg-gold group-hover:border-gold 
-                                transition-all duration-500 ease-out">
-                        <svg class="w-4 h-4 text-gray-300 group-hover:text-black transform group-hover:translate-x-0.5 transition-all" 
-                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path d="M9 5l7 7-7 7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                    </div>
-                </a>
-            </div>
+            @include('component.partials.pagination-bar', [
+                'paginator'   => $styles,
+                'containerId' => 'grid-container',
+            ])
         </main>
 
         @include('component.layout.footer')
@@ -166,6 +108,62 @@
         btn.addEventListener('click', function() {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });
+    </script>
+
+    <script>
+    const AJAX_URL     = "{{ route('gallery') }}";
+    const EXTRA_PARAMS = {};
+    const GRID_ID      = 'grid-container';
+
+    async function changePage(page) {
+        if (page < 1 || page > lastPage || isFetching) return;
+        isFetching = true;
+        const grid = document.getElementById(GRID_ID);
+        grid.style.opacity = '0.3';
+        grid.style.pointerEvents = 'none';
+        try {
+            const params = new URLSearchParams({ page, ...EXTRA_PARAMS });
+            const res = await fetch(`${AJAX_URL}?${params}`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                }
+            });
+            const data = await res.json();
+            grid.innerHTML = data.html;
+            currentPage = data.current_page;
+            lastPage    = data.last_page;
+            updatePaginationUI();
+            if (typeof AOS !== 'undefined') AOS.refreshHard();
+            grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } catch (err) {
+            console.error('Pagination error:', err);
+        } finally {
+            grid.style.opacity = '1';
+            grid.style.pointerEvents = 'auto';
+            isFetching = false;
+        }
+    }
+
+    function updatePaginationUI() {
+        const bar  = document.getElementById('pagination-bar');
+        const prev = document.getElementById('btn-prev');
+        const next = document.getElementById('btn-next');
+
+        if (lastPage <= 1) {
+            bar.classList.add('opacity-0', 'pointer-events-none');
+        } else {
+            bar.classList.remove('opacity-0', 'pointer-events-none');
+        }
+
+        document.getElementById('page-current').textContent = String(currentPage).padStart(2, '0');
+        document.getElementById('page-total').textContent   = String(lastPage).padStart(2, '0');
+
+        prev.classList.toggle('opacity-30',          currentPage <= 1);
+        prev.classList.toggle('pointer-events-none', currentPage <= 1);
+        next.classList.toggle('opacity-30',          currentPage >= lastPage);
+        next.classList.toggle('pointer-events-none', currentPage >= lastPage);
+    }
     </script>
 </body>
 </html>

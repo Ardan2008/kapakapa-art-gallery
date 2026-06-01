@@ -379,80 +379,130 @@ class ArtWorkController extends Controller
         ]);
     }
 
-    public function gallery(Request $request)
+    public function allArtists(Request $request)
     {
-        $style = $request->query('style');
-        $artworks = collect(); // Initialize as empty collection
-        $styleName = $style ?? 'All Collections';
+        $artists = Artist::orderBy('name', 'asc')->paginate(10);
 
-        if ($style) {
-            // Fetch artworks belonging to the specific style
-            $artworks = ArtWork::where('category', $style)
-                ->orderBy('created_at', 'desc')
-                ->get();
-            
-            return view('component.gallery.review_gallery', [
-                'styleName' => $styleName,
-                'artworks' => $artworks
+        if ($request->ajax()) {
+            return response()->json([
+                'html'         => view('component.artists.partials.artists-grid', compact('artists'))->render(),
+                'current_page' => $artists->currentPage(),
+                'last_page'    => $artists->lastPage(),
             ]);
         }
 
-        // Fetch unique categories (styles) that have available stock
-        $styles = ArtWork::select('category')
+        return view('component.artists.artists', compact('artists'));
+    }
+
+    public function profile(Request $request, $id = null)
+    {
+        $artist = $id
+            ? Artist::findOrFail($id)
+            : Artist::first();
+
+        if (!$artist) return redirect()->route('home');
+
+        // Selalu paginate — baik AJAX maupun initial load
+        $artworks = $artist->artworks()->paginate(10);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'html'         => view('component.artists.partials.artworks-grid', compact('artworks', 'artist'))->render(),
+                'current_page' => $artworks->currentPage(),
+                'last_page'    => $artworks->lastPage(),
+            ]);
+        }
+
+        return view('component.artists.profile_art', compact('artist', 'artworks'));
+    }
+
+    public function gallery(Request $request)
+    {
+        $style = $request->query('style');
+        $styleName = $style ?? 'All Collections';
+
+        if ($style) {
+            $artworks = ArtWork::where('category', $style)
+                ->orderBy('created_at', 'desc')
+                ->paginate(10);
+
+            if ($request->ajax()) {
+                return response()->json([
+                    'html'         => view('component.gallery.partials.review-grid', compact('artworks'))->render(),
+                    'current_page' => $artworks->currentPage(),
+                    'last_page'    => $artworks->lastPage(),
+                    'total'        => $artworks->total(),
+                ]);
+            }
+
+            return view('component.gallery.review_gallery', compact('styleName', 'artworks'));
+        }
+
+        // Gallery index — styles tetap pakai manual paginator karena array
+        $allStyles = $this->buildStyles();
+        $page      = $request->get('page', 1);
+        $perPage   = 10;
+        $paged     = new \Illuminate\Pagination\LengthAwarePaginator(
+            array_slice($allStyles, ($page - 1) * $perPage, $perPage),
+            count($allStyles), $perPage, $page,
+            ['path' => route('gallery')]
+        );
+
+        if ($request->ajax()) {
+            return response()->json([
+                'html'         => view('component.gallery.partials.gallery-grid', ['styles' => $paged])->render(),
+                'current_page' => $paged->currentPage(),
+                'last_page'    => $paged->lastPage(),
+            ]);
+        }
+
+        return view('component.gallery.gallery', ['styles' => $paged]);
+    }
+
+    private function buildStyles(): array
+    {
+        // Ambil semua artwork yang stock > 0, group by category
+        // Gunakan 1 query saja dengan subquery untuk latest
+        $categories = ArtWork::select('category')
             ->whereNotNull('category')
             ->where('category', '<>', '')
             ->where('stock', '>', 0)
             ->distinct()
+            ->pluck('category');
+
+        // 1 query: ambil semua artwork yang dibutuhkan sekaligus
+        $latestArtworks = ArtWork::whereIn('category', $categories)
+            ->where('stock', '>', 0)
+            ->orderBy('created_at', 'desc')
             ->get()
-            ->map(function($group) {
-                $latest_art = ArtWork::where('category', $group->category)
-                    ->where('stock', '>', 0)
-                    ->latest()
-                    ->first();
-                
-                if (!$latest_art) return null;
+            ->groupBy('category');
 
-                $artworks_count = ArtWork::where('category', $group->category)
-                    ->where('stock', '>', 0)
-                    ->count();
-                
-                $images = $latest_art ? (is_array($latest_art->images) ? $latest_art->images : json_decode($latest_art->images, true)) : [];
-                
-                return [
-                    'title' => $group->category,
-                    'author' => $latest_art->artist ?? 'Various Artists',
-                    'count' => $artworks_count,
-                    'main_img' => (is_array($images) && count($images) > 0) ? $images[0] : ($latest_art->image_url ?? 'https://via.placeholder.com/800'),
-                    'sub_img1' => (is_array($images) && count($images) > 1) ? $images[1] : ((is_array($images) && count($images) > 0) ? $images[0] : ($latest_art->image_url ?? 'https://via.placeholder.com/400')),
-                    'sub_img2' => (is_array($images) && count($images) > 2) ? $images[2] : ((is_array($images) && count($images) > 0) ? $images[0] : ($latest_art->image_url ?? 'https://via.placeholder.com/400')),
-                ];
-            })
-            ->filter();
+        // 1 query: hitung per category
+        $counts = ArtWork::whereIn('category', $categories)
+            ->where('stock', '>', 0)
+            ->selectRaw('category, COUNT(*) as total')
+            ->groupBy('category')
+            ->pluck('total', 'category');
 
-        return view('component.gallery.gallery', compact('styles'));
-    }
+        return $categories->map(function ($category) use ($latestArtworks, $counts) {
+            $latest = $latestArtworks->get($category)?->first();
+            if (!$latest) return null;
 
-    public function allArtists()
-    {
-        $artists = Artist::orderBy('name', 'asc')->get();
-        return view('component.artists.artists', compact('artists'));
-    }
+            $images = is_array($latest->images)
+                ? $latest->images
+                : json_decode($latest->images, true);
 
-    public function profile($id = null)
-    {
-        // If no ID, get the first artist
-        $artist = $id ? Artist::with('artworks')->findOrFail($id) : Artist::with('artworks')->first();
-        
-        if (!$artist) {
-            return redirect()->route('home');
-        }
-
-        $categories = [
-            'Realisme', 'Naturalisme', 'Impresionisme', 'Ekspresionisme', 
-            'Kubisme', 'Surealisme', 'Abstrak', 'Minimalisme', 
-            'Konseptual', 'Street Art / Graffiti', 'Pointilisme', 'Naif / Primitif'
-        ];
-
-        return view('component.artists.profile_art', compact('artist', 'categories'));
+            return [
+                'title'    => $category,
+                'author'   => $latest->artist ?? 'Various Artists',
+                'count'    => $counts->get($category, 0),
+                'main_img' => $images[0] ?? $latest->image_url ?? 'https://via.placeholder.com/800',
+                'sub_img1' => $images[1] ?? $images[0] ?? 'https://via.placeholder.com/400',
+                'sub_img2' => $images[2] ?? $images[0] ?? 'https://via.placeholder.com/400',
+            ];
+        })
+        ->filter()
+        ->values()
+        ->toArray();
     }
 }

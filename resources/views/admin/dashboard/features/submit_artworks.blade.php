@@ -188,11 +188,11 @@
                                             <div>
                                                 <h3 class="text-xl font-bold text-gray-300 tracking-tight uppercase">{{ $item['title'] }}</h3>
                                                 <p class="text-[10px] text-[#C9A74E] font-bold tracking-[0.3em] uppercase mt-1 opacity-80">{{ $item['artist'] }}</p>
-                        @if(!empty($item['dimensions']))
-                            <p class="text-[8px] text-gray-500 font-medium tracking-[0.2em] uppercase mt-2">
-                                <span class="text-gray-400">Dim:</span> {{ $item['dimensions'] }}
-                            </p>
-                        @endif
+                                                @if(!empty($item['dimensions']))
+                                                    <p class="text-[8px] text-gray-500 font-medium tracking-[0.2em] uppercase mt-2">
+                                                        <span class="text-gray-400">Dim:</span> {{ $item['dimensions'] }}
+                                                    </p>
+                                                @endif
                                             </div>
                                             <div class="flex gap-2">
                                                 <button class="btn-add-art p-3 rounded-full bg-white/5 text-[#C9A74E] hover:bg-[#C9A74E] hover:text-black transition-all duration-300" 
