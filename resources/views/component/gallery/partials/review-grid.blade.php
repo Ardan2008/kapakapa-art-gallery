@@ -6,8 +6,9 @@
                     $sub_img2 = (is_array($images) && count($images) > 2) ? $images[2] : $main_img;
                     $author = $item->artist ?? 'Unknown Artist';
                     $dimensions = ($item->width && $item->height) ? $item->width . ' x ' . $item->height . ' ' . $item->unit : 'N/A';
+                    $price = $item->price ? '$ ' . number_format($item->price, 2, '.', ',') : null;
                 @endphp
-                <div onclick="openModal('{{ $main_img }}', '{{ addslashes($item->title) }}', '{{ addslashes($author) }}', '{{ $dimensions }}')" 
+                <div onclick="openModal('{{ addslashes(json_encode($images)) }}', '{{ addslashes($item->title) }}', '{{ addslashes($author) }}', '{{ $dimensions }}', '{{ $price ?? '' }}')"
                     class="group block cursor-pointer" 
                     data-aos="fade-up">
                     
@@ -46,7 +47,13 @@
                         </div>
                         <div class="flex justify-between items-center text-[10px] uppercase tracking-[0.4em] text-gray-500 pl-0 group-hover:pl-4 transition-all duration-700">
                             <span>By {{ $author }}</span>
-                            <span class="text-gold/40 group-hover:text-gold">{{ $dimensions }}</span>
+                            <div class="flex items-center gap-3">
+                                @if($price)
+                                    <span class="text-gold font-serif italic normal-case text-sm tracking-normal">{{ $price }}</span>
+                                    <span class="w-[1px] h-3 bg-zinc-700"></span>
+                                @endif
+                                <span class="text-gold/40 group-hover:text-gold">{{ $dimensions }}</span>
+                            </div>
                         </div>
                     </div>
                 </div>

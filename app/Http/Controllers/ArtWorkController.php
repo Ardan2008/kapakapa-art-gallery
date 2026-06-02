@@ -156,8 +156,6 @@ class ArtWorkController extends Controller
             'artwork.*.desc' => 'required|string',
             'artwork.*.painterRef' => 'required|string|max:255',
             'artwork.*.style' => 'required|string',
-            'artwork.*.stock' => 'required|integer|min:0',
-            'artwork.*.maxLimit' => 'required|integer|min:0',
             'artwork.*.basePrice' => 'required|numeric|min:0',
             'artwork.*.salePrice' => 'nullable|numeric|min:0',
             'artwork.*.certificate' => 'nullable|file|mimes:jpeg,jpg,png,gif,webp,pdf|max:20480',
@@ -340,8 +338,6 @@ class ArtWorkController extends Controller
                     'artist_desc' => $artist->bio,
                     'art_desc' => $artData['desc'] ?? '',
                     'painter_ref' => $artData['painterRef'] ?? '',
-                    'stock' => $artData['stock'] ?? 0,
-                    'max_limit' => $artData['maxLimit'] ?? 0,
                     'base_price' => $artData['basePrice'] ?? null,
                     'sale_price' => $artData['salePrice'] ?? 0,
                     'images' => $images,
@@ -533,25 +529,18 @@ class ArtWorkController extends Controller
 
     private function buildStyles(): array
     {
-        // Ambil semua artwork yang stock > 0, group by category
-        // Gunakan 1 query saja dengan subquery untuk latest
         $categories = ArtWork::select('category')
             ->whereNotNull('category')
             ->where('category', '<>', '')
-            ->where('stock', '>', 0)
             ->distinct()
             ->pluck('category');
 
-        // 1 query: ambil semua artwork yang dibutuhkan sekaligus
         $latestArtworks = ArtWork::whereIn('category', $categories)
-            ->where('stock', '>', 0)
             ->orderBy('created_at', 'desc')
             ->get()
             ->groupBy('category');
 
-        // 1 query: hitung per category
         $counts = ArtWork::whereIn('category', $categories)
-            ->where('stock', '>', 0)
             ->selectRaw('category, COUNT(*) as total')
             ->groupBy('category')
             ->pluck('total', 'category');

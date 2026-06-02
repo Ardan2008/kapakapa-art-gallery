@@ -6,6 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -151,6 +152,33 @@
         .max-w-md:hover .border-white\/5 {
             border-color: rgba(212, 175, 55, 0.2);
         }
+
+        .swiper-button-next, .swiper-button-prev {
+            color: #C9A74E !important;
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+            width: 44px !important;
+            height: 44px !important;
+            border-radius: 50%;
+            border: 1px solid rgba(201,167,78,0.2);
+            transition: all 0.3s ease;
+        }
+        .swiper-button-next:after, .swiper-button-prev:after { font-size: 16px !important; }
+        .swiper-button-next:hover, .swiper-button-prev:hover {
+            background: rgba(201,167,78,0.1);
+            border-color: #C9A74E;
+        }
+        .swiper-pagination-bullet { background: #fff !important; opacity: 0.3 !important; }
+        .swiper-pagination-bullet-active {
+            background: #C9A74E !important; opacity: 1 !important;
+            width: 20px !important; border-radius: 4px !important;
+        }
+
+        .reviewSwiper,
+        .reviewSwiper .swiper-slide {
+            width: 100%;
+            height: 100%;
+        }
     </style>
 </head>
 <body class="bg-dark text-gray-300 overflow-x-hidden">
@@ -225,31 +253,34 @@
     </button>
 
     <div id="artModal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 md:p-8">
-        <div class="absolute inset-0 bg-black/95 backdrop-blur-sm" onclick="closeModal()"></div>
+        <div class="absolute inset-0 bg-black/95 backdrop-blur-sm"></div>
         
         <div class="relative bg-zinc-900 border border-white/10 w-full max-w-5xl flex flex-col md:flex-row shadow-2xl animate-in fade-in zoom-in duration-300">
             
-            <button onclick="closeModal()" class="absolute top-6 right-6 z-[130] group outline-none">
-                <div class="relative flex items-center justify-center w-12 h-12 transition-all duration-500 transform group-hover:rotate-90">
-                    <div class="absolute inset-0 bg-white/0 group-hover:bg-white/5 rounded-full scale-0 group-hover:scale-100 transition-transform duration-500"></div>
-                    <svg class="w-8 h-8 text-white/30 group-hover:text-gold transition-colors duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path d="M6 18L18 6M6 6l12 12" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <button onclick="closeModal()" class="absolute top-5 right-5 z-[130] group outline-none">
+                <div class="relative w-11 h-11 flex items-center justify-center rounded-full bg-white/5 border border-white/20 group-hover:border-gold/60 transition-all duration-300 shadow-lg overflow-hidden">
+                    <div class="absolute inset-0 rounded-full bg-gold translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out"></div>
+                    <svg class="relative z-10 w-5 h-5 text-white group-hover:text-black group-hover:rotate-90 transition-all duration-300" 
+                        fill="none" stroke="currentColor" stroke-width="2" 
+                        stroke-linecap="round" viewBox="0 0 24 24">
+                        <path d="M6 6l12 12M6 18L18 6"/>
                     </svg>
                 </div>
             </button>
 
-            <div id="imageContainer" class="w-full md:w-2/3 bg-black flex items-start justify-center p-6 overflow-y-auto relative group/zoom custom-scrollbar" style="max-height: 85vh;">
-                <div class="relative w-full shadow-2xl">
-                    <img id="modalImage" src="" alt="Artwork" 
-                        class="object-contain transition-transform duration-500 ease-out cursor-zoom-in w-full h-auto"
-                        onmousemove="zoomIn(event)" 
-                        onmouseleave="zoomOut(event)">
-                    
-                    <div class="absolute bottom-4 left-1/2 -translate-x-1/2 pointer-events-none opacity-0 group-hover/zoom:opacity-100 transition-opacity duration-700">
-                        <span class="text-[9px] text-white/30 uppercase tracking-[0.4em] whitespace-nowrap bg-black/20 backdrop-blur-sm px-4 py-2 border border-white/5">
-                            Move cursor to explore details
-                        </span>
-                    </div>
+            <div id="imageContainer" class="w-full md:w-2/3 bg-black relative" style="height: 85vh;">
+
+                <div id="reviewPageIndicator" class="absolute top-5 right-5 z-20 px-3 py-1.5 rounded-full border border-white/10 bg-black/50 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-500">
+                    <span class="text-white text-[11px] tracking-[0.1em]">
+                        <span id="reviewCurrentPage">1</span> / <span id="reviewTotalPages">1</span>
+                    </span>
+                </div>
+
+                <div class="swiper reviewSwiper w-full h-full">
+                    <div class="swiper-wrapper" id="reviewSwiperWrapper"></div>
+                    <div class="swiper-button-next"></div>
+                    <div class="swiper-button-prev"></div>
+                    <div class="swiper-pagination !bottom-6"></div>
                 </div>
             </div>
 
@@ -261,6 +292,11 @@
                     <div class="border-b border-white/5 pb-4">
                         <span class="text-zinc-500 text-[10px] uppercase tracking-widest block mb-1">Collection Info</span>
                         <p id="modalCount" class="text-gray-300 text-sm"></p>
+                    </div>
+
+                    <div id="modalPriceWrap" class="hidden border-b border-white/5 pb-4">
+                        <span class="text-zinc-500 text-[10px] uppercase tracking-widest block mb-1">Price</span>
+                        <p id="modalPrice" class="text-gold font-serif italic text-2xl"></p>
                     </div>
                     
                     <p class="text-zinc-400 text-sm leading-relaxed font-light italic">
@@ -429,27 +465,83 @@
         }
 
         // --- LOGIKA MODAL UTAMA ---
-        function openModal(img, title, author, count) {
-            const modal    = document.getElementById('artModal');
-            const modalImg = document.getElementById('modalImage');
+        let reviewSwiper = null;
+        let reviewIndicatorTimeout = null;
 
-            modalImg.src = img;
+        function initReviewSwiper() {
+            if (reviewSwiper) reviewSwiper.destroy(true, true);
+            reviewSwiper = new Swiper(".reviewSwiper", {
+                loop: false,
+                speed: 700,
+                grabCursor: true,
+                pagination: { el: ".swiper-pagination", clickable: true },
+                navigation: { nextEl: ".swiper-button-next", prevEl: ".swiper-button-prev" },
+                keyboard: { enabled: true },
+                on: {
+                    slideChange: function() { updateReviewIndicator(this.activeIndex + 1, this.slides.length); },
+                    init: function() { updateReviewIndicator(this.activeIndex + 1, this.slides.length); }
+                }
+            });
+        }
+
+        function updateReviewIndicator(current, total) {
+            const indicator = document.getElementById('reviewPageIndicator');
+            document.getElementById('reviewCurrentPage').innerText = current;
+            document.getElementById('reviewTotalPages').innerText = total;
+            indicator.classList.remove('opacity-0');
+            indicator.classList.add('opacity-100');
+            if (reviewIndicatorTimeout) clearTimeout(reviewIndicatorTimeout);
+            reviewIndicatorTimeout = setTimeout(() => {
+                indicator.classList.remove('opacity-100');
+                indicator.classList.add('opacity-0');
+            }, 2000);
+        }
+
+        function openModal(imagesJson, title, author, count, price) {
+            const modal   = document.getElementById('artModal');
+            const wrapper = document.getElementById('reviewSwiperWrapper');
+
+            // Parse images — bisa berupa JSON array string atau URL tunggal
+            let imagesArray = [];
+            try {
+                const parsed = JSON.parse(imagesJson);
+                imagesArray = Array.isArray(parsed) ? parsed : [parsed];
+            } catch(e) {
+                imagesArray = [imagesJson];
+            }
+
+            // Inject slides
+            wrapper.innerHTML = '';
+            imagesArray.forEach(imgUrl => {
+                const slide = document.createElement('div');
+                slide.className = 'swiper-slide';
+                slide.innerHTML = `
+                    <img src="${imgUrl}" alt="${title}"
+                        class="w-full h-full object-cover transition-transform duration-700 ease-out cursor-zoom-in"
+                        onmousemove="zoomIn(event)"
+                        onmouseleave="zoomOut(event)">
+                `;
+                wrapper.appendChild(slide);
+            });
+
             document.getElementById('modalTitle').innerText  = title;
             document.getElementById('modalAuthor').innerText = author;
-            document.getElementById('modalCount').innerText  = count + " High Resolution Artworks";
+            document.getElementById('modalCount').innerText  = count;
 
-            const tempImg = new Image();
-            tempImg.onload = function() {
-                const isPortrait = this.naturalHeight > this.naturalWidth;
-                if (isPortrait) {
-                    modalImg.classList.remove('landscape-mode');
-                    modalImg.classList.add('portrait-mode');
-                } else {
-                    modalImg.classList.remove('portrait-mode');
-                    modalImg.classList.add('landscape-mode');
-                }
-            };
-            tempImg.src = img;
+            // Tampilkan harga
+            const priceEl   = document.getElementById('modalPrice');
+            const priceWrap = document.getElementById('modalPriceWrap');
+            if (price && price.trim() !== '') {
+                priceEl.innerText = price;
+                priceWrap.classList.remove('hidden');
+            } else {
+                priceWrap.classList.add('hidden');
+            }
+
+            setTimeout(() => {
+                initReviewSwiper();
+                updateReviewIndicator(1, imagesArray.length);
+            }, 100);
 
             modal.classList.remove('hidden');
             modal.classList.add('flex');
@@ -633,5 +725,7 @@
         next.classList.toggle('pointer-events-none', currentPage >= lastPage);
     }
     </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 </body>
 </html>

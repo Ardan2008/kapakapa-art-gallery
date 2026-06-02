@@ -345,21 +345,6 @@
                                     </div>
                                 </div>
 
-                                <div class="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="block text-[8px] text-gray-600 font-black uppercase tracking-widest mb-2">Stock</label>
-                                        <input type="number" name="artwork[${i}][stock]" value="${art.stock || 1}"
-                                               class="w-full bg-neutral-800/50 border border-white/5 text-white rounded-xl px-4 py-3 focus:border-[#C9A74E]/50 outline-none transition-all text-xs font-bold text-center"
-                                               required>
-                                    </div>
-                                    <div>
-                                        <label class="block text-[8px] text-gray-600 font-black uppercase tracking-widest mb-2">Limit</label>
-                                        <input type="number" name="artwork[${i}][maxLimit]" value="${art.max_limit || 1}"
-                                               class="w-full bg-neutral-800/50 border border-white/5 text-white rounded-xl px-4 py-3 focus:border-[#C9A74E]/50 outline-none transition-all text-xs font-bold text-center"
-                                               required>
-                                    </div>
-                                </div>
-
                                 <div class="grid grid-cols-3 gap-3">
                                     <div>
                                         <label class="block text-[8px] text-gray-600 font-black uppercase tracking-widest mb-2">Width</label>

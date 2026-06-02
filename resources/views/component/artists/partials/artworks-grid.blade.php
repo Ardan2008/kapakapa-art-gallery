@@ -4,7 +4,7 @@
                             $imagesJson = json_encode($artImages);
                         @endphp
                         <a href="javascript:void(0)" 
-                        onclick="openModal({{ $imagesJson }}, '{{ addslashes($art->title) }}', '{{ addslashes($art->category) }}', '{{ $art->width }}', '{{ $art->height }}', '{{ $art->unit }}', '{{ $art->certificate_url }}')"
+                        onclick="openModal({{ $imagesJson }}, '{{ addslashes($art->title) }}', '{{ addslashes($art->category) }}', '{{ $art->width }}', '{{ $art->height }}', '{{ $art->unit }}', '{{ $art->certificate_url }}', '{{ $art->price ?? '' }}')"
                         data-aos="fade-up" 
                         data-aos-delay="{{ ($index % 5) * 100 }}"
                         data-aos-duration="1000"
@@ -51,6 +51,11 @@
                                 <p class="text-[9px] uppercase tracking-[0.6em] text-slate-500 font-medium group-hover:text-slate-200 smooth-transition">
                                     {{ $art->category }} // {{ $art->width && $art->height ? $art->width . ' x ' . $art->height . ' ' . $art->unit : 'No Dimensions' }}
                                 </p>
+                                @if($art->price)
+                                    <p class="text-gold font-serif italic text-base mt-2 tracking-normal normal-case">
+                                        $ {{ number_format($art->price, 2, '.', ',') }}
+                                    </p>
+                                @endif
                             </div>
                         </a>
                     @endforeach

@@ -13,7 +13,6 @@ class HomeController extends Controller
         $heroArtworks = ArtWork::whereNotNull('image_url')
             ->where('image_url', 'not like', '%placeholder%')
             ->where('image_url', 'not like', '%dicebear%')
-            ->where('stock', '>', 0)
             ->latest()
             ->take(5)
             ->get();
@@ -26,13 +25,11 @@ class HomeController extends Controller
         $featured_categories = ArtWork::select('category')
             ->whereNotNull('category')
             ->where('category', '<>', '')
-            ->where('stock', '>', 0) // Considering 'published' as having stock available
             ->groupBy('category')
             ->get()
             ->map(function ($group) {
                 // Retrieve the latest available artwork for this specific style
                 $art = ArtWork::where('category', $group->category)
-                    ->where('stock', '>', 0)
                     ->orderBy('created_at', 'desc')
                     ->first();
                 

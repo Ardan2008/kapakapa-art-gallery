@@ -377,10 +377,6 @@
                                 <h3 class="font-serif text-2xl text-gray-300 group-hover:text-[#C9A74E] transition-colors duration-500 italic">
                                     {{ $art['title'] }}
                                 </h3>
-                                <span class="h-[1px] flex-grow mx-6 bg-white/10 group-hover:bg-[#C9A74E]/30 transition-all"></span>
-                                <span class="text-[#C9A74E] font-serif italic text-lg">
-                                    {{ $art['price'] }}
-                                </span>
                             </div>
                             
                             <div class="flex justify-between items-center opacity-60 group-hover:opacity-100 transition-opacity">

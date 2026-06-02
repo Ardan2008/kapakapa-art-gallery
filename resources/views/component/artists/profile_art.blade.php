@@ -96,6 +96,17 @@
             transition: width 0.3s ease;
         }
 
+        .mySwiper {
+            width: 100%;
+            height: 100%;
+        }
+
+        .swiper-slide {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
         #mobilePageIndicator {
             transition: opacity 0.5s ease;
             backdrop-filter: blur(10px) !important;
@@ -152,11 +163,15 @@
                     </p>
 
                     <div class="relative max-w-4xl">
-                        <div id="bioText" class="text-slate-300/90 text-lg md:text-xl leading-relaxed font-light transition-all duration-1000 ease-in-out overflow-hidden max-h-[120px]">
+                        <div id="bioText" class="text-slate-300/90 text-lg md:text-xl leading-[1.9] font-light tracking-wide overflow-hidden max-h-[112px]" style="transition: max-height 0.45s cubic-bezier(0.4,0,0.2,1), opacity 0.3s ease;">
                             {!! nl2br(e($artist->bio)) !!}
                         </div>
-                        
-                        <div id="textOverlay" class="absolute bottom-0 left-0 w-full h-20 bg-gradient-to-t from-[#0a0a0a] to-transparent transition-opacity duration-700"></div>
+
+                        {{-- Left accent line --}}
+                        <div class="absolute -left-6 top-0 w-[1px] h-full bg-gradient-to-b from-transparent via-[#C9A74E]/20 to-transparent pointer-events-none"></div>
+
+                        {{-- Fade overlay --}}
+                        <div id="textOverlay" class="absolute bottom-0 left-0 w-full h-28 pointer-events-none" style="transition: opacity 0.25s ease; background: linear-gradient(to top, #0a0a0a 30%, rgba(10,10,10,0.6) 65%, transparent 100%);"></div>
                     </div>
                     
                     <div class="mt-8">
@@ -233,20 +248,27 @@
     </button>
 
     <div id="artModal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 md:p-8">
-    <div class="absolute inset-0 bg-black/95 backdrop-blur-sm" onclick="closeModal()"></div>
+    <div class="absolute inset-0 bg-black/95 backdrop-blur-sm"></div>
     
-    <div class="relative bg-zinc-900 border border-white/10 w-full max-w-6xl overflow-hidden flex flex-col md:flex-row shadow-2xl animate-in fade-in zoom-in duration-300">
+    <div class="relative bg-zinc-900 border border-white/10 w-full max-w-4xl max-h-[85vh] overflow-hidden flex flex-col md:flex-row shadow-2xl animate-in fade-in zoom-in duration-300">
         
-        <button onclick="closeModal()" class="absolute top-6 right-6 z-[130] group outline-none">
-            <div class="relative flex items-center justify-center w-12 h-12 transition-all duration-500 transform group-hover:rotate-90">
-                <div class="absolute inset-0 bg-white/0 group-hover:bg-white/5 rounded-full scale-0 group-hover:scale-100 transition-transform duration-500"></div>
-                <svg class="w-8 h-8 text-white/30 group-hover:text-gold transition-colors duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path d="M6 18L18 6M6 6l12 12" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+        <button onclick="closeModal()" class="absolute top-5 right-5 z-[130] group outline-none">
+            <div class="relative w-11 h-11 flex items-center justify-center rounded-full bg-white/5 border border-white/20 group-hover:border-gold/60 transition-all duration-300 shadow-lg overflow-hidden">
+                
+                {{-- Gelembung dari bawah --}}
+                <div class="absolute inset-0 rounded-full bg-gold translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out"></div>
+
+                {{-- Icon X --}}
+                <svg class="relative z-10 w-5 h-5 text-white group-hover:text-black group-hover:rotate-90 transition-all duration-300" 
+                    fill="none" stroke="currentColor" stroke-width="2" 
+                    stroke-linecap="round" viewBox="0 0 24 24">
+                    <path d="M6 6l12 12M6 18L18 6"/>
                 </svg>
+
             </div>
         </button>
 
-        <div id="imageContainer" class="w-full md:w-2/3 bg-[#050505] flex items-center justify-center relative min-h-[50vh]">
+        <div id="imageContainer" class="w-full md:w-3/5 bg-[#050505] relative" style="height: 85vh;">
             
             <!-- Page Number Indicator -->
             <div id="mobilePageIndicator" class="absolute top-5 right-5 px-3 py-1.5 rounded-full border border-white/10 opacity-0 pointer-events-none transition-opacity duration-500">
@@ -276,7 +298,7 @@
             </div>
         </div>
 
-        <div class="w-full md:w-1/3 p-8 md:p-12 flex flex-col justify-between border-t md:border-t-0 md:border-l border-white/5 bg-zinc-900/40 backdrop-blur-md overflow-y-auto max-h-screen relative custom-scrollbar">
+        <div class="w-full md:w-2/5 p-6 md:p-8 flex flex-col justify-between border-t md:border-t-0 md:border-l border-white/5 bg-zinc-900/40 backdrop-blur-md overflow-y-auto max-h-[85vh] relative custom-scrollbar">
             
             <div class="absolute top-0 right-0 w-32 h-32 bg-gold/5 blur-[80px] pointer-events-none"></div>
 
@@ -297,6 +319,11 @@
                             <p id="modalDimensions" class="text-gray-200 text-xl font-light font-serif italic"></p>
                             <span class="text-[10px] text-zinc-600 mb-1.5 uppercase">Certified</span>
                         </div>
+                    </div>
+
+                    <div id="modalPriceWrap" class="hidden group bg-white/[0.02] border border-white/5 p-5 rounded-2xl transition-all duration-500 hover:bg-white/[0.04]">
+                        <span class="text-zinc-500 text-[9px] uppercase tracking-[0.2em] block mb-2 font-medium">Price</span>
+                        <p id="modalPrice" class="text-gold font-serif italic text-2xl"></p>
                     </div>
                     
                     <div class="relative pl-6 border-l border-gold/20">
@@ -590,7 +617,7 @@
         }
 
         // --- LOGIKA MODAL UTAMA ---
-        function openModal(images, title, author, width, height, unit, certificate) {
+        function openModal(images, title, author, width, height, unit, certificate, price) {
             const modal = document.getElementById('artModal');
             const wrapper = document.getElementById('modalSwiperWrapper');
             
@@ -601,14 +628,12 @@
             const imagesArray = Array.isArray(images) ? images : [images];
             imagesArray.forEach(imgUrl => {
                 const slide = document.createElement('div');
-                slide.className = 'swiper-slide flex items-center justify-center p-6 md:p-12';
+                slide.className = 'swiper-slide';
                 slide.innerHTML = `
-                    <div class="relative overflow-hidden shadow-[0_30px_100px_rgba(0,0,0,0.8)] border border-white/5 bg-zinc-900 group/zoom">
-                        <img src="${imgUrl}" alt="${title}" 
-                            class="max-h-[70vh] md:max-h-[82vh] w-auto object-contain transition-transform duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] cursor-zoom-in scale-100"
-                            onmousemove="zoomIn(event)" 
-                            onmouseleave="zoomOut(event)">
-                    </div>
+                    <img src="${imgUrl}" alt="${title}" 
+                        class="w-full h-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] cursor-zoom-in"
+                        onmousemove="zoomIn(event)" 
+                        onmouseleave="zoomOut(event)">
                 `;
                 wrapper.appendChild(slide);
             });
@@ -621,9 +646,18 @@
             const dimensionsText = (width && height) ? `${width} x ${height} ${unit}` : 'Dimensions not specified';
             document.getElementById('modalDimensions').innerText = dimensionsText;
 
-            // ✅ Update Certificate dinamis
+            // Update Certificate dinamis
             const certImg = document.getElementById('certImageActual');
             certImg.src = (certificate && certificate.trim() !== '') ? certificate : '/img/sertif.png';
+
+            const priceEl   = document.getElementById('modalPrice');
+            const priceWrap = document.getElementById('modalPriceWrap');
+            if (price && price.toString().trim() !== '') {
+                priceEl.innerText = '$ ' + parseFloat(price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                priceWrap.classList.remove('hidden');
+            } else {
+                priceWrap.classList.add('hidden');
+            }
 
             // Re-init Swiper
             setTimeout(() => {
@@ -886,6 +920,15 @@
                     if (typeof AOS !== 'undefined') AOS.refreshHard();
                 }, 400);
             });
+        });
+
+        document.querySelector('#closeCircle')?.closest('button')?.addEventListener('mouseenter', () => {
+            const circle = document.getElementById('closeCircle');
+            circle.style.strokeDashoffset = '0';
+        });
+        document.querySelector('#closeCircle')?.closest('button')?.addEventListener('mouseleave', () => {
+            const circle = document.getElementById('closeCircle');
+            circle.style.strokeDashoffset = '113';
         });
     </script>
 

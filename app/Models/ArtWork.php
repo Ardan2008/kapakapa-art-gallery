@@ -20,8 +20,6 @@ class ArtWork extends Model
         'artist_desc',
         'art_desc',
         'painter_ref',
-        'stock',
-        'max_limit',
         'base_price',
         'sale_price',
         'images',
@@ -33,6 +31,8 @@ class ArtWork extends Model
         'collector_country',
         'collector_country_code',
     ];
+
+    protected $table = 'art_works';
 
     protected $casts = [
         'sold_at' => 'datetime',
