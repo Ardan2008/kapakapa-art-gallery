@@ -755,7 +755,7 @@
 
             try {
                 // Fetch Data from Backend
-                const response = await fetch(`/api/sold-artworks/${encodeURIComponent(categoryData.title)}`);
+                const response = await fetch(`/api/dashboard/sold-artworks/${encodeURIComponent(categoryData.title)}`);
                 transactions = await response.json();
                 
                 // Render the table rows

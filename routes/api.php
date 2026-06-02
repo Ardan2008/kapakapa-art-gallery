@@ -14,6 +14,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::get('/dashboard/customers', [CustomerCountryController::class, 'index']);
 
 Route::prefix('dashboard')->group(function () {
+    Route::get('/sold-artworks/{category}', [DashboardController::class, 'getSoldArtworks']);
     Route::get('/stats', [DashboardController::class, 'getStats']);           // ← baru
     Route::get('/visitors', [DashboardController::class, 'getVisitorStats']);
     Route::get('/visitors/online', [DashboardController::class, 'getOnlineVisitors']);

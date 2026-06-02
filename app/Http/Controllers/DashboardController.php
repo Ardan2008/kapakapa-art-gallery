@@ -10,39 +10,49 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $topArtworks = ArtWork::whereNotNull('sold_at')
-            ->select('category', DB::raw('count(*) as sold_count'))
-            ->groupBy('category')
-            ->orderByDesc('sold_count')
-            ->limit(10)
-            ->get()
-            ->map(function ($item, $index) {
-                return [
-                    'rank'       => $index + 1,
-                    'title'      => $item->category,
-                    'sold_count' => $item->sold_count,
-                    'image'      => $this->getCategoryImage($item->category),
-                ];
-            });
+        $topArtworks = collect([
+            ['rank' => 1, 'title' => 'Realisme',       'sold_count' => 142, 'image' => 'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?q=80&w=400&auto=format&fit=crop'],
+            ['rank' => 2, 'title' => 'Surealisme',      'sold_count' => 118, 'image' => 'https://images.unsplash.com/photo-1578301978018-3005759f48f7?q=80&w=400&auto=format&fit=crop'],
+            ['rank' => 3, 'title' => 'Abstrak',         'sold_count' => 97,  'image' => 'https://images.unsplash.com/photo-1582201942988-13e60e4556ee?q=80&w=400&auto=format&fit=crop'],
+            ['rank' => 4, 'title' => 'Impresionisme',   'sold_count' => 85,  'image' => 'https://images.unsplash.com/photo-1615529151169-7b1ff50dc7f2?q=80&w=400&auto=format&fit=crop'],
+            ['rank' => 5, 'title' => 'Kubisme',         'sold_count' => 73,  'image' => 'https://images.unsplash.com/photo-1612812166620-a072f77ec45b?w=500&auto=format&fit=crop&q=60'],
+            ['rank' => 6, 'title' => 'Ekspresionisme',  'sold_count' => 61,  'image' => 'https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?q=80&w=400&auto=format&fit=crop'],
+            ['rank' => 7, 'title' => 'Naturalisme',     'sold_count' => 54,  'image' => 'https://images.unsplash.com/photo-1549490349-8643362247b5?q=80&w=400&auto=format&fit=crop'],
+            ['rank' => 8, 'title' => 'Minimalisme',     'sold_count' => 42,  'image' => 'https://images.unsplash.com/photo-1543857778-c4a1a3e0b2eb?q=80&w=400&auto=format&fit=crop'],
+            ['rank' => 9, 'title' => 'Pointilisme',     'sold_count' => 36,  'image' => 'https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?q=80&w=400&auto=format&fit=crop'],
+            ['rank' => 10,'title' => 'Konseptual',      'sold_count' => 29,  'image' => 'https://images.unsplash.com/photo-1579783483458-83d02161294e?q=80&w=400&auto=format&fit=crop'],
+        ]);
 
         return view('admin.dashboard.main.transactions', compact('topArtworks'));
     }
 
     public function getSoldArtworks($category)
     {
+        // Coba ambil dari DB dulu
         $artworks = ArtWork::where('category', $category)
             ->whereNotNull('sold_at')
             ->orderByDesc('sold_at')
             ->get()
-            ->map(function ($art) {
-                return [
-                    'artwork'   => $art->title,
-                    'artist'    => $art->artist,
-                    'collector' => $art->collector_name,
-                    'price'     => '$' . number_format($art->price, 0),
-                    'date'      => $art->sold_at->format('d M Y'),
-                ];
-            });
+            ->map(fn($art) => [
+                'artwork'   => $art->title,
+                'artist'    => $art->artist,
+                'collector' => $art->collector_name,
+                'price'     => '$' . number_format($art->price, 0),
+                'date'      => $art->sold_at->format('d M Y'),
+            ]);
+
+        // Jika kosong, kembalikan dummy
+        if ($artworks->isEmpty()) {
+            $dummyNames  = ['Anya Forger', 'Loid Forger', 'Mikasa Ackerman', 'Levi Heichou', 'Erwin Smith'];
+            $dummyArtists = ['Picasso Jr.', 'Van Gogh II', 'Monet Black', 'Da Vinci III', 'Frida K.'];
+            $artworks = collect(range(1, 6))->map(fn($i) => [
+                'artwork'   => "$category Art No.$i",
+                'artist'    => $dummyArtists[array_rand($dummyArtists)],
+                'collector' => $dummyNames[array_rand($dummyNames)],
+                'price'     => '$' . number_format(rand(1500, 15000)),
+                'date'      => now()->subDays(rand(1, 90))->format('d M Y'),
+            ]);
+        }
 
         return response()->json($artworks);
     }
