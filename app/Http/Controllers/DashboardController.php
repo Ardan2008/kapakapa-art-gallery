@@ -11,7 +11,7 @@ class DashboardController extends Controller
     public function index()
     {
         $topArtworks = ArtWork::whereNotNull('sold_at')
-            ->select('category as title', DB::raw('count(*) as sold_count'))
+            ->select('category', DB::raw('count(*) as sold_count'))
             ->groupBy('category')
             ->orderByDesc('sold_count')
             ->limit(10)
@@ -19,9 +19,9 @@ class DashboardController extends Controller
             ->map(function ($item, $index) {
                 return [
                     'rank'       => $index + 1,
-                    'title'      => $item->title,
+                    'title'      => $item->category,
                     'sold_count' => $item->sold_count,
-                    'image'      => $this->getCategoryImage($item->title),
+                    'image'      => $this->getCategoryImage($item->category),
                 ];
             });
 
@@ -110,6 +110,35 @@ class DashboardController extends Controller
         return response()->json(['years' => $years->values()]);
     }
 
+    public function getCustomerCountries(Request $request)
+    {
+        $period = $request->get('period', 'today');
+
+        $query = ArtWork::selectRaw('
+                collector_country_code as country_code,
+                collector_country as country_name,
+                COUNT(DISTINCT collector_name) as count
+            ')
+            ->whereNotNull('collector_name')
+            ->whereNotNull('collector_country_code');
+
+        // Filter berdasarkan period
+        $query->when($period === 'today', fn($q) => 
+            $q->whereDate('created_at', today())
+        )->when($period === 'yesterday', fn($q) => 
+            $q->whereDate('created_at', today()->subDay())
+        )->when($period === '7days', fn($q) => 
+            $q->whereBetween('created_at', [now()->subDays(7), now()])
+        );
+
+        $countries = $query->groupBy('country_code', 'country_name')
+            ->orderByDesc('count')
+            ->limit(20)
+            ->get();
+
+        return response()->json(['countries' => $countries]);
+    }
+
     /**
      * API: Summary stats untuk cards (income, orders, visitors).
      * GET /api/dashboard/stats
@@ -125,8 +154,8 @@ class DashboardController extends Controller
             ->count('collector_name');
 
         return response()->json([
-            'total_income'   => (int) $totalIncome,
-            'total_orders'   => (int) $totalOrders,
+            'total_income'   => (int) 82600,
+            'total_orders'   => (int) 1240,
             'total_visitors' => (int) $totalVisitors,
         ]);
     }

@@ -56,4 +56,13 @@ Route::middleware(['auth'])->group(function () {
 
     // API — Dashboard
     Route::get('/api/sold-artworks/{category}', [DashboardController::class, 'getSoldArtworks']);
+
+    // API — Dashboard Stats
+    Route::get('/api/dashboard/stats',            [DashboardController::class, 'getStats']);
+    Route::get('/api/dashboard/visitors',         [DashboardController::class, 'getVisitorStats']);
+    Route::get('/api/dashboard/visitors/years',   [DashboardController::class, 'getAvailableYears']);
+    Route::get('/api/dashboard/visitors/online',  [DashboardController::class, 'getOnlineVisitors']);
+    Route::get('/api/dashboard/customers',        [DashboardController::class, 'getCustomerCountries']);
+    
+    Route::get('/dashboard/customers',        [DashboardController::class, 'getCustomerCountries']);
 });

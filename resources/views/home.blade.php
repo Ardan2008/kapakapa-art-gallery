@@ -225,21 +225,27 @@
 
     <section class="max-w-[1600px] mx-auto px-6 -translate-y-16 relative z-30">
         <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
-            <?php 
-            $galleryImages = ['45', '46', '47', '48', '49'];
-            
-            foreach ($galleryImages as $imgId): 
-            ?>
-                <div class="relative h-56 md:h-80 overflow-hidden group bg-[#1a1a1a] border border-white/5 shadow-2xl block">
+            @foreach ($heroArtworks as $artwork)
+                <a href="{{ route('gallery', ['style' => $artwork->category]) }}"
+                class="relative h-56 md:h-80 overflow-hidden group bg-[#1a1a1a] border border-white/5 shadow-2xl block">
                     
                     <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-80 group-hover:opacity-30 transition-all z-10 duration-700"></div>
                     
-                    <img src="https://picsum.photos/600/800?random=<?php echo $imgId; ?>" 
+                    <img src="{{ $artwork->image_url }}" 
                         class="absolute inset-0 object-cover w-full h-full grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-1000 ease-out" 
-                        alt="Gallery Artwork">
+                        alt="{{ $artwork->title }}">
 
-                </div>
-            <?php endforeach; ?>
+                    <div class="absolute bottom-0 left-0 right-0 z-20 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-500">
+                        <p class="text-[9px] uppercase tracking-[0.4em] text-[#C9A74E]">{{ $artwork->category }}</p>
+                        <p class="text-white font-serif italic text-sm">{{ $artwork->title }}</p>
+                    </div>
+                </a>
+            @endforeach
+
+            {{-- Fallback kalau artwork kurang dari 5 --}}
+            @for ($i = $heroArtworks->count(); $i < 5; $i++)
+                <div class="relative h-56 md:h-80 overflow-hidden bg-[#1a1a1a] border border-white/5"></div>
+            @endfor
         </div>
     </section>
 

@@ -33,35 +33,38 @@ class ArtWorkController extends Controller
     public function index()
     {
         $collections = Artist::with('artworks')->orderBy('created_at', 'desc')->get()->map(function($artist) {
-            // Collect all images from all associated artworks
-            $images = [];
-            if ($artist->artworks) {
-                foreach ($artist->artworks as $artwork) {
-                    $artImages = is_array($artwork->images) ? $artwork->images : json_decode($artwork->images, true);
-                    if (is_array($artImages)) {
-                        foreach ($artImages as $img) {
-                            $images[] = $img;
-                        }
-                    }
-                }
+            
+            // Ambil semua gambar dari semua artworks, per slot
+            // SESUDAH (benar):
+            $firstArtwork = $artist->artworks->first();
+            $artImages = [];
+            if ($firstArtwork) {
+                $artImages = is_array($firstArtwork->images)
+                    ? $firstArtwork->images
+                    : json_decode($firstArtwork->images, true);
+                if (!is_array($artImages)) $artImages = [];
             }
 
-            // Ensure we have at least 3 images for the card layout
-            while (count($images) < 3) {
-                $images[] = 'https://api.dicebear.com/8.x/notionists/svg?seed=' . urlencode($artist->name) . count($images);
-            }
+            $fallback = !empty($artImages[0]) ? $artImages[0] : 'https://via.placeholder.com/500x500?text=No+Image';
+            $responseImages = [
+                !empty($artImages[0]) ? $artImages[0] : $fallback,
+                !empty($artImages[1]) ? $artImages[1] : $fallback,
+                !empty($artImages[2]) ? $artImages[2] : $fallback,
+            ];
 
             return [
-                'id' => sprintf('%02d', $artist->id),
-                'title' => $artist->name . ' Collection',
-                'category' => $artist->artworks->first()->category ?? 'Art',
-                'artist' => 'By ' . $artist->name,
-                'images' => array_slice($images, 0, 3),
+                'id'             => sprintf('%02d', $artist->id),
+                'title'          => $artist->name . ' Collection',
+                'category'       => $artist->artworks->first()->category ?? 'Art',
+                'artist'         => 'By ' . $artist->name,
+                'images'         => $responseImages,
                 'full_artist_name' => $artist->name,
-                'birthplace' => $artist->birthplace,
-                'career' => $artist->career,
-                'artist_desc' => $artist->bio,
-                'dimensions' => $artist->artworks->first() ? ($artist->artworks->first()->width . 'x' . $artist->artworks->first()->height . ' ' . $artist->artworks->first()->unit) : null,
+                'birthplace'     => $artist->birthplace,
+                'career'         => $artist->career,
+                'artist_desc'    => $artist->bio,
+                'dimensions'     => $artist->artworks->first() 
+                    ? ($artist->artworks->first()->width . 'x' . $artist->artworks->first()->height . ' ' . $artist->artworks->first()->unit) 
+                    : null,
             ];
         });
 
@@ -157,7 +160,7 @@ class ArtWorkController extends Controller
             'artwork.*.maxLimit' => 'required|integer|min:0',
             'artwork.*.basePrice' => 'required|numeric|min:0',
             'artwork.*.salePrice' => 'nullable|numeric|min:0',
-            'artwork.*.certificate' => 'nullable|file|max:20480',
+            'artwork.*.certificate' => 'nullable|file|mimes:jpeg,jpg,png,gif,webp,pdf|max:20480',
             'artistData.name' => 'required|string',
             'artistData.birthplace' => 'required|string',
             'artistData.career' => 'required|string',
@@ -252,7 +255,6 @@ class ArtWorkController extends Controller
                 'artwork.*.width' => 'nullable|numeric|min:0',
                 'artwork.*.height' => 'nullable|numeric|min:0',
                 'artwork.*.unit' => 'nullable|string|max:10',
-                'artwork.*.media.*' => 'nullable|image|max:20480',
                 'artwork.*.certificate' => 'nullable|file|max:20480',
             ]);
 
@@ -282,12 +284,38 @@ class ArtWorkController extends Controller
                 $artwork = (!empty($artData['id'])) ? ArtWork::find($artData['id']) : new ArtWork();
                 if (!$artwork) $artwork = new ArtWork();
                 
-                $images = $artwork->images ?? [];
+                // Ambil gambar lama
+                $existingImages = is_array($artwork->images) ? $artwork->images : [];
+
+                // Proses upload baru per slot (slot 0, 1, 2)
+                $newImages = [];
                 if ($request->hasFile("artwork.$index.media")) {
-                    foreach ($request->file("artwork.$index.media") as $file) {
+                    foreach ($request->file("artwork.$index.media") as $slotIndex => $file) {
+                        if (!$file || !$file->isValid() || $file->getSize() === 0) continue;
+
+                        $allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/jpg'];
+                        if (!in_array($file->getMimeType(), $allowedMimes)) continue;
+
                         $path = $file->store('artworks', 'public');
-                        $images[] = Storage::url($path);
+                        $newImages[$slotIndex] = Storage::url($path);
                     }
+                }
+
+                // Merge: slot yang ada upload baru → pakai baru, slot kosong → pakai lama
+                $images = [];
+                for ($slot = 0; $slot < 3; $slot++) {
+                    if (isset($newImages[$slot])) {
+                        $images[$slot] = $newImages[$slot]; // pakai upload baru
+                    } elseif (isset($existingImages[$slot])) {
+                        $images[$slot] = $existingImages[$slot]; // pakai yang lama
+                    }
+                    // slot kosong dan tidak ada lama → tidak dimasukkan
+                }
+
+                $images = array_values($images); // reindex
+
+                if (empty($images)) {
+                    $images = ['https://via.placeholder.com/500x500?text=No+Image'];
                 }
 
                 // Fallback for images
@@ -334,28 +362,65 @@ class ArtWorkController extends Controller
 
             // Prepare response data for the frontend card
             $artist->load('artworks');
-            $allImages = $artist->artworks->flatMap(fn($a) => is_array($a->images) ? $a->images : [])->values()->all();
-            while (count($allImages) < 3) $allImages[] = 'https://via.placeholder.com/500x500?text=No+Image';
+
+            $slot0 = null;
+            $slot1 = null;
+            $slot2 = null;
+
+            foreach ($artist->artworks as $artwork) {
+                $artImages = is_array($artwork->images) 
+                    ? $artwork->images 
+                    : json_decode($artwork->images, true);
+                
+                if (!is_array($artImages)) continue;
+
+                // Setiap slot diisi dari gambar yang benar-benar ada di posisi itu
+                if ($slot0 === null && !empty($artImages[0]) && 
+                    !str_contains($artImages[0], 'placeholder')) {
+                    $slot0 = $artImages[0];
+                }
+                if ($slot1 === null && !empty($artImages[1]) && 
+                    !str_contains($artImages[1], 'placeholder')) {
+                    $slot1 = $artImages[1];
+                }
+                if ($slot2 === null && !empty($artImages[2]) && 
+                    !str_contains($artImages[2], 'placeholder')) {
+                    $slot2 = $artImages[2];
+                }
+
+                if ($slot0 && $slot1 && $slot2) break;
+            }
+
+            // Fallback ke slot0 kalau slot lain kosong
+            $fallback = $slot0 ?? 'https://via.placeholder.com/500x500?text=No+Image';
+            $responseImages = [
+                $slot0 ?? $fallback,
+                $slot1 ?? $fallback,
+                $slot2 ?? $fallback,
+            ];
 
             return response()->json([
                 'success' => true,
                 'message' => 'Collection processed successfully!',
                 'artwork' => [
-                    'id' => sprintf('%02d', $artist->id),
-                    'title' => $artist->name . ' Collection',
-                    'category' => $artist->artworks->first()->category ?? 'Art',
-                    'artist' => 'By ' . $artist->name,
-                    'images' => array_slice($allImages, 0, 3),
+                    'id'               => sprintf('%02d', $artist->id),
+                    'title'            => $artist->name . ' Collection',
+                    'category'         => $artist->artworks->first()->category ?? 'Art',
+                    'artist'           => 'By ' . $artist->name,
+                    'images'           => $responseImages,
                     'full_artist_name' => $artist->name,
-                    'birthplace' => $artist->birthplace,
-                    'career' => $artist->career,
-                    'artist_desc' => $artist->bio
+                    'birthplace'       => $artist->birthplace,
+                    'career'           => $artist->career,
+                    'artist_desc'      => $artist->bio
                 ]
             ]);
         } catch (\Exception $e) {
+            error_log('storeCollection error: ' . $e->getMessage());
+            error_log($e->getTraceAsString());
+            
             return response()->json([
                 'success' => false,
-                'message' => 'Server Error: ' . $e->getMessage()
+                'message' => 'Server Error: ' . $e->getMessage() . ' | Line: ' . $e->getLine() . ' | File: ' . $e->getFile()
             ], 500);
         }
     }
@@ -396,14 +461,17 @@ class ArtWorkController extends Controller
 
     public function profile(Request $request, $id = null)
     {
-        $artist = $id
-            ? Artist::findOrFail($id)
-            : Artist::first();
-
+        $artist = $id ? Artist::findOrFail($id) : Artist::first();
         if (!$artist) return redirect()->route('home');
 
-        // Selalu paginate — baik AJAX maupun initial load
-        $artworks = $artist->artworks()->paginate(10);
+        $search = $request->get('search');
+
+        $artworks = $artist->artworks()
+            ->when($search, fn($q) => 
+                $q->where('title', 'like', "%{$search}%")
+                ->orWhere('category', 'like', "%{$search}%")
+            )
+            ->paginate(10);
 
         if ($request->ajax()) {
             return response()->json([
@@ -423,6 +491,10 @@ class ArtWorkController extends Controller
 
         if ($style) {
             $artworks = ArtWork::where('category', $style)
+                ->when($request->get('search'), fn($q, $search) =>
+                    $q->where('title', 'like', "%{$search}%")
+                    ->orWhere('artist', 'like', "%{$search}%")
+                )
                 ->orderBy('created_at', 'desc')
                 ->paginate(10);
 
@@ -485,20 +557,39 @@ class ArtWorkController extends Controller
             ->pluck('total', 'category');
 
         return $categories->map(function ($category) use ($latestArtworks, $counts) {
-            $latest = $latestArtworks->get($category)?->first();
-            if (!$latest) return null;
+            $artworksInCat = $latestArtworks->get($category);
+            if (!$artworksInCat || $artworksInCat->isEmpty()) return null;
 
-            $images = is_array($latest->images)
-                ? $latest->images
-                : json_decode($latest->images, true);
+            // Ambil gambar slot[0] dari 3 artwork pertama
+            $slots = [];
+            foreach ($artworksInCat as $artwork) {
+                $imgs = is_array($artwork->images)
+                    ? $artwork->images
+                    : json_decode($artwork->images, true);
+
+                if (!is_array($imgs)) continue;
+
+                // Ambil gambar pertama yang valid dari artwork ini
+                foreach ($imgs as $img) {
+                    if (!empty($img) && !str_contains($img, 'placeholder')) {
+                        $slots[] = $img;
+                        break;
+                    }
+                }
+
+                if (count($slots) >= 3) break;
+            }
+
+            $latest   = $artworksInCat->first();
+            $fallback = $slots[0] ?? $latest->image_url ?? 'https://via.placeholder.com/800';
 
             return [
                 'title'    => $category,
                 'author'   => $latest->artist ?? 'Various Artists',
                 'count'    => $counts->get($category, 0),
-                'main_img' => $images[0] ?? $latest->image_url ?? 'https://via.placeholder.com/800',
-                'sub_img1' => $images[1] ?? $images[0] ?? 'https://via.placeholder.com/400',
-                'sub_img2' => $images[2] ?? $images[0] ?? 'https://via.placeholder.com/400',
+                'main_img' => $slots[0] ?? $fallback,
+                'sub_img1' => $slots[1] ?? $fallback,
+                'sub_img2' => $slots[2] ?? $fallback,
             ];
         })
         ->filter()

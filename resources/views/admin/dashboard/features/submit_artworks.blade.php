@@ -170,16 +170,19 @@
                                     <div class="relative bg-neutral-900/80 backdrop-blur-xl rounded-[2rem] p-5 border border-white/5 transition-all duration-500 group-hover:-translate-y-2 group-hover:border-[#C9A74E]/30">
                                         <span class="absolute top-6 right-8 text-5xl font-black text-white/5 italic select-none">{{ $item['id'] }}</span>
                                         
-                                        <div class="grid grid-cols-3 gap-3 h-72 mb-8">
+                                        <div class="grid grid-cols-3 gap-3 mb-8" style="height: 280px;">
                                             <div class="col-span-2 overflow-hidden rounded-2xl shadow-2xl">
-                                                <img src="{{ $item['images'][0] }}" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-105">
+                                                <img src="{{ $item['images'][0] }}" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-105"
+                                                    onerror="this.src='https://via.placeholder.com/500x500?text=No+Image'">
                                             </div>
-                                            <div class="flex flex-col gap-3">
-                                                <div class="h-1/2 overflow-hidden rounded-2xl">
-                                                    <img src="{{ $item['images'][1] }}" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700">
+                                            <div class="flex flex-col gap-3" style="height: 280px;">
+                                                <div class="overflow-hidden rounded-2xl" style="height: 135px;">
+                                                    <img src="{{ $item['images'][1] }}" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
+                                                        onerror="this.src='https://via.placeholder.com/500x500?text=No+Image'">
                                                 </div>
-                                                <div class="h-1/2 overflow-hidden rounded-2xl border border-[#C9A74E]/20">
-                                                    <img src="{{ $item['images'][2] }}" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700">
+                                                <div class="overflow-hidden rounded-2xl border border-[#C9A74E]/20" style="height: 135px;">
+                                                    <img src="{{ $item['images'][2] }}" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
+                                                        onerror="this.src='https://via.placeholder.com/500x500?text=No+Image'">
                                                 </div>
                                             </div>
                                         </div>
@@ -348,10 +351,13 @@
     </div>
 
     <script>
+        let selectedArtistData = null;
+        let currentSlide = 0;
+        let totalSlides = 4;
+
         const categories = @json($categories);
         let currentCollectionSlide = 0;
         let totalCollectionSlides = 1;
-
 
         // Dropdown Toggle
         function toggleDropdown() {
@@ -436,8 +442,8 @@
             qty = parseInt(qty) || 1;
             totalCollectionSlides = qty;
             currentCollectionSlide = 0;
-            
             const container = document.getElementById('collection-slides-container');
+            if (!container) return; // guard: elemen tidak ada di halaman ini
             container.innerHTML = '';
             
             for (let i = 0; i < qty; i++) {
@@ -544,9 +550,22 @@
         }
 
         function updateCollectionNav() {
-            document.getElementById('collection-slide-counter').innerText = `Artwork ${currentCollectionSlide + 1} of ${totalCollectionSlides}`;
-            document.getElementById('collPrevBtn').disabled = currentCollectionSlide === 0;
-            document.getElementById('collNextBtn').disabled = currentCollectionSlide === totalCollectionSlides - 1;
+            const counter = document.getElementById('collection-slide-counter');
+            const prevBtn = document.getElementById('collPrevBtn');
+            const nextBtn = document.getElementById('collNextBtn');
+            if (counter) counter.innerText = `Artwork ${currentCollectionSlide + 1} of ${totalCollectionSlides}`;
+            if (prevBtn) prevBtn.disabled = currentCollectionSlide === 0;
+            if (nextBtn) nextBtn.disabled = currentCollectionSlide === totalCollectionSlides - 1;
+        }
+
+        function navigateCollectionSlide(dir) {
+            const next = currentCollectionSlide + dir;
+            if (next >= 0 && next < totalCollectionSlides) {
+                currentCollectionSlide = next;
+                document.querySelectorAll('.collection-slide')
+                        .forEach((s, i) => s.classList.toggle('hidden', i !== currentCollectionSlide));
+                updateCollectionNav();
+            }
         }
 
         function handleCollectionMedia(input, index) {
@@ -684,16 +703,22 @@
                 <div class="relative bg-neutral-900/80 backdrop-blur-xl rounded-[2rem] p-5 border border-white/5 transition-all duration-500 group-hover:-translate-y-2 group-hover:border-[#C9A74E]/30">
                     <span class="absolute top-6 right-8 text-5xl font-black text-white/5 italic select-none">${art.id}</span>
                     
-                    <div class="grid grid-cols-3 gap-3 h-72 mb-8">
+                    <div class="grid grid-cols-3 gap-3 mb-8" style="height: 280px;">
                         <div class="col-span-2 overflow-hidden rounded-2xl shadow-2xl">
-                            <img src="${art.images[0]}" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-105">
+                            <img src="${art.images?.[0] ?? ''}"
+                                class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-105"
+                                onerror="this.onerror=null; this.style.display='none'; this.parentElement.style.background='#2a2a2a';">
                         </div>
-                        <div class="flex flex-col gap-3">
-                            <div class="h-1/2 overflow-hidden rounded-2xl">
-                                <img src="${art.images[1]}" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700">
+                        <div class="flex flex-col gap-3" style="height: 280px;">
+                            <div class="overflow-hidden rounded-2xl" style="height: 135px;">
+                                <img src="${art.images?.[1] ?? ''}"
+                                    class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
+                                    onerror="this.onerror=null; this.style.display='none'; this.parentElement.style.background='#2a2a2a';">
                             </div>
-                            <div class="h-1/2 overflow-hidden rounded-2xl border border-[#C9A74E]/20">
-                                <img src="${art.images[2]}" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700">
+                            <div class="overflow-hidden rounded-2xl border border-[#C9A74E]/20" style="height: 135px;">
+                                <img src="${art.images?.[2] ?? ''}"
+                                    class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
+                                    onerror="this.onerror=null; this.style.display='none'; this.parentElement.style.background='#2a2a2a';">
                             </div>
                         </div>
                     </div>
@@ -877,16 +902,15 @@
 
         // Klik di luar untuk menutup
         window.onclick = function(event) {
-            // Tutup Sidebar jika klik overlay
-            if (event.target.id === 'sidebarOverlay') {
-                handleNavDrawer(false);
+            if (event.target.id === 'sidebarOverlay') handleNavDrawer(false);
+            if (!event.target.closest('#dropdownBtn')) {
+                document.getElementById('dropdownMenu').classList.add('hidden');
+                document.getElementById('dropdownArrow').classList.remove('rotate-180');
             }
-            // Tutup Profile Dropdown
             if (!event.target.closest('#profileButton')) {
-                const drop = document.getElementById('profileDropdown');
-                if(drop) drop.classList.add('hidden-modal');
+                document.getElementById('profileDropdown')?.classList.add('hidden-modal');
             }
-        }
+        };
 
         // Modal Handlers dengan Scroll Lock
         function openSettings() {
@@ -1385,16 +1409,22 @@
                     headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') }
                 });
 
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error(`Server error ${response.status}: response bukan JSON`);
+                }
+
                 const result = await response.json();
 
                 if (result.success) {
                     await Swal.fire({ icon: 'success', title: 'Batch Success!', text: result.message, background: '#1a1a1a', color: '#fff', timer: 2000, showConfirmButton: false });
-                    result.artworks.forEach(art => appendNewArtworkCard(art));
+                    (result.artworks ?? []).forEach(art => appendNewArtworkCard(art));
                     closeMultiForm();
                 } else {
                     throw new Error(result.message || 'Submission failed');
                 }
             } catch (error) {
+                Swal.close(); // ← TAMBAHKAN INI agar loading spinner berhenti
                 Swal.fire({ icon: 'error', title: 'Batch Upload Failed', text: error.message, background: '#1a1a1a', color: '#fff' });
             }
         }

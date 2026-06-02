@@ -52,14 +52,32 @@
             cursor: pointer;
             transition: all 0.3s ease;
         }
-        .preview-box:hover {
-            border-color: #C9A74E;
-            background: #2a2a2a;
+
+        /* Override khusus untuk cert box agar menyesuaikan gambar */
+        .cert-preview-box {
+            aspect-ratio: unset;       /* hapus paksa square */
+            min-height: 80px;
+            height: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
+
+        .cert-preview-box img {
+            width: 100%;
+            height: auto;              /* tinggi otomatis ikuti aspect ratio */
+            object-fit: contain;       /* tidak crop, tampil penuh */
+            max-height: 200px;
+        }
+
         .preview-box img {
             width: 100%;
             height: 100%;
             object-fit: cover;
+        }
+        .preview-box:hover {
+            border-color: #C9A74E;
+            background: #2a2a2a;
         }
     </style>
 </head>
@@ -384,8 +402,8 @@
                                             <div class="preview-box"
                                                  id="mediaBox_${i}_${j}"
                                                  onclick="handleMediaClick(${i}, ${j})">
-                                                <input type="file" name="artwork[${i}][media][]"
-                                                       id="mediaInput_${i}_${j}"
+                                                <input type="file" name="artwork[${i}][media][${j}]"
+                                                    id="mediaInput_${i}_${j}"
                                                        accept="image/*"
                                                        class="hidden"
                                                        onchange="previewMedia(this, ${i}, ${j})">
@@ -408,8 +426,8 @@
                                                required
                                                onchange="handleCertUpload(this, ${i})">
                                         <div onclick="document.getElementById('certInput_${i}').click()"
-                                             class="preview-box border-red-500/20"
-                                             id="certBox_${i}">
+                                            class="preview-box cert-preview-box border-red-500/20"
+                                            id="certBox_${i}">
                                             <div id="certPlaceholder_${i}"
                                                  class="absolute inset-0 flex flex-col items-center justify-center text-red-500/40">
                                                 <i data-lucide="shield-check" class="w-4 h-4 mb-1"></i>
@@ -556,7 +574,41 @@
 
             if (!result.isConfirmed) return;
 
-            const formData = new FormData(event.target);
+            // ── Build FormData manual, skip file kosong ──
+            const form = event.target;
+            const formData = new FormData();
+
+            // 1. Append semua field non-file (text, textarea, select, hidden)
+            form.querySelectorAll('input:not([type="file"]), textarea, select').forEach(el => {
+                if (el.name && el.value !== '') {
+                    formData.append(el.name, el.value);
+                }
+            });
+
+            // 2. Append CSRF
+            formData.append('_token', document.querySelector('meta[name="csrf-token"]').content);
+
+            // 3. Append profile artist jika ada
+            const profileInput = document.getElementById('profileInput');
+            if (profileInput && profileInput.files.length > 0 && profileInput.files[0].size > 0) {
+                formData.append('artist[profile]', profileInput.files[0]);
+            }
+
+            // 4. Append media per artwork per slot
+            for (let i = 0; i < totalCollectionSlides; i++) {
+                for (let j = 0; j <= 2; j++) {
+                    const mediaInput = document.getElementById(`mediaInput_${i}_${j}`);
+                    if (mediaInput && mediaInput.files.length > 0 && mediaInput.files[0].size > 0) {
+                        formData.append(`artwork[${i}][media][${j}]`, mediaInput.files[0]);
+                    }
+                }
+                
+                // Certificate
+                const certInput = document.getElementById(`certInput_${i}`);
+                if (certInput && certInput.files.length > 0 && certInput.files[0].size > 0) {
+                    formData.append(`artwork[${i}][certificate]`, certInput.files[0]);
+                }
+            }
 
             Swal.fire({
                 title: 'Publishing Collection...',

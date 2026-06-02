@@ -29,6 +29,9 @@ class ArtWork extends Model
         'width',
         'height',
         'unit',
+        'collector_name',
+        'collector_country',
+        'collector_country_code',
     ];
 
     protected $casts = [

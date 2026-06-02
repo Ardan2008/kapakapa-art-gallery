@@ -535,6 +535,19 @@
             });
         }
 
+        function animateCounter(el, targetValue) {
+            const startTime = performance.now();
+            const duration = 2000;
+            const update = (currentTime) => {
+                const progress = Math.min((currentTime - startTime) / duration, 1);
+                const easeOut = 1 - Math.pow(1 - progress, 3);
+                el.innerText = Math.floor(easeOut * targetValue).toLocaleString('en-US');
+                if (progress < 1) requestAnimationFrame(update);
+                else el.innerText = targetValue.toLocaleString('en-US');
+            };
+            requestAnimationFrame(update);
+        }
+
         // ═══════════════════════════════════════════════════════════
         // DOM CONTENT LOADED — satu blok saja
         // ═══════════════════════════════════════════════════════════
@@ -571,21 +584,6 @@
                         animateCounter(el, +el.getAttribute('data-target'));
                     });
                 }
-            }
-
-            // Fungsi animasi counter yang bisa dipanggil ulang dengan nilai baru
-            function animateCounter(el, targetValue) {
-                const startTime = performance.now();
-                const duration = 2000;
-
-                const update = (currentTime) => {
-                    const progress = Math.min((currentTime - startTime) / duration, 1);
-                    const easeOut = 1 - Math.pow(1 - progress, 3);
-                    el.innerText = Math.floor(easeOut * targetValue).toLocaleString('en-US');
-                    if (progress < 1) requestAnimationFrame(update);
-                    else el.innerText = targetValue.toLocaleString('en-US');
-                };
-                requestAnimationFrame(update);
             }
 
             // ── SALES ANALYTICS CHART (Line) ────────────────────
@@ -718,7 +716,11 @@
                         scales: {
                             y: {
                                 beginAtZero: true,
-                                ticks: { stepSize: 250, color: '#6b7280' },
+                                max: 200,          // ← default max 200
+                                ticks: { 
+                                    stepSize: 50,  // ← step 50 agar tidak terlalu jarang
+                                    color: '#6b7280' 
+                                },
                                 grid: { color: 'rgba(255,255,255,0.05)', drawBorder: false }
                             },
                             x: {
@@ -733,7 +735,6 @@
                 buildYearDropdown();
 
                 const defaultYear = new Date().getFullYear().toString();
-                fetchVisitorStats(defaultYear);
 
                 // Polling: refresh data tiap 30 detik
                 visitorLiveInterval = setInterval(() => {
@@ -800,7 +801,7 @@
             const curMonth = new Date().getMonth();
             // Hitung max hanya dari bulan yang sudah terjadi
             const relevantData = monthly.slice(0, curMonth + 1);
-            const maxVal = Math.max(...relevantData, 500);
+            const maxVal = Math.max(...relevantData, 200);
 
             visitorChart.data.datasets[0].data = monthly;
             visitorChart.data.datasets[0].backgroundColor = monthly.map((_, i) =>

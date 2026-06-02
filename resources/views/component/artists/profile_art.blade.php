@@ -341,7 +341,7 @@
                 <button class="flex-1 group relative overflow-hidden bg-[#C9A74E] p-[1px] transition-all duration-500">
                     <div class="relative bg-[#C9A74E] py-4 transition-all duration-300 group-hover:bg-[#1a1a1a] border border-transparent group-hover:border-[#C9A74E]">
                         <span class="text-black group-hover:text-[#C9A74E] text-[10px] font-bold uppercase tracking-[0.3em] flex items-center justify-center gap-2">
-                            Download
+                            Buy Now
                         </span>
                     </div>
                 </button>
@@ -855,6 +855,36 @@
                     // Slide back to the first image immediately
                     slider.style.transform = `translateX(0)`;
                 });
+            });
+
+            // Taruh di dalam DOMContentLoaded
+            document.querySelector('input[placeholder="TYPE OF ART..."]')?.addEventListener('input', function() {
+                const query = this.value.trim();
+                const params = new URLSearchParams({ 
+                    page: 1, 
+                    search: query,
+                    ...EXTRA_PARAMS 
+                });
+                
+                clearTimeout(this._searchTimeout);
+                this._searchTimeout = setTimeout(async () => {
+                    const grid = document.getElementById(GRID_ID);
+                    grid.style.opacity = '0.3';
+                    
+                    const res = await fetch(`${AJAX_URL}?${params}`, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        }
+                    });
+                    const data = await res.json();
+                    grid.innerHTML = data.html;
+                    currentPage = data.current_page;
+                    lastPage = data.last_page;
+                    updatePaginationUI();
+                    grid.style.opacity = '1';
+                    if (typeof AOS !== 'undefined') AOS.refreshHard();
+                }, 400);
             });
         });
     </script>

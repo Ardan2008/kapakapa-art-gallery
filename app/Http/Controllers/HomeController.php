@@ -4,13 +4,20 @@ namespace App\Http\Controllers;
 
 use App\Models\Artist;
 use App\Models\ArtWork;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class HomeController extends Controller
 {
     public function index()
     {
+        // Hero grid: 5 artwork terbaru dengan gambar valid
+        $heroArtworks = ArtWork::whereNotNull('image_url')
+            ->where('image_url', 'not like', '%placeholder%')
+            ->where('image_url', 'not like', '%dicebear%')
+            ->where('stock', '>', 0)
+            ->latest()
+            ->take(5)
+            ->get();
+
         // Fetch all artists for the "Behind the Mastery" carousel
         $featured_artists = Artist::latest()->get();
         
@@ -48,6 +55,6 @@ class HomeController extends Controller
             })
             ->filter(); // Automatically removes nulls (styles that no longer have stock)
 
-        return view('home', compact('featured_artists', 'featured_categories'));
+        return view('home', compact('featured_artists', 'featured_categories', 'heroArtworks'));
     }
 }

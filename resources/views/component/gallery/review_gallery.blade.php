@@ -227,7 +227,7 @@
     <div id="artModal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 md:p-8">
         <div class="absolute inset-0 bg-black/95 backdrop-blur-sm" onclick="closeModal()"></div>
         
-        <div class="relative bg-zinc-900 border border-white/10 w-full max-w-5xl overflow-hidden flex flex-col md:flex-row shadow-2xl animate-in fade-in zoom-in duration-300">
+        <div class="relative bg-zinc-900 border border-white/10 w-full max-w-5xl flex flex-col md:flex-row shadow-2xl animate-in fade-in zoom-in duration-300">
             
             <button onclick="closeModal()" class="absolute top-6 right-6 z-[130] group outline-none">
                 <div class="relative flex items-center justify-center w-12 h-12 transition-all duration-500 transform group-hover:rotate-90">
@@ -238,10 +238,10 @@
                 </div>
             </button>
 
-            <div id="imageContainer" class="w-full md:w-2/3 bg-black flex items-center justify-center p-6 overflow-hidden relative group/zoom">
-                <div class="relative overflow-hidden shadow-2xl">
+            <div id="imageContainer" class="w-full md:w-2/3 bg-black flex items-start justify-center p-6 overflow-y-auto relative group/zoom custom-scrollbar" style="max-height: 85vh;">
+                <div class="relative w-full shadow-2xl">
                     <img id="modalImage" src="" alt="Artwork" 
-                        class="max-h-[70vh] md:max-h-[80vh] object-contain transition-transform duration-500 ease-out cursor-zoom-in"
+                        class="object-contain transition-transform duration-500 ease-out cursor-zoom-in w-full h-auto"
                         onmousemove="zoomIn(event)" 
                         onmouseleave="zoomOut(event)">
                     
@@ -272,7 +272,7 @@
                             <div class="absolute inset-0 bg-[#C9A74E] translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out"></div>
                             
                             <span class="relative z-10 text-[#C9A74E] group-hover:text-black text-[9px] font-bold uppercase tracking-[0.3em] flex items-center justify-center transition-colors duration-500">
-                                Download Art
+                                Buy Now
                             </span>
 
                             <div class="absolute inset-0 border border-transparent group-hover:border-[#C9A74E] transition-colors duration-500"></div>
@@ -377,6 +377,38 @@
 
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script>
+        document.querySelector('input[placeholder="KEYWORDS..."]')?.addEventListener('input', function() {
+            const query = this.value.trim();
+            
+            clearTimeout(this._searchTimeout);
+            this._searchTimeout = setTimeout(async () => {
+                const grid = document.getElementById(GRID_ID);
+                grid.style.opacity = '0.3';
+                grid.style.pointerEvents = 'none';
+                
+                const params = new URLSearchParams({ 
+                    page: 1, 
+                    search: query,
+                    ...EXTRA_PARAMS 
+                });
+                
+                const res = await fetch(`${AJAX_URL}?${params}`, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    }
+                });
+                const data = await res.json();
+                grid.innerHTML = data.html;
+                currentPage = data.current_page;
+                lastPage = data.last_page;
+                updatePaginationUI();
+                if (typeof AOS !== 'undefined') AOS.refreshHard();
+                grid.style.opacity = '1';
+                grid.style.pointerEvents = 'auto';
+            }, 400);
+        });
+
         // --- LOGIKA ZOOM (Smooth & Intuitive) ---
         function zoomIn(event) {
             const img = event.currentTarget;
@@ -398,18 +430,30 @@
 
         // --- LOGIKA MODAL UTAMA ---
         function openModal(img, title, author, count) {
-            const modal = document.getElementById('artModal');
-            
-            // Set Data ke elemen modal
-            document.getElementById('modalImage').src = img;
-            document.getElementById('modalTitle').innerText = title;
-            document.getElementById('modalAuthor').innerText = author;
-            document.getElementById('modalCount').innerText = count + " High Resolution Artworks";
+            const modal    = document.getElementById('artModal');
+            const modalImg = document.getElementById('modalImage');
 
-            // Tampilkan Modal
+            modalImg.src = img;
+            document.getElementById('modalTitle').innerText  = title;
+            document.getElementById('modalAuthor').innerText = author;
+            document.getElementById('modalCount').innerText  = count + " High Resolution Artworks";
+
+            const tempImg = new Image();
+            tempImg.onload = function() {
+                const isPortrait = this.naturalHeight > this.naturalWidth;
+                if (isPortrait) {
+                    modalImg.classList.remove('landscape-mode');
+                    modalImg.classList.add('portrait-mode');
+                } else {
+                    modalImg.classList.remove('portrait-mode');
+                    modalImg.classList.add('landscape-mode');
+                }
+            };
+            tempImg.src = img;
+
             modal.classList.remove('hidden');
             modal.classList.add('flex');
-            document.body.style.overflow = 'hidden'; // Lock scroll body
+            document.body.style.overflow = 'hidden';
         }
 
         function closeModal() {
@@ -488,6 +532,43 @@
                 btn.classList.remove('opacity-100', 'translate-y-0', 'pointer-events-auto');
             }
         });
+
+        document.querySelector('input[placeholder="KEYWORDS..."]')?.addEventListener('input', function() {
+            clearTimeout(this._searchTimeout);
+            this._searchTimeout = setTimeout(async () => {
+                const grid = document.getElementById(GRID_ID);
+                grid.style.opacity = '0.3';
+                grid.style.pointerEvents = 'none';
+
+                const params = new URLSearchParams({ 
+                    page: 1, 
+                    search: this.value.trim(),
+                    ...EXTRA_PARAMS 
+                });
+
+                const res = await fetch(`${AJAX_URL}?${params}`, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    }
+                });
+                const data = await res.json();
+                grid.innerHTML = data.html;
+                currentPage = data.current_page;
+                lastPage = data.last_page;
+
+                const countEl = document.getElementById('artworks-count');
+                if (countEl && data.total !== undefined) {
+                    countEl.textContent = String(data.total).padStart(2, '0');
+                }
+
+                updatePaginationUI();
+                if (typeof AOS !== 'undefined') AOS.refreshHard();
+                grid.style.opacity = '1';
+                grid.style.pointerEvents = 'auto';
+            }, 400);
+        });
+
         btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
     </script>
 
