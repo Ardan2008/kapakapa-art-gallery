@@ -644,5 +644,7 @@
             });
         });
     </script>
+
+    @include('component.layout.content-protection')
 </body>
 </html>
