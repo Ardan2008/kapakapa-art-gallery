@@ -484,6 +484,32 @@
             });
         }
 
+        let isReviewScrolling = false;
+
+        document.addEventListener('wheel', (e) => {
+            // Cek modal terbuka
+            const modal = document.getElementById('artModal');
+            if (!modal || modal.classList.contains('hidden') || !reviewSwiper) return;
+
+            // Hanya aktif saat hover di area swiper
+            const isOverSwiper = e.target.closest('.reviewSwiper');
+            if (!isOverSwiper) return;
+
+            e.preventDefault();
+            if (isReviewScrolling) return;
+
+            isReviewScrolling = true;
+            if (e.deltaY > 0) {
+                reviewSwiper.slideNext();
+            } else {
+                reviewSwiper.slidePrev();
+            }
+
+            setTimeout(() => {
+                isReviewScrolling = false;
+            }, 300); // debounce 300ms
+        }, { passive: false });
+
         function updateReviewIndicator(current, total) {
             const indicator = document.getElementById('reviewPageIndicator');
             document.getElementById('reviewCurrentPage').innerText = current;
