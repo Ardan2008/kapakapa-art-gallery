@@ -1,67 +1,67 @@
-{{--
-    Proteksi yang aktif:
-      ✓ Klik-kanan (context menu) diblokir
-      ✓ Keyboard shortcuts inspeksi diblokir (F12, Ctrl+Shift+I/J/C/U, Ctrl+S)
-      ✓ Drag & drop gambar diblokir
-      ✓ Seleksi teks diblokir pada elemen gambar & judul artwork
-      ✓ Print screen & Ctrl+P → watermark muncul + overlay
-      ✓ Download via <a download> diblokir
-      ✓ DevTools detection → watermark muncul + banner peringatan
-      ✓ Watermark TERSEMBUNYI saat normal, MUNCUL saat pelanggaran
-      ✓ Watermark otomatis hilang setelah 4 detik
-    ============================================================
---}}
+{{-- OVERLAYS --}}
 
-{{-- OVERLAY: muncul saat PrintScreen / Ctrl+P --}}
-<div id="kpk-protect-overlay"
+{{-- Fullscreen protection overlay (print / devtools) --}}
+<div id="kpk-overlay"
      aria-hidden="true"
-     style="
-        display:none;
-        position:fixed;
-        inset:0;
-        z-index:2147483647;
-        background:rgba(5,5,5,0.97);
-        backdrop-filter:blur(20px);
-        -webkit-backdrop-filter:blur(20px);
-        align-items:center;
-        justify-content:center;
-        flex-direction:column;
-        gap:16px;
-     ">
+     style="display:none;position:fixed;inset:0;z-index:2147483647;
+            background:rgba(5,5,5,0.97);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+            align-items:center;justify-content:center;flex-direction:column;gap:16px;">
     <svg width="48" height="48" viewBox="0 0 24 24" fill="none"
          stroke="#C9A74E" stroke-width="1" stroke-linecap="round">
         <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
         <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
     </svg>
     <p style="color:#C9A74E;font-family:'Playfair Display',serif;font-style:italic;
-              font-size:1.5rem;letter-spacing:-.02em;margin:0;">
-        Content Protected
+              font-size:1.5rem;letter-spacing:-.02em;margin:0;">Content Protected</p>
+    <p style="color:#C9A74E;font-family:'Plus Jakarta Sans',sans-serif;font-size:.75rem;
+              letter-spacing:.15em;text-transform:uppercase;margin:0;opacity:.7;">
+        Screenshot &amp; screen recording tidak diizinkan
     </p>
-    <p style="color:#666;font-family:'Plus Jakarta Sans',sans-serif;
-              font-size:.7rem;letter-spacing:.3em;text-transform:uppercase;margin:0;">
-        Kapakapa Art Gallery © {{ date('Y') }}
+    <p style="color:#666;font-family:'Plus Jakarta Sans',sans-serif;font-size:.7rem;
+              letter-spacing:.3em;text-transform:uppercase;margin:0;">
+        Kapakapa Art Gallery &copy; {{ date('Y') }}
     </p>
 </div>
 
-{{-- DEVTOOLS WARNING BANNER --}}
+{{-- Screenshot detection banner --}}
+<div id="kpk-ss-banner"
+     aria-hidden="true"
+     style="display:none;position:fixed;inset:0;z-index:2147483646;
+            background:rgba(0,0,0,0.92);backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);
+            align-items:center;justify-content:center;flex-direction:column;gap:20px;">
+    <svg width="56" height="56" viewBox="0 0 24 24" fill="none"
+         stroke="#C9A74E" stroke-width="1" stroke-linecap="round">
+        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+        <line x1="2" y1="2" x2="22" y2="22" stroke="#ff4444" stroke-width="2"/>
+    </svg>
+    <p style="color:#C9A74E;font-family:'Playfair Display',serif;font-style:italic;
+              font-size:1.6rem;letter-spacing:-.02em;margin:0;text-align:center;">
+        Screenshot Diblokir
+    </p>
+    <p style="color:#aaa;font-family:'Plus Jakarta Sans',sans-serif;font-size:.72rem;
+              letter-spacing:.25em;text-transform:uppercase;margin:0;
+              text-align:center;max-width:320px;line-height:1.8;">
+        Pengambilan gambar konten ini tidak diizinkan.<br>
+        Semua karya dilindungi hak cipta.
+    </p>
+    <p style="color:#555;font-family:'Plus Jakarta Sans',sans-serif;font-size:.6rem;
+              letter-spacing:.3em;text-transform:uppercase;margin:0;">
+        Kapakapa Art Gallery &copy; {{ date('Y') }}
+    </p>
+</div>
+
+{{-- DevTools warning bar --}}
 <div id="kpk-devtools-banner"
      aria-hidden="true"
-     style="
-        display:none;
-        position:fixed;
-        bottom:0; left:0; right:0;
-        z-index:2147483646;
-        background:linear-gradient(90deg,#0a0a0a,#1a1200,#0a0a0a);
-        border-top:1px solid rgba(201,167,78,.25);
-        padding:12px 24px;
-        align-items:center;
-        justify-content:center;
-        gap:12px;
-     ">
+     style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:2147483645;
+            background:linear-gradient(90deg,#0a0a0a,#1a1200,#0a0a0a);
+            border-top:1px solid rgba(201,167,78,.25);
+            padding:12px 24px;align-items:center;justify-content:center;gap:12px;">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
          stroke="#C9A74E" stroke-width="1.5" stroke-linecap="round">
         <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-        <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+        <line x1="12" y1="9" x2="12" y2="13"/>
+        <line x1="12" y1="17" x2="12.01" y2="17"/>
     </svg>
     <span style="color:#C9A74E;font-family:'Plus Jakarta Sans',sans-serif;
                  font-size:.65rem;letter-spacing:.35em;text-transform:uppercase;">
@@ -70,387 +70,356 @@
 </div>
 
 <style>
-    /* ══════════════════════════════════════════════════
-       WATERMARK — TERSEMBUNYI secara default
-       Hanya muncul saat JS menambahkan class .kpk-violation
-       pada <body> atau container gambar
-    ══════════════════════════════════════════════════ */
+    /* ═══════════════════════════════════════════════════════════
+    ARTWORK IMAGE SELECTORS
+    Reused across blur rules, watermark, and violation states
+    ═══════════════════════════════════════════════════════════ */
 
+    /* Shorthand: all artwork image containers */
     .artwork-slide,
     .swiper-slide,
     .artwork-card-container,
+    [class*="swiper"],
+    [class*="slide"],
+    [class*="artwork"],
     .group > div:has(> img),
     .group > div:has(> .artwork-slider) {
         position: relative !important;
     }
 
-    /* Canvas watermark — tersembunyi saat normal */
-    .kpk-wm-canvas {
-        position: absolute !important;
-        inset: 0 !important;
-        width: 100% !important;
-        height: 100% !important;
-        z-index: 40 !important;
-        pointer-events: none !important;
-        user-select: none !important;
-        -webkit-user-select: none !important;
-
-        /* TERSEMBUNYI by default */
-        opacity: 0 !important;
-        transition: opacity 0.3s ease !important;
-    }
-
-    /* MUNCUL saat body punya class violation */
-    body.kpk-violation .kpk-wm-canvas {
-        opacity: 1 !important;
-    }
-
-    /* CSS ::after watermark — juga tersembunyi by default */
-    .artwork-slide::after,
-    .swiper-slide::after,
-    .artwork-card-container::after {
-        content: 'KAPAKAPA ART GALLERY © {{ date('Y') }}  ·  KAPAKAPA ART GALLERY © {{ date('Y') }}  ·  KAPAKAPA ART GALLERY © {{ date('Y') }}';
-        position: absolute;
-        inset: 0;
-        z-index: 50;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-family: 'Plus Jakarta Sans', sans-serif;
-        font-size: clamp(9px, 1vw, 11px);
-        font-weight: 700;
-        letter-spacing: .25em;
-        text-transform: uppercase;
-        white-space: nowrap;
-        overflow: hidden;
-        transform: rotate(-35deg) scale(2.2);
-        transform-origin: center center;
-        pointer-events: none !important;
-        user-select: none !important;
-        -webkit-user-select: none !important;
-
-        /* TERSEMBUNYI by default */
-        color: rgba(201, 167, 78, 0) !important;
-        transition: color 0.3s ease !important;
-    }
-
-    /* MUNCUL saat violation */
-    body.kpk-violation .artwork-slide::after,
-    body.kpk-violation .swiper-slide::after,
-    body.kpk-violation .artwork-card-container::after {
-        color: rgba(201, 167, 78, 0.35) !important;
-    }
-
-    /* ── Anti-drag gambar ── */
-    img {
-        -webkit-user-drag: none !important;
-        -khtml-user-drag:  none !important;
-        -moz-user-drag:    none !important;
-        -o-user-drag:      none !important;
-        user-drag:         none !important;
-        pointer-events:    none !important;
-        -webkit-user-select: none !important;
-        -moz-user-select:    none !important;
-        -ms-user-select:     none !important;
-        user-select:         none !important;
-    }
-
+    /* ── Artwork images: blur by default ── */
     .artwork-slide img,
     .swiper-slide img,
     .artwork-card-container img,
+    [class*="swiper"] img,
+    [class*="slide"] img,
+    [class*="artwork"] img,
     .group img {
+        filter: blur(18px) brightness(0.6) !important;
+        transition: filter 0.4s ease !important;
         max-width: 100% !important;
         width: 100% !important;
         height: 100% !important;
         object-fit: cover !important;
     }
 
-    /* ── Anti-select teks karya ── */
+    /* ── Clear blur when user is actively interacting ── */
+    body.kpk-active .artwork-slide img,
+    body.kpk-active .swiper-slide img,
+    body.kpk-active .artwork-card-container img,
+    body.kpk-active [class*="swiper"] img,
+    body.kpk-active [class*="slide"] img,
+    body.kpk-active [class*="artwork"] img,
+    body.kpk-active .group img {
+        filter: none !important;
+    }
+
+    /* ── Hard blur on violation ── */
+    body.kpk-violation .artwork-slide img,
+    body.kpk-violation .swiper-slide img,
+    body.kpk-violation .artwork-card-container img,
+    body.kpk-violation [class*="swiper"] img,
+    body.kpk-violation [class*="slide"] img,
+    body.kpk-violation [class*="artwork"] img,
+    body.kpk-violation .group img {
+        filter: blur(25px) brightness(0.3) !important;
+        transition: filter 0s !important;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+    SCREENSHOT STATE — blur entire page instantly
+    ═══════════════════════════════════════════════════════════ */
+    body.kpk-screenshot > *:not(#kpk-overlay):not(#kpk-ss-banner):not(#kpk-devtools-banner):not(script):not(style) {
+        filter: blur(30px) brightness(0.2) !important;
+        pointer-events: none !important;
+        transition: filter 0s !important;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+    GLOBAL ANTI-THEFT
+    ═══════════════════════════════════════════════════════════ */
+
+    /* Prevent image drag & selection */
+    img {
+        -webkit-user-drag: none !important;
+        user-drag: none !important;
+        pointer-events: none !important;
+        -webkit-user-select: none !important;
+        user-select: none !important;
+    }
+
+    /* Prevent artwork title selection */
     .font-serif,
     [data-aos],
     .group .font-serif {
         -webkit-user-select: none !important;
-        -moz-user-select:    none !important;
-        -ms-user-select:     none !important;
-        user-select:         none !important;
+        user-select: none !important;
     }
 
-    /* ── Print ── */
+    /* Print: show only protection overlay */
     @media print {
-        body > *:not(#kpk-protect-overlay) { visibility: hidden !important; }
-        #kpk-protect-overlay {
-            display: flex !important;
-            visibility: visible !important;
-        }
+        body > *:not(#kpk-overlay) { visibility: hidden !important; }
+        #kpk-overlay { display: flex !important; visibility: visible !important; }
     }
 </style>
 
 <script>
-(function () {
-    'use strict';
+    (function () {
+        'use strict';
 
-    var overlay      = document.getElementById('kpk-protect-overlay');
-    var banner       = document.getElementById('kpk-devtools-banner');
-    var overlayTimer = null;
-    var violationTimer = null;
+        /* ── Element references ── */
+        var overlay        = document.getElementById('kpk-overlay');
+        var ssBanner       = document.getElementById('kpk-ss-banner');
+        var devtoolsBanner = document.getElementById('kpk-devtools-banner');
 
-    /* ════════════════════════════════════════════
-       CORE: Aktifkan watermark sementara
-       Durasi: 4000ms lalu hilang sendiri
-       Dipanggil setiap kali ada pelanggaran
-    ════════════════════════════════════════════ */
-    function triggerViolation() {
-        document.body.classList.add('kpk-violation');
-        clearTimeout(violationTimer);
-        violationTimer = setTimeout(function () {
-            document.body.classList.remove('kpk-violation');
-        }, 4000);
-    }
+        /* ── Timers ── */
+        var overlayTimer   = null;
+        var violationTimer = null;
+        var ssBannerTimer  = null;
+        var activeTimer    = null;
 
-    /* ════════════════════════════════════════════
-       1. KLIK KANAN
-    ════════════════════════════════════════════ */
-    document.addEventListener('contextmenu', function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        triggerViolation();
-        return false;
-    }, true);
+        /* ════════════════════════════════════════════════════
+        ACTIVE STATE
+        Images are clear only while the user is interacting.
+        Reverts to blur after 8 seconds of inactivity.
+        ════════════════════════════════════════════════════ */
 
-    /* ════════════════════════════════════════════
-       2. KEYBOARD SHORTCUTS
-    ════════════════════════════════════════════ */
-    document.addEventListener('keydown', function (e) {
-        var k     = e.key ? e.key.toUpperCase() : '';
-        var ctrl  = e.ctrlKey || e.metaKey;
-        var shift = e.shiftKey;
+        function setActive() {
+            if (document.body.classList.contains('kpk-violation')) return;
+            if (document.body.classList.contains('kpk-screenshot')) return;
+            document.body.classList.add('kpk-active');
+            clearTimeout(activeTimer);
+            activeTimer = setTimeout(function () {
+                document.body.classList.remove('kpk-active');
+            }, 8000);
+        }
 
-        // F12
-        if (e.keyCode === 123) {
-            block(e); triggerViolation(); return;
+        function setInactive() {
+            clearTimeout(activeTimer);
+            document.body.classList.remove('kpk-active');
         }
-        // Ctrl+Shift+I/J/C — DevTools
-        if (ctrl && shift && (k==='I'||k==='J'||k==='C')) {
-            block(e); triggerViolation(); return;
-        }
-        // Ctrl+U — View Source
-        if (ctrl && k === 'U') {
-            block(e); triggerViolation(); return;
-        }
-        // Ctrl+S — Save
-        if (ctrl && k === 'S') {
-            block(e); triggerViolation(); return;
-        }
-        // Ctrl+P — Print
-        if (ctrl && k === 'P') {
-            showOverlay(); triggerViolation(); block(e); return;
-        }
-        // PrtScr (keyCode 44)
-        if (e.keyCode === 44) {
-            showOverlay(); triggerViolation(); return;
-        }
-        // Win+Shift+S (keyCode 83 + metaKey + shift) — Windows Snipping
-        if (e.metaKey && shift && k === 'S') {
-            showOverlay(); triggerViolation(); block(e); return;
-        }
-        // Ctrl+A — Select All (di luar input)
-        if (ctrl && k === 'A' && !isTypingTarget(e.target)) {
-            block(e); triggerViolation(); return;
-        }
-    }, true);
 
-    function block(e) { e.preventDefault(); e.stopPropagation(); }
+        ['mousemove', 'mouseenter', 'scroll', 'touchstart', 'touchmove', 'click'].forEach(function (evt) {
+            document.addEventListener(evt, setActive, { passive: true });
+        });
 
-    function isTypingTarget(el) {
-        return el && (
-            el.tagName === 'INPUT'    ||
-            el.tagName === 'TEXTAREA' ||
-            el.isContentEditable
-        );
-    }
+        /* ════════════════════════════════════════════════════
+        VIOLATION  — watermark visible for 4 seconds
+        ════════════════════════════════════════════════════ */
 
-    /* ════════════════════════════════════════════
-       3. DRAG gambar
-    ════════════════════════════════════════════ */
-    document.addEventListener('dragstart', function (e) {
-        if (e.target && e.target.tagName === 'IMG') {
-            e.preventDefault();
-            triggerViolation();
+        function triggerViolation() {
+            setInactive();
+            document.body.classList.add('kpk-violation');
+            clearTimeout(violationTimer);
+            violationTimer = setTimeout(function () {
+                document.body.classList.remove('kpk-violation');
+            }, 4000);
         }
-    }, true);
 
-    /* ════════════════════════════════════════════
-       4. PRINT / BEFORE-PRINT
-    ════════════════════════════════════════════ */
-    if (window.matchMedia) {
-        try {
-            window.matchMedia('print').addEventListener('change', function (m) {
-                if (m.matches) { showOverlay(); triggerViolation(); }
-            });
-        } catch(e) {
-            window.matchMedia('print').addListener(function (m) {
-                if (m.matches) { showOverlay(); triggerViolation(); }
-            });
+        /* ════════════════════════════════════════════════════
+        SCREENSHOT PROTECTION
+        Blurs the entire page instantly, shows banner 3 sec.
+        ════════════════════════════════════════════════════ */
+
+        function triggerScreenshot() {
+            setInactive();
+            document.body.classList.add('kpk-screenshot', 'kpk-violation');
+            if (ssBanner) ssBanner.style.display = 'flex';
+            clearTimeout(ssBannerTimer);
+            ssBannerTimer = setTimeout(function () {
+                document.body.classList.remove('kpk-screenshot', 'kpk-violation');
+                if (ssBanner) ssBanner.style.display = 'none';
+            }, 3000);
         }
-    }
-    window.addEventListener('beforeprint', function () {
-        showOverlay(); triggerViolation();
-    }, true);
 
-    /* ════════════════════════════════════════════
-       5. DOWNLOAD link
-    ════════════════════════════════════════════ */
-    document.addEventListener('click', function (e) {
-        var el = e.target.closest('a[download]');
-        if (el) {
+        function showOverlay() {
+            if (!overlay) return;
+            overlay.style.display = 'flex';
+            clearTimeout(overlayTimer);
+            overlayTimer = setTimeout(function () {
+                overlay.style.display = 'none';
+            }, 2500);
+        }
+
+        /* ════════════════════════════════════════════════════
+        1. CONTEXT MENU
+        ════════════════════════════════════════════════════ */
+
+        document.addEventListener('contextmenu', function (e) {
             e.preventDefault();
             e.stopPropagation();
             triggerViolation();
+            return false;
+        }, true);
+
+        /* ════════════════════════════════════════════════════
+        2. KEYBOARD SHORTCUTS
+        ════════════════════════════════════════════════════ */
+
+        function isTypingTarget(el) {
+            return el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable);
         }
-    }, true);
 
-    /* ════════════════════════════════════════════
-       6. COPY
-    ════════════════════════════════════════════ */
-    document.addEventListener('copy', function (e) {
-        if (isTypingTarget(document.activeElement)) return;
-        e.preventDefault();
-        if (e.clipboardData) e.clipboardData.setData('text/plain', '');
-        triggerViolation();
-    }, true);
-
-    /* ════════════════════════════════════════════
-       7. DEVTOOLS SIZE DETECTION
-       Saat terbuka → watermark muncul + banner
-       Saat tutup   → watermark hilang + banner hilang
-    ════════════════════════════════════════════ */
-    var devtoolsOpen = false;
-    function checkDevtools() {
-        var isOpen = (window.outerWidth  - window.innerWidth  > 160) ||
-                     (window.outerHeight - window.innerHeight > 160);
-
-        if (isOpen && !devtoolsOpen) {
-            devtoolsOpen = true;
-            if (banner) banner.style.display = 'flex';
-            /* Watermark terus muncul selama DevTools terbuka */
-            document.body.classList.add('kpk-violation');
-            clearTimeout(violationTimer); // jangan auto-hilang selama devtools masih buka
-        } else if (!isOpen && devtoolsOpen) {
-            devtoolsOpen = false;
-            if (banner) banner.style.display = 'none';
-            /* Watermark hilang saat DevTools ditutup */
-            document.body.classList.remove('kpk-violation');
+        function block(e) {
+            e.preventDefault();
+            e.stopPropagation();
         }
-    }
-    setInterval(checkDevtools, 1000);
 
-    /* ════════════════════════════════════════════
-       8. WATERMARK CANVAS — inject ke semua img karya
-          Tersembunyi by default via CSS opacity:0
-          Muncul otomatis saat body.kpk-violation aktif
-    ════════════════════════════════════════════ */
-    var WM_TEXT  = 'KAPAKAPA ART GALLERY \u00A9 {{ date('Y') }}';
-    var WM_COLOR = 'rgba(201,167,78,0.35)';
+        document.addEventListener('keydown', function (e) {
+            var k     = e.key ? e.key.toUpperCase() : '';
+            var ctrl  = e.ctrlKey;
+            var meta  = e.metaKey;
+            var shift = e.shiftKey;
+            var alt   = e.altKey;
+            var code  = e.keyCode;
 
-    function injectCanvasWatermark(imgEl) {
-        var parent = imgEl.parentElement;
-        if (!parent) return;
-        if (parent.querySelector('.kpk-wm-canvas')) return;
+            /* DevTools / source inspection */
+            if (code === 123)                                       { block(e); triggerViolation(); return; } // F12
+            if (ctrl && shift && (k==='I'||k==='J'||k==='C'))      { block(e); triggerViolation(); return; } // Ctrl+Shift+I/J/C
+            if (ctrl && k === 'U')                                  { block(e); triggerViolation(); return; } // Ctrl+U
+            if (ctrl && k === 'S')                                  { block(e); triggerViolation(); return; } // Ctrl+S
+            if (ctrl && k === 'A' && !isTypingTarget(e.target))    { block(e); triggerViolation(); return; } // Ctrl+A
+            if (ctrl && k === 'P')                                  { block(e); showOverlay(); triggerViolation(); return; } // Ctrl+P
 
-        var pos = window.getComputedStyle(parent).position;
-        if (pos === 'static') parent.style.position = 'relative';
+            /* Screenshot — Windows/Linux (PrtScr = keyCode 44) */
+            if (code === 44 || (alt && code === 44) || (meta && code === 44) ||
+                (ctrl && code === 44) || (shift && code === 44))   { block(e); triggerScreenshot(); return; }
 
-        var canvas = document.createElement('canvas');
-        canvas.className = 'kpk-wm-canvas';
-        parent.appendChild(canvas);
+            /* Screenshot — Windows Snipping Tool */
+            if (meta && shift && k === 'S')                        { block(e); triggerScreenshot(); return; }
 
-        function drawWatermark() {
-            var w = parent.offsetWidth;
-            var h = parent.offsetHeight;
-            if (!w || !h) return;
+            /* Screenshot — macOS */
+            if (meta && shift && (k==='3'||k==='4'||k==='5'||k==='6'))  { block(e); triggerScreenshot(); return; }
+            if (meta && ctrl  && shift && (k==='3'||k==='4'))            { block(e); triggerScreenshot(); return; }
 
-            canvas.width  = w;
-            canvas.height = h;
-            var ctx = canvas.getContext('2d');
-            ctx.clearRect(0, 0, w, h);
+        }, true);
 
-            ctx.save();
-            ctx.translate(w / 2, h / 2);
-            ctx.rotate(-35 * Math.PI / 180);
+        /* keyup: PrtScr often only fires reliably on keyup */
+        document.addEventListener('keyup', function (e) {
+            var k = e.key ? e.key.toUpperCase() : '';
+            if (e.keyCode === 44)                                          { triggerScreenshot(); }
+            if (e.metaKey && e.shiftKey && (k==='3'||k==='4'||k==='5'))  { triggerScreenshot(); }
+        }, true);
 
-            ctx.font         = 'bold ' + Math.max(9, Math.round(w * 0.018)) + 'px "Plus Jakarta Sans", sans-serif';
-            ctx.fillStyle    = WM_COLOR;
-            ctx.textAlign    = 'center';
-            ctx.textBaseline = 'middle';
+        /* ════════════════════════════════════════════════════
+        3. IMAGE DRAG
+        ════════════════════════════════════════════════════ */
 
-            var lineH  = Math.max(28, Math.round(h * 0.08));
-            var lines  = Math.ceil(h / lineH) + 4;
-            var startY = -lineH * Math.ceil(lines / 2);
-
-            for (var i = 0; i < lines; i++) {
-                ctx.fillText(
-                    WM_TEXT + '   \u00B7   ' + WM_TEXT + '   \u00B7   ' + WM_TEXT,
-                    0,
-                    startY + i * lineH
-                );
+        document.addEventListener('dragstart', function (e) {
+            if (e.target && e.target.tagName === 'IMG') {
+                e.preventDefault();
+                triggerViolation();
             }
-            ctx.restore();
+        }, true);
+
+        /* ════════════════════════════════════════════════════
+        4. PRINT
+        ════════════════════════════════════════════════════ */
+
+        window.addEventListener('beforeprint', function () {
+            showOverlay();
+            triggerViolation();
+        }, true);
+
+        if (window.matchMedia) {
+            var printMQ = window.matchMedia('print');
+            var onPrint = function (m) { if (m.matches) { showOverlay(); triggerViolation(); } };
+            try   { printMQ.addEventListener('change', onPrint); }
+            catch (_) { printMQ.addListener(onPrint); }
         }
 
-        if (imgEl.complete && imgEl.naturalWidth) {
-            drawWatermark();
-        } else {
-            imgEl.addEventListener('load', drawWatermark);
-        }
+        /* ════════════════════════════════════════════════════
+        5. DOWNLOAD LINKS
+        ════════════════════════════════════════════════════ */
 
-        if (window.ResizeObserver) {
-            new ResizeObserver(drawWatermark).observe(parent);
-        }
-    }
+        document.addEventListener('click', function (e) {
+            var el = e.target.closest('a[download]');
+            if (el) {
+                e.preventDefault();
+                e.stopPropagation();
+                triggerViolation();
+            }
+        }, true);
 
-    function watermarkAll() {
-        document.querySelectorAll(
-            '.swiper-slide img, .artwork-slide img, .artwork-card-container img'
-        ).forEach(function (img) {
-            injectCanvasWatermark(img);
+        /* ════════════════════════════════════════════════════
+        6. COPY
+        ════════════════════════════════════════════════════ */
+
+        document.addEventListener('copy', function (e) {
+            if (isTypingTarget(document.activeElement)) return;
+            e.preventDefault();
+            if (e.clipboardData) e.clipboardData.setData('text/plain', '');
+            triggerViolation();
+        }, true);
+
+        /* ════════════════════════════════════════════════════
+        7. DEVTOOLS DETECTION (window size heuristic)
+        ════════════════════════════════════════════════════ */
+
+        var devtoolsOpen = false;
+
+        setInterval(function () {
+            var isOpen = (window.outerWidth  - window.innerWidth  > 160) ||
+                        (window.outerHeight - window.innerHeight > 160);
+
+            if (isOpen && !devtoolsOpen) {
+                devtoolsOpen = true;
+                if (devtoolsBanner) devtoolsBanner.style.display = 'flex';
+                setInactive();
+                document.body.classList.add('kpk-violation');
+                clearTimeout(violationTimer);
+            } else if (!isOpen && devtoolsOpen) {
+                devtoolsOpen = false;
+                if (devtoolsBanner) devtoolsBanner.style.display = 'none';
+                document.body.classList.remove('kpk-violation');
+            }
+        }, 1000);
+
+        /* ════════════════════════════════════════════════════
+        8. WINDOW / TAB FOCUS
+        Window blur fires instantly — key defence against
+        Win+Shift+S (Snipping Tool steals focus immediately).
+        ════════════════════════════════════════════════════ */
+
+        window.addEventListener('blur', function () {
+            setInactive();
+            document.body.classList.add('kpk-screenshot');
         });
-    }
 
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', watermarkAll);
-    } else {
-        watermarkAll();
-    }
+        window.addEventListener('focus', function () {
+            setTimeout(function () {
+                if (!document.body.classList.contains('kpk-violation')) {
+                    document.body.classList.remove('kpk-screenshot');
+                }
+            }, 800);
+        });
 
-    if (window.MutationObserver) {
-        new MutationObserver(function (mutations) {
-            mutations.forEach(function (m) {
-                m.addedNodes.forEach(function (node) {
-                    if (node.nodeType !== 1) return;
-                    var imgs = node.tagName === 'IMG'
-                        ? [node]
-                        : Array.from(node.querySelectorAll('img'));
-                    imgs.forEach(function (img) {
-                        if (img.closest('.swiper-slide, .artwork-slide, .artwork-card-container')) {
-                            injectCanvasWatermark(img);
-                        }
-                    });
-                });
-            });
-        }).observe(document.body, { childList: true, subtree: true });
-    }
+        document.addEventListener('visibilitychange', function () {
+            if (document.visibilityState === 'hidden') {
+                setInactive();
+                document.body.classList.add('kpk-screenshot');
+            } else {
+                setTimeout(function () {
+                    if (!document.body.classList.contains('kpk-violation')) {
+                        document.body.classList.remove('kpk-screenshot');
+                    }
+                }, 800);
+            }
+        });
 
-    /* ════════════════════════════════════════════
-       HELPER: tampilkan overlay sementara
-    ════════════════════════════════════════════ */
-    function showOverlay() {
-        if (!overlay) return;
-        overlay.style.display = 'flex';
-        clearTimeout(overlayTimer);
-        overlayTimer = setTimeout(function () {
-            overlay.style.display = 'none';
-        }, 2500);
-    }
+        /* ════════════════════════════════════════════════════
+        9. FULLSCREEN CHANGE
+        ════════════════════════════════════════════════════ */
 
-})();
+        function onFullscreenChange() {
+            var active = document.fullscreenElement      ||
+                        document.webkitFullscreenElement ||
+                        document.mozFullScreenElement    ||
+                        document.msFullscreenElement;
+            if (!active) triggerViolation();
+        }
+
+        ['fullscreenchange', 'webkitfullscreenchange', 'mozfullscreenchange', 'MSFullscreenChange']
+            .forEach(function (evt) { document.addEventListener(evt, onFullscreenChange); });
+    })();
 </script>
