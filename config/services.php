@@ -39,4 +39,13 @@ return [
         'license_key' => env('MAXMIND_LICENSE_KEY'),
     ],
 
+    'google' => [
+        'client_id'     => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect'      => env('GOOGLE_REDIRECT_URI'),
+    ],
+
+    'giphy' => [
+        'key' => env('GIPHY_API_KEY'),
+    ],
 ];

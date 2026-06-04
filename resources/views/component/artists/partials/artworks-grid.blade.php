@@ -4,7 +4,7 @@
                             $imagesJson = json_encode($artImages);
                         @endphp
                         <a href="javascript:void(0)" 
-                        onclick="openModal({{ $imagesJson }}, '{{ addslashes($art->title) }}', '{{ addslashes($art->category) }}', '{{ $art->width }}', '{{ $art->height }}', '{{ $art->unit }}', '{{ $art->certificate_url }}', '{{ $art->price ?? '' }}')"
+                        onclick="openModal({{ $imagesJson }}, '{{ addslashes($art->title) }}', '{{ addslashes($art->category) }}', '{{ $art->width }}', '{{ $art->height }}', '{{ $art->unit }}', '{{ $art->certificate_url }}', '{{ $art->price ?? '' }}', {{ $art->id }})"
                         data-aos="fade-up" 
                         data-aos-delay="{{ ($index % 5) * 100 }}"
                         data-aos-duration="1000"

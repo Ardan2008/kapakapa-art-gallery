@@ -43,4 +43,9 @@ class ArtWork extends Model
     {
         return $this->belongsTo(Artist::class);
     }
+
+    public function comments() 
+    { 
+        return $this->hasMany(Comment::class, 'artwork_id'); 
+    }
 }

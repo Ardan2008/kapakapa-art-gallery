@@ -8,7 +8,7 @@
                     $dimensions = ($item->width && $item->height) ? $item->width . ' x ' . $item->height . ' ' . $item->unit : 'N/A';
                     $price = $item->price ? '$ ' . number_format($item->price, 2, '.', ',') : null;
                 @endphp
-                <div onclick="openModal('{{ addslashes(json_encode($images)) }}', '{{ addslashes($item->title) }}', '{{ addslashes($author) }}', '{{ $dimensions }}', '{{ $price ?? '' }}')"
+                <div onclick="openModal('{{ addslashes(json_encode($images)) }}', '{{ addslashes($item->title) }}', '{{ addslashes($author) }}', '{{ $dimensions }}', '{{ $price ?? '' }}', {{ $item->id }} )"
                     class="group block cursor-pointer" 
                     data-aos="fade-up">
                     

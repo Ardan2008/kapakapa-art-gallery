@@ -7,6 +7,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <link rel="stylesheet" href="{{ asset('css/comment-system.css') }}">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -339,75 +340,7 @@
                 </div>
             </div>
 
-            <div id="commentOverlay" 
-                class="fixed inset-0 z-[140] bg-black/90 backdrop-blur-2xl flex items-center justify-center p-6 invisible opacity-0 transition-all duration-500 ease-in-out" 
-                onclick="if(event.target === this) toggleCommentModal()">
-
-                <div id="commentContent" 
-                    class="w-full max-w-md flex flex-col bg-zinc-900/80 rounded-3xl border border-white/5 h-[80vh] max-h-[600px] overflow-hidden shadow-2xl transform scale-95 transition-all duration-500 ease-out">
-
-                    <div class="p-6 border-b border-white/10 flex justify-between items-center bg-zinc-900/50">
-                        <div>
-                            <h3 class="text-gray-300 font-serif italic text-2xl tracking-tight">Curator's Notes</h3>
-                            <p class="text-[9px] text-gold uppercase tracking-[0.4em] mt-1">Community Discussion</p>
-                        </div>
-                        <button onclick="toggleCommentModal()" class="group relative p-2 outline-none flex items-center justify-center transition-all duration-300">
-                            <div class="absolute inset-0 rounded-full border border-[#C9A74E]/0 group-hover:border-[#C9A74E]/20 group-hover:scale-110 transition-all duration-500"></div>
-                            <div class="absolute inset-0 rounded-full bg-[#C9A74E]/0 group-hover:bg-[#C9A74E]/5 transition-all duration-500"></div>
-
-                            <svg class="relative z-10 w-6 h-6 text-white/20 group-hover:text-[#C9A74E] transition-all duration-500 group-hover:rotate-90" 
-                                fill="none" 
-                                stroke="currentColor" 
-                                viewBox="0 0 24 24">
-                                <path d="M6 18L18 6M6 6l12 12" 
-                                    stroke-width="1.2" 
-                                    stroke-linecap="round" 
-                                    stroke-linejoin="round"/>
-                            </svg>
-                        </button>
-                    </div>
-
-                    <div class="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar bg-black/20">
-                        <div class="flex gap-3 max-w-[90%] group">
-                            <div class="w-8 h-8 rounded-full bg-zinc-800 border border-white/5 flex-shrink-0 flex items-center justify-center text-[10px] text-zinc-500 font-bold group-hover:border-gold/30 transition-colors">AD</div>
-                            <div class="bg-white/[0.03] border border-white/5 p-4 rounded-2xl rounded-tl-none">
-                                <p class="text-[12px] text-zinc-400 font-light leading-relaxed italic">
-                                    "Pencahayaan yang sangat dramatis. Terlihat seperti perpaduan gaya klasik Caravaggio."
-                                </p>
-                            </div>
-                        </div>
-
-                        <div class="flex gap-3 flex-row-reverse max-w-[90%] ml-auto group">
-                            <div class="w-8 h-8 rounded-full bg-gold/10 border border-gold/30 flex-shrink-0 flex items-center justify-center text-[10px] text-gold font-bold group-hover:bg-gold/20 transition-all">EV</div>
-                            <div class="bg-gold/5 border border-gold/20 p-4 rounded-2xl rounded-tr-none text-right">
-                                <p class="text-[12px] text-gray-300 italic font-light leading-relaxed">
-                                    "I love how the textures pop out when zoomed in."
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="p-6 bg-zinc-900/80 border-t border-white/5">
-                        <div class="relative flex items-center gap-3 bg-white/[0.03] border border-white/10 p-1.5 pl-5 rounded-full focus-within:border-gold/50 transition-all duration-500">
-                            <input type="text" placeholder="Share your perspective..." class="flex-1 bg-transparent py-2 text-xs text-white outline-none italic placeholder:text-zinc-600">
-                            <button class="group relative bg-[#C9A74E] text-black p-2.5 rounded-full overflow-hidden transition-all duration-500 hover:bg-[#B3923E] active:scale-90 shadow-lg shadow-[#C9A74E]/20">
-        
-                                <div class="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/40 to-transparent"></div>
-
-                                <svg class="w-3.5 h-3.5 rotate-45 transition-all duration-500 group-hover:-translate-y-10 group-hover:translate-x-10 opacity-100 group-hover:opacity-0" 
-                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-
-                                <svg class="absolute inset-0 m-auto w-3.5 h-3.5 rotate-45 -translate-x-10 translate-y-10 opacity-0 transition-all duration-500 group-hover:translate-x-0 group-hover:translate-y-0 group-hover:opacity-100" 
-                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            @include('component.partials.comment-overlay')
         </div> 
     </div>
 
@@ -523,11 +456,11 @@
             }, 2000);
         }
 
-        function openModal(imagesJson, title, author, count, price) {
+        function openModal(imagesJson, title, author, count, price, artworkId) {
             const modal   = document.getElementById('artModal');
             const wrapper = document.getElementById('reviewSwiperWrapper');
-
-            // Parse images — bisa berupa JSON array string atau URL tunggal
+ 
+            // Parse images
             let imagesArray = [];
             try {
                 const parsed = JSON.parse(imagesJson);
@@ -535,7 +468,7 @@
             } catch(e) {
                 imagesArray = [imagesJson];
             }
-
+ 
             // Inject slides
             wrapper.innerHTML = '';
             imagesArray.forEach(imgUrl => {
@@ -549,12 +482,12 @@
                 `;
                 wrapper.appendChild(slide);
             });
-
+ 
             document.getElementById('modalTitle').innerText  = title;
             document.getElementById('modalAuthor').innerText = author;
             document.getElementById('modalCount').innerText  = count;
-
-            // Tampilkan harga
+ 
+            // Price
             const priceEl   = document.getElementById('modalPrice');
             const priceWrap = document.getElementById('modalPriceWrap');
             if (price && price.trim() !== '') {
@@ -563,79 +496,127 @@
             } else {
                 priceWrap.classList.add('hidden');
             }
-
+ 
             setTimeout(() => {
                 initReviewSwiper();
                 updateReviewIndicator(1, imagesArray.length);
             }, 100);
-
+ 
+            // ← PENTING: set artwork ID untuk comment system
+            _currentCommentArtworkId = artworkId;
+ 
             modal.classList.remove('hidden');
             modal.classList.add('flex');
             document.body.style.overflow = 'hidden';
         }
-
+ 
         function closeModal() {
             const modal = document.getElementById('artModal');
-            const commentOverlay = document.getElementById('commentOverlay');
-            const modalImg = document.getElementById('modalImage');
-
-            // Sembunyikan Modal Utama
+ 
             modal.classList.add('hidden');
             modal.classList.remove('flex');
-            
-            // Reset Zoom Gambar agar saat buka gambar lain tidak miring
-            if (modalImg) modalImg.style.transform = "scale(1)";
-
-            // Pastikan Overlay Komentar juga ikut tertutup
-            if (commentOverlay) {
-                commentOverlay.classList.add('hidden');
-                commentOverlay.classList.remove('flex');
+ 
+            // Tutup comment overlay juga kalau terbuka
+            const overlay = document.getElementById('commentOverlay');
+            if (overlay && !overlay.classList.contains('invisible')) {
+                overlay.classList.add('invisible', 'opacity-0');
+                overlay.classList.remove('opacity-100');
+                const content = document.getElementById('commentContent');
+                content && content.classList.replace('scale-100', 'scale-95');
             }
-            
-            document.body.style.overflow = 'auto'; // Unlock scroll body
+ 
+            document.body.style.overflow = 'auto';
         }
 
         // --- LOGIKA KOMENTAR ---
         function toggleCommentModal() {
             const overlay = document.getElementById('commentOverlay');
             const content = document.getElementById('commentContent');
-
-            if (overlay.classList.contains('invisible')) {
-                // Tampilkan Modal
-                overlay.classList.remove('invisible');
+            if (!overlay || !content) return;
+ 
+            const isOpen = overlay.dataset.open === 'true';
+ 
+            if (!isOpen) {
+                // ── BUKA ──
+                if (!_currentCommentArtworkId) return;
+ 
+                // Reset state
+                _commentState.comments  = [];
+                _commentState.lastCount = 0;
+                _commentState.hasLoaded = false;
+                _commentState.isSending = false;
+ 
+                // Reset list UI
+                const list = document.getElementById('commentList');
+                if (list) [...list.querySelectorAll('.comment-node')].forEach(n => n.remove());
+                const loading = document.getElementById('commentLoading');
+                const empty   = document.getElementById('commentEmptyState');
+                loading && loading.classList.remove('hidden');
+                empty   && empty.classList.add('hidden');
+ 
+                // Reset badge & input
+                const badge = document.getElementById('commentCountBadge');
+                if (badge) badge.textContent = '…';
+                const input   = document.getElementById('commentInput');
+                const counter = document.getElementById('charCount');
+                if (input)   { input.value = ''; input._bound = false; }
+                if (counter) { counter.textContent = '0 / 280'; counter.style.color = ''; }
+ 
+                // Tampilkan
+                overlay.classList.remove('invisible', 'opacity-0');
                 overlay.classList.add('opacity-100');
-                
-                // Efek Scale Up konten
                 content.classList.remove('scale-95');
                 content.classList.add('scale-100');
+                overlay.dataset.open = 'true';
+ 
+                // Load komentar + mulai polling
+                _fetchComments(_currentCommentArtworkId).then(items => {
+                    if (!items) { _hideLoading(); return; }
+                    _renderAll(document.getElementById('commentList'), items);
+                    _commentState.comments  = items;
+                    _commentState.lastCount = items.length;
+                    _commentState.hasLoaded = true;
+                    _setupInput();
+                });
+                _startPoll(_currentCommentArtworkId);
+                _startTimeRefresh();
+ 
             } else {
-                // Sembunyikan Modal
+                // ── TUTUP ──
+                _stopPoll();
                 content.classList.remove('scale-100');
                 content.classList.add('scale-95');
-                
                 overlay.classList.remove('opacity-100');
-                
-                // Tunggu transisi selesai sebelum memberikan invisible
+                overlay.classList.add('opacity-0');
                 setTimeout(() => {
                     overlay.classList.add('invisible');
-                }, 500); // 500ms sesuai duration-500 di HTML
+                    overlay.dataset.open = 'false';
+                }, 500);
             }
         }
 
         // --- LOGIKA PENUTUPAN MODAL UTAMA JUGA MENUTUP OVERLAY KOMENTAR ---
         function closeModal() {
-            const modal = document.getElementById('artModal');
-            const commentOverlay = document.getElementById('commentOverlay');
-
+            const modal   = document.getElementById('artModal');
+            const overlay = document.getElementById('commentOverlay');
+            const content = document.getElementById('commentContent');
+ 
+            // Tutup modal utama
             modal.classList.add('hidden');
             modal.classList.remove('flex');
-            
-            // Pastikan overlay komentar ikut tertutup saat modal utama ditutup
-            if (commentOverlay) {
-                commentOverlay.classList.add('hidden');
-                commentOverlay.classList.remove('flex');
+ 
+            // Tutup & reset comment overlay sepenuhnya
+            _stopPoll();
+            if (overlay) {
+                overlay.classList.add('invisible', 'opacity-0');
+                overlay.classList.remove('opacity-100');
+                overlay.dataset.open = 'false';          // ← KUNCI: reset flag
             }
-            
+            if (content) {
+                content.classList.remove('scale-100');
+                content.classList.add('scale-95');
+            }
+ 
             document.body.style.overflow = 'auto';
         }
 
@@ -754,6 +735,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
-    @include('component.layout.content-protection')
+    {{-- @include('component.layout.content-protection') --}}
+    <script src="{{ asset('js/comment-system.js') }}"></script>
 </body>
 </html>

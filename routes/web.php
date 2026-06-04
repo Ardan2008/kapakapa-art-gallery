@@ -5,6 +5,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ArtWorkController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\CommentController;
+use App\Http\Controllers\GoogleAuthController;
 
 // --- PUBLIC ROUTES ---
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -21,12 +23,24 @@ Route::get('/review_gallery', fn() => view('component.gallery.review_gallery'))-
 Route::get('/artists', [ArtWorkController::class, 'allArtists'])->name('artists');
 Route::get('/profile_art/{id?}', [ArtWorkController::class, 'profile'])->name('profile_art');
 
-// Login
+// Comments (read = public, write = Google auth checked in controller)
+Route::get('/artworks/{artwork}/comments',  [CommentController::class, 'index']);
+Route::post('/artworks/{artwork}/comments', [CommentController::class, 'store']);
+Route::put('/artworks/{artwork}/comments/{comment}',    [CommentController::class, 'update']);
+Route::delete('/artworks/{artwork}/comments/{comment}', [CommentController::class, 'destroy']);
+
+// --- GOOGLE OAUTH ---
+Route::get('/auth/google',          [GoogleAuthController::class, 'redirect'])->name('auth.google');
+Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback'])->name('auth.google.callback');
+Route::post('/auth/google/logout',  [GoogleAuthController::class, 'logout'])->name('auth.google.logout');
+Route::get('/auth/google/me',       [GoogleAuthController::class, 'me'])->name('auth.google.me');
+
+// Login (admin)
 $adminPath = env('ADMIN_URL', 'login');
 Route::get('/' . $adminPath, fn() => view('admin.form_login'))->name('login');
 Route::post('/api/login', [AuthController::class, 'login']);
 
-// --- PROTECTED ROUTES ---
+// --- PROTECTED ROUTES (admin) ---
 Route::middleware(['auth'])->group(function () {
 
     // Dashboard & Sidebar
@@ -58,11 +72,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/api/sold-artworks/{category}', [DashboardController::class, 'getSoldArtworks']);
 
     // API — Dashboard Stats
-    Route::get('/api/dashboard/stats',            [DashboardController::class, 'getStats']);
-    Route::get('/api/dashboard/visitors',         [DashboardController::class, 'getVisitorStats']);
-    Route::get('/api/dashboard/visitors/years',   [DashboardController::class, 'getAvailableYears']);
-    Route::get('/api/dashboard/visitors/online',  [DashboardController::class, 'getOnlineVisitors']);
-    Route::get('/api/dashboard/customers',        [DashboardController::class, 'getCustomerCountries']);
-    
-    Route::get('/dashboard/customers',        [DashboardController::class, 'getCustomerCountries']);
+    Route::get('/api/dashboard/stats',           [DashboardController::class, 'getStats']);
+    Route::get('/api/dashboard/visitors',        [DashboardController::class, 'getVisitorStats']);
+    Route::get('/api/dashboard/visitors/years',  [DashboardController::class, 'getAvailableYears']);
+    Route::get('/api/dashboard/visitors/online', [DashboardController::class, 'getOnlineVisitors']);
+    Route::get('/api/dashboard/customers',       [DashboardController::class, 'getCustomerCountries']);
+
+    Route::get('/dashboard/customers', [DashboardController::class, 'getCustomerCountries']);
 });
