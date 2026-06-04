@@ -118,6 +118,22 @@ class CommentController extends Controller
         ]]);
     }
 
+    public function show(ArtWork $artwork)
+    {
+        return response()->json([
+            'id'              => $artwork->id,
+            'title'           => $artwork->title,
+            'artist'          => $artwork->artist,
+            'images'          => $artwork->images,
+            'price'           => $artwork->price,
+            'width'           => $artwork->width,
+            'height'          => $artwork->height,
+            'unit'            => $artwork->unit,
+            'certificate_url' => $artwork->certificate_url,
+            'category'        => $artwork->category,
+        ]);
+    }
+
     public function destroy(ArtWork $artwork, Comment $comment)
     {
         $googleUser = Session::get('google_user');

@@ -70,19 +70,26 @@
         gap: 12px !important;
         margin-top: 1.75rem !important;
     }
+
+    /* Pastikan SweetAlert2 muncul di atas commentOverlay (z-[200]) */
+    .swal-above-overlay {
+        z-index: 9999 !important;
+    }
+
+    /* Backdrop Swal tidak menutup overlay comment */
+    .swal2-backdrop-show {
+        z-index: 9998 !important;
+    }
 </style>
 
 @php $googleUser = session('google_user'); @endphp
 
     <div id="commentOverlay"
-        class="fixed inset-0 z-[200] invisible opacity-0 transition-all duration-500 ease-in-out flex items-center justify-center"
-        data-open="false">
+    class="fixed inset-0 z-[200] invisible opacity-0 transition-all duration-500 ease-in-out flex items-center justify-center"
+    data-open="false">
 
-    {{-- Backdrop (di dalam modal saja) --}}
-    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"
-        onclick="toggleCommentModal()"></div>
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
 
-    {{-- Panel slide dari kanan, di dalam modal --}}
     <div id="commentContent"
         class="relative w-full max-w-[420px] max-h-[85vh] bg-zinc-950 border border-white/5
                 rounded-lg flex flex-col shadow-2xl scale-95 transition-transform duration-500 ease-in-out"
@@ -130,7 +137,6 @@
         <div class="flex-shrink-0 border-t border-white/5">
 
             @if ($googleUser)
-                {{-- Profile bar --}}
                 <div class="flex items-center justify-between px-5 py-3 bg-white/[0.02] border-b border-white/5">
                     <div class="flex items-center gap-3">
                         @if ($googleUser['avatar'])
@@ -149,10 +155,16 @@
                     </div>
                     <form method="POST" action="{{ route('auth.google.logout') }}" class="m-0">
                         @csrf
-                        <input type="hidden" name="redirect" value="{{ url()->current() }}">
+                        <input type="hidden" name="redirect" id="logoutRedirect" value="{{ url()->current() }}">
+                        <input type="hidden" name="reopen_artwork_id" id="logoutArtworkId" value="">
                         <button type="submit"
                                 class="group flex items-center gap-1.5 text-[9px] uppercase tracking-[0.2em]
-                                    text-zinc-600 hover:text-rose-400 transition-colors duration-300 px-2 py-1.5">
+                                    text-zinc-600 hover:text-rose-400 transition-colors duration-300 px-2 py-1.5"
+                                onclick="
+                                    const id = _currentCommentArtworkId;
+                                    document.getElementById('logoutArtworkId').value = id;
+                                    document.getElementById('logoutRedirect').value = window.location.pathname + window.location.search + (id ? '#artwork=' + id : '');
+                                ">
                             <svg class="w-3 h-3 group-hover:rotate-12 transition-transform duration-300"
                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
@@ -163,30 +175,36 @@
                     </form>
                 </div>
 
-                {{-- Input area --}}
                 <div class="px-4 py-3">
-                    {{-- Sticker/GIF Picker Panel --}}
                     <div id="stickerPanel" class="hidden mb-2 bg-zinc-900 border border-white/8 rounded-2xl overflow-hidden">
-                        {{-- Tabs --}}
                         <div class="flex border-b border-white/5">
                             <button onclick="_switchTab('sticker')" id="tabSticker"
-                                    class="flex-1 py-2.5 text-[10px] uppercase tracking-[0.2em] text-gold border-b-2 border-gold transition-all">
-                                🎭 Stickers
+                                    class="flex-1 py-2.5 flex items-center justify-center gap-1.5 text-[10px] uppercase tracking-[0.2em] text-gold border-b-2 border-gold transition-all">
+                                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <path d="M8 9.5 C8 8.7 8.7 8 9.5 8 C10.3 8 11 8.7 11 9.5"/>
+                                    <path d="M13 9.5 C13 8.7 13.7 8 14.5 8 C15.3 8 16 8.7 16 9.5"/>
+                                    <path d="M8.5 15 Q12 18 15.5 15"/>
+                                    <path d="M12 2 C12 2 15 5 19 5" stroke-width="1.2" opacity="0.4"/>
+                                </svg>
+                                Stickers
                             </button>
                             <button onclick="_switchTab('gif')" id="tabGif"
-                                    class="flex-1 py-2.5 text-[10px] uppercase tracking-[0.2em] text-zinc-500 border-b-2 border-transparent hover:text-zinc-300 transition-all">
+                                    class="flex-1 py-2.5 flex items-center justify-center gap-1.5 text-[10px] uppercase tracking-[0.2em] text-zinc-500 border-b-2 border-transparent hover:text-zinc-300 transition-all">
+                                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="2" y="6" width="20" height="12" rx="3"/>
+                                    <path d="M9 12 H6 M6 9.5 V14.5"/>
+                                    <path d="M12 9.5 V14.5"/>
+                                    <path d="M22 9 L17 12 L22 15"/>
+                                </svg>
                                 GIF
                             </button>
                         </div>
-
-                        {{-- Sticker Panel --}}
                         <div id="panelSticker" class="p-3">
                             <input id="stickerSearch" type="text" placeholder="Search stickers..."
                                 class="w-full bg-white/[0.04] border border-white/8 rounded-lg px-3 py-2 text-[11px] text-zinc-300 placeholder:text-zinc-600 focus:outline-none focus:border-gold/30 mb-3 transition-all">
                             <div id="stickerGrid" class="grid grid-cols-4 gap-1 max-h-[160px] overflow-y-auto custom-scrollbar"></div>
                         </div>
-
-                        {{-- GIF Panel --}}
                         <div id="panelGif" class="hidden p-3">
                             <input id="gifSearch" type="text" placeholder="Search GIFs..."
                                 class="w-full bg-white/[0.04] border border-white/8 rounded-lg px-3 py-2 text-[11px] text-zinc-300 placeholder:text-zinc-600 focus:outline-none focus:border-gold/30 mb-3 transition-all">
@@ -194,9 +212,7 @@
                         </div>
                     </div>
 
-                    {{-- Input bar --}}
                     <div class="flex items-center gap-2 bg-white/[0.04] border border-white/8 rounded-full px-3 py-2 backdrop-blur-sm focus-within:border-gold/30 transition-all duration-300">
-
                         @if ($googleUser['avatar'])
                             <img src="{{ $googleUser['avatar'] }}"
                                 class="w-7 h-7 rounded-full border border-gold/20 flex-shrink-0 object-cover" alt="">
@@ -207,20 +223,14 @@
                             </div>
                         @endif
 
-                        {{-- Emoji trigger --}}
                         <button onclick="_toggleStickerPanel()"
                                 class="flex-shrink-0 text-zinc-500 hover:text-gold transition-colors">
                             <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
                                 stroke-linecap="round" stroke-linejoin="round">
-                                <!-- Body: rounded square -->
                                 <path d="M7 2h10a5 5 0 015 5v10a5 5 0 01-5 5H7a5 5 0 01-5-5V7a5 5 0 015-5z"/>
-                                <!-- Wink / tab on top -->
                                 <path d="M10.5 2c0 0 1.5-1.5 3 0" stroke-width="1.2"/>
-                                <!-- Left eye (wink line) -->
                                 <path d="M8.5 10.5 L10.5 10.5" stroke-width="1.8"/>
-                                <!-- Right eye (dot) -->
                                 <circle cx="15" cy="10.5" r="1" fill="currentColor" stroke="none"/>
-                                <!-- Smile -->
                                 <path d="M9 14.5 Q12 17 15 14.5"/>
                             </svg>
                         </button>
@@ -246,7 +256,6 @@
                 </div>
 
             @else
-                {{-- Google Sign-in CTA --}}
                 <div class="px-5 py-6 flex flex-col items-center text-center gap-4">
                     <div class="w-10 h-10 rounded-full bg-white/[0.03] border border-white/8
                                 flex items-center justify-center mb-1">
@@ -260,10 +269,15 @@
                         <p class="text-zinc-600 text-[10px] font-light">Join the conversation with your Google account.</p>
                     </div>
                     <a id="googleSignInBtn"
-                       href="{{ route('auth.google') }}?redirect={{ urlencode(url()->current()) }}"
-                       class="group flex items-center gap-3 w-full justify-center
-                              bg-white/[0.04] border border-white/10 rounded-xl px-5 py-3
-                              hover:border-gold/30 hover:bg-white/[0.07] transition-all duration-500">
+                    href="{{ route('auth.google') }}?redirect={{ urlencode(url()->current()) }}"
+                    onclick="
+                        const base = '{{ route('auth.google') }}';
+                        const redirect = encodeURIComponent(window.location.href + '#artwork=' + (_currentCommentArtworkId || ''));
+                        this.href = base + '?redirect=' + redirect;
+                    "
+                    class="group flex items-center gap-3 w-full justify-center
+                            bg-white/[0.04] border border-white/10 rounded-xl px-5 py-3
+                            hover:border-gold/30 hover:bg-white/[0.07] transition-all duration-500">
                         <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24">
                             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
                             <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>

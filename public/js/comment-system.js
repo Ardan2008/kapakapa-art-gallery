@@ -65,7 +65,6 @@ function _buildComment(c, isNew = false) {
     div.onmouseenter = () => div.style.background = 'rgba(255,255,255,0.02)';
     div.onmouseleave = () => div.style.background = '';
 
-    // Avatar
     let avatarHtml;
     if (c.avatar) {
         avatarHtml = `<img src="${_escHtml(c.avatar)}" alt="${_escHtml(c.name || '')}"
@@ -81,7 +80,6 @@ function _buildComment(c, isNew = false) {
                       </div>`;
     }
 
-    // Body content — sticker/gif tampil sebagai gambar, teks biasa sebagai teks
     let bodyContent;
     const type = c.type || 'text';
     if ((type === 'gif' || type === 'sticker') && c.sticker_url) {
@@ -93,7 +91,6 @@ function _buildComment(c, isNew = false) {
         bodyContent = _escHtml(c.body || '');
     }
 
-    // Action menu — hanya untuk komentar sendiri dan bukan optimistic
     const actionMenu = (isOwn && !c._optimistic) ? `
         <div class="comment-actions flex gap-1 mt-1 ${isOwn ? 'justify-end' : ''}">
             ${type === 'text' ? `
@@ -207,7 +204,6 @@ function _showAuthPrompt(loginUrl) {
             btn.href = url.toString();
         } catch(e) {}
     }
-    // Shake the sign-in section
     const section = btn?.closest('div');
     if (section) {
         section.style.transform = 'translateX(-4px)';
@@ -302,7 +298,38 @@ function _setupInput() {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   OPTIMISTIC HELPER — shared by text & sticker submit
+   RESET UI HELPER — dipanggil setiap kali modal dibuka
+   agar comment dari artwork sebelumnya tidak bocor
+═══════════════════════════════════════════════════════════ */
+function _resetCommentUI() {
+    // Reset state
+    _commentState.comments  = [];
+    _commentState.lastCount = 0;
+    _commentState.hasLoaded = false;
+    _commentState.isSending = false;
+
+    // Bersihkan semua comment node yang lama
+    const list = _el('commentList');
+    if (list) [...list.querySelectorAll('.comment-node')].forEach(n => n.remove());
+
+    // Tampilkan loading, sembunyikan empty state
+    _el('commentLoading')    && _el('commentLoading').classList.remove('hidden');
+    _el('commentEmptyState') && _el('commentEmptyState').classList.add('hidden');
+
+    // Reset badge
+    const badge = _el('commentCountBadge');
+    if (badge) badge.textContent = '…';
+
+    // Reset input
+    const input = _el('commentInput');
+    if (input) { input.value = ''; input._bound = false; input.style.height = 'auto'; }
+
+    // Tutup sticker panel jika terbuka
+    _el('stickerPanel') && _el('stickerPanel').classList.add('hidden');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   OPTIMISTIC HELPER
 ═══════════════════════════════════════════════════════════ */
 function _optimisticInsert(previewData) {
     const list = _el('commentList');
@@ -351,6 +378,7 @@ function _optimisticFail(tmpId) {
 
 /* ═══════════════════════════════════════════════════════════
    PUBLIC — toggleCommentModal
+   SATU FUNGSI TUNGGAL — tidak di-override di view manapun
 ═══════════════════════════════════════════════════════════ */
 function toggleCommentModal() {
     const overlay = _el('commentOverlay');
@@ -362,32 +390,16 @@ function toggleCommentModal() {
     if (!isOpen) {
         if (!_currentCommentArtworkId) return;
 
-        // Reset state
-        _commentState.comments  = [];
-        _commentState.lastCount = 0;
-        _commentState.hasLoaded = false;
-        _commentState.isSending = false;
+        // FIX UTAMA: reset UI terlebih dulu agar comment artwork lama tidak bocor
+        _resetCommentUI();
 
-        // Reset list UI
-        const list = _el('commentList');
-        if (list) [...list.querySelectorAll('.comment-node')].forEach(n => n.remove());
-        _el('commentLoading')    && _el('commentLoading').classList.remove('hidden');
-        _el('commentEmptyState') && _el('commentEmptyState').classList.add('hidden');
-
-        // Reset badge & input
-        const badge = _el('commentCountBadge');
-        if (badge) badge.textContent = '…';
-        const input = _el('commentInput');
-        if (input) { input.value = ''; input._bound = false; input.style.height = 'auto'; }
-
-        // Open overlay
         overlay.classList.remove('invisible', 'opacity-0');
         overlay.classList.add('opacity-100');
         content.classList.remove('scale-95');
         content.classList.add('scale-100');
         overlay.dataset.open = 'true';
 
-        // Fetch & poll
+        // Fetch comment sesuai _currentCommentArtworkId yang sudah di-set openModal()
         _fetchComments(_currentCommentArtworkId).then(items => {
             if (!items) { _hideLoading(); return; }
             _renderAll(_el('commentList'), items);
@@ -400,7 +412,6 @@ function toggleCommentModal() {
         _startTimeRefresh();
 
     } else {
-        // Close
         _stopPoll();
         content.classList.remove('scale-100');
         content.classList.add('scale-95');
@@ -410,6 +421,25 @@ function toggleCommentModal() {
             overlay.classList.add('invisible');
             overlay.dataset.open = 'false';
         }, 500);
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PUBLIC — closeCommentOverlay
+   Dipanggil dari closeModal() di setiap view
+═══════════════════════════════════════════════════════════ */
+function closeCommentOverlay() {
+    _stopPoll();
+    const overlay = _el('commentOverlay');
+    const content = _el('commentContent');
+    if (overlay) {
+        overlay.classList.add('invisible', 'opacity-0');
+        overlay.classList.remove('opacity-100');
+        overlay.dataset.open = 'false';
+    }
+    if (content) {
+        content.classList.remove('scale-100');
+        content.classList.add('scale-95');
     }
 }
 
@@ -464,15 +494,12 @@ async function submitComment() {
 
 /* ═══════════════════════════════════════════════════════════
    PUBLIC — submitSticker / GIF
-   Dipanggil langsung saat user klik stiker/gif di panel
 ═══════════════════════════════════════════════════════════ */
 async function _submitSticker(stickerUrl, type) {
     if (!_currentCommentArtworkId) return;
 
-    // Tutup panel picker dulu
     _el('stickerPanel') && _el('stickerPanel').classList.add('hidden');
 
-    // Optimistic insert — tampilkan gambar langsung
     const tmpId = _optimisticInsert({ sticker_url: stickerUrl, type });
 
     const icon    = _el('sendIcon');
@@ -508,6 +535,10 @@ async function _submitSticker(stickerUrl, type) {
    EDIT / DELETE
 ═══════════════════════════════════════════════════════════ */
 async function _deleteComment(id, artworkId) {
+    // Simpan referensi overlay sebelum Swal membuka
+    const overlay = _el('commentOverlay');
+    const content = _el('commentContent');
+
     const result = await Swal.fire({
         title: '<span style="font-size:15px; letter-spacing:0.15em; text-transform:uppercase; font-weight:500; color:#e4e4e7">Delete this note?</span>',
         html:  '<span style="font-size:11px; color:#71717a; letter-spacing:0.05em">This action cannot be undone.</span>',
@@ -519,35 +550,68 @@ async function _deleteComment(id, artworkId) {
         cancelButtonText:  'Cancel',
         buttonsStyling: false,
         reverseButtons: true,
+        // FIX: z-index lebih tinggi dari commentOverlay (z-[200])
         customClass: {
             popup:         'swal-gold-popup',
             confirmButton: 'swal-gold-confirm',
             cancelButton:  'swal-gold-cancel',
             icon:          'swal-gold-icon',
             actions:       'swal-gold-actions',
+            container:     'swal-above-overlay',
+        },
+        // FIX: pastikan overlay comment tetap visible saat Swal terbuka
+        didOpen: () => {
+            if (overlay) {
+                overlay.classList.remove('invisible', 'opacity-0');
+                overlay.classList.add('opacity-100');
+                overlay.dataset.open = 'true';
+            }
+            if (content) {
+                content.classList.remove('scale-95');
+                content.classList.add('scale-100');
+            }
+        },
+        // FIX: kembalikan overlay setelah Swal close (cancel)
+        didClose: () => {
+            if (overlay) {
+                overlay.classList.remove('invisible', 'opacity-0');
+                overlay.classList.add('opacity-100');
+                overlay.dataset.open = 'true';
+            }
+            if (content) {
+                content.classList.remove('scale-95');
+                content.classList.add('scale-100');
+            }
         },
     });
 
     if (!result.isConfirmed) return;
 
-    // ── Loading screen ──
+    // Loading screen
     Swal.fire({
         background: '#09090b',
         color: '#e4e4e7',
         allowOutsideClick: false,
         allowEscapeKey: false,
         showConfirmButton: false,
-        customClass: { popup: 'swal-gold-popup' },
+        customClass: {
+            popup:     'swal-gold-popup',
+            container: 'swal-above-overlay',
+        },
+        didOpen: () => {
+            if (overlay) {
+                overlay.classList.remove('invisible', 'opacity-0');
+                overlay.classList.add('opacity-100');
+                overlay.dataset.open = 'true';
+            }
+        },
         html: `
             <div style="display:flex; flex-direction:column; align-items:center; gap:20px; padding:12px 0">
                 <div style="position:relative; width:48px; height:48px;">
                     <svg style="animation:spin 1s linear infinite; width:48px; height:48px;"
                          viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <circle cx="24" cy="24" r="20"
-                                stroke="rgba(201,167,78,0.15)" stroke-width="3"/>
-                        <path d="M24 4 A20 20 0 0 1 44 24"
-                              stroke="#C9A74E" stroke-width="3"
-                              stroke-linecap="round"/>
+                        <circle cx="24" cy="24" r="20" stroke="rgba(201,167,78,0.15)" stroke-width="3"/>
+                        <path d="M24 4 A20 20 0 0 1 44 24" stroke="#C9A74E" stroke-width="3" stroke-linecap="round"/>
                     </svg>
                     <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center;">
                         <div style="width:6px; height:6px; border-radius:999px; background:#C9A74E;
@@ -560,8 +624,7 @@ async function _deleteComment(id, artworkId) {
             </div>
             <style>
                 @keyframes spin  { to { transform: rotate(360deg); } }
-                @keyframes pulse { 0%,100% { opacity:.3; transform:scale(.8); }
-                                   50%      { opacity:1;  transform:scale(1.2); } }
+                @keyframes pulse { 0%,100%{ opacity:.3; transform:scale(.8); } 50%{ opacity:1; transform:scale(1.2); } }
             </style>
         `,
     });
@@ -597,6 +660,19 @@ async function _deleteComment(id, artworkId) {
                     popup:            'swal-gold-popup',
                     icon:             'swal-gold-success-icon',
                     timerProgressBar: 'swal-gold-progress',
+                    container:        'swal-above-overlay',
+                },
+                // FIX: setelah success, pastikan overlay tetap terbuka
+                didClose: () => {
+                    if (overlay) {
+                        overlay.classList.remove('invisible', 'opacity-0');
+                        overlay.classList.add('opacity-100');
+                        overlay.dataset.open = 'true';
+                    }
+                    if (content) {
+                        content.classList.remove('scale-95');
+                        content.classList.add('scale-100');
+                    }
                 },
             });
         }
@@ -615,6 +691,18 @@ async function _deleteComment(id, artworkId) {
                 popup:         'swal-gold-popup',
                 confirmButton: 'swal-gold-confirm',
                 actions:       'swal-gold-actions',
+                container:     'swal-above-overlay',
+            },
+            didClose: () => {
+                if (overlay) {
+                    overlay.classList.remove('invisible', 'opacity-0');
+                    overlay.classList.add('opacity-100');
+                    overlay.dataset.open = 'true';
+                }
+                if (content) {
+                    content.classList.remove('scale-95');
+                    content.classList.add('scale-100');
+                }
             },
         });
     }
@@ -623,7 +711,7 @@ async function _deleteComment(id, artworkId) {
 function _editComment(id) {
     const node = document.querySelector(`.comment-node[data-cid="${id}"]`);
     if (!node) return;
-    const bodyWrap   = node.querySelector('.comment-body-wrap');
+    const bodyWrap    = node.querySelector('.comment-body-wrap');
     const currentText = bodyWrap.textContent.trim();
 
     bodyWrap.innerHTML = `
@@ -759,22 +847,18 @@ async function _loadStickers(query) {
         const res  = await fetch(url);
         const data = await res.json();
         grid.innerHTML = '';
-
         if (!data.data || data.data.length === 0) {
             grid.innerHTML = `<p class="col-span-4 text-center text-zinc-600 text-[10px] py-4">No stickers found</p>`;
             return;
         }
-
         data.data.forEach(sticker => {
             const previewUrl = sticker.images?.fixed_width_small?.url || sticker.images?.original?.url;
             const fullUrl    = sticker.images?.original?.url;
             if (!previewUrl || !fullUrl) return;
-
             const img = document.createElement('img');
-            img.src   = previewUrl;
+            img.src       = previewUrl;
             img.className = 'w-full h-16 object-contain rounded-lg cursor-pointer hover:bg-white/5 hover:scale-110 transition-all duration-200 p-1';
             img.loading   = 'lazy';
-            // ← langsung submit saat diklik
             img.addEventListener('click', () => _submitSticker(fullUrl, 'sticker'));
             grid.appendChild(img);
         });
@@ -797,22 +881,18 @@ async function _loadGifs(query) {
         const res  = await fetch(url);
         const data = await res.json();
         grid.innerHTML = '';
-
         if (!data.data || data.data.length === 0) {
             grid.innerHTML = `<p class="col-span-3 text-center text-zinc-600 text-[10px] py-4">No GIFs found</p>`;
             return;
         }
-
         data.data.forEach(gif => {
             const previewUrl = gif.images?.fixed_height_small?.url || gif.images?.original?.url;
             const fullUrl    = gif.images?.original?.url;
             if (!previewUrl || !fullUrl) return;
-
             const img = document.createElement('img');
-            img.src   = previewUrl;
+            img.src       = previewUrl;
             img.className = 'w-full h-20 object-cover rounded-lg cursor-pointer hover:opacity-80 hover:scale-105 transition-all duration-200';
             img.loading   = 'lazy';
-            // ← langsung submit saat diklik
             img.addEventListener('click', () => _submitSticker(fullUrl, 'gif'));
             grid.appendChild(img);
         });
@@ -820,3 +900,108 @@ async function _loadGifs(query) {
         grid.innerHTML = `<p class="col-span-3 text-center text-zinc-600 text-[10px] py-4">Failed to load GIFs</p>`;
     }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   AUTO-REOPEN MODAL SETELAH LOGIN / LOGOUT
+   Baca hash #artwork=ID dari URL, buka modal + comment otomatis
+═══════════════════════════════════════════════════════════ */
+(function _autoReopenAfterAuth() {
+    const hash  = window.location.hash;
+    const match = hash.match(/#artwork=(\d+)/);
+    if (!match) return;
+
+    const artworkId = parseInt(match[1]);
+    if (!artworkId) return;
+
+    // Bersihkan hash dari URL tanpa reload
+    history.replaceState(null, '', window.location.pathname + window.location.search);
+
+    const _tryOpen = () => {
+        if (typeof openModal !== 'function') {
+            setTimeout(_tryOpen, 100);
+            return;
+        }
+
+        // Fetch data artwork lengkap dulu sebelum buka modal
+        fetch(`/artworks/${artworkId}`, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest', Accept: 'application/json' }
+        })
+        .then(r => r.json())
+        .then(art => {
+            // Panggil openModal sesuai signature masing-masing view
+            // Deteksi view dari fungsi openModal yang tersedia
+            try {
+                // profile_art.blade.php — openModal(images, title, author, width, height, unit, certificate, price, artworkId)
+                // review_gallery.blade.php — openModal(imagesJson, title, author, count, price, artworkId)
+                // Cek dari parameter openModal yang ada
+                const fnStr = openModal.toString();
+                const isProfileView = fnStr.includes('certificate') || fnStr.includes('width');
+
+                if (isProfileView) {
+                    openModal(
+                        art.images || [],
+                        art.title  || '',
+                        art.artist || '',
+                        art.width  || '',
+                        art.height || '',
+                        art.unit   || 'cm',
+                        art.certificate_url || '',
+                        art.price  || '',
+                        art.id
+                    );
+                } else {
+                    const dimensions = (art.width && art.height)
+                        ? art.width + ' x ' + art.height + ' ' + (art.unit || 'cm')
+                        : '';
+                    openModal(
+                        JSON.stringify(art.images || []),
+                        art.title  || '',
+                        art.artist || '',
+                        dimensions,
+                        art.price  || '',
+                        art.id
+                    );
+                }
+            } catch(e) {
+                console.error('[AutoReopen] openModal failed:', e);
+            }
+
+            // Buka comment overlay setelah modal terbuka
+            setTimeout(() => {
+                _currentCommentArtworkId = artworkId;
+
+                const overlay = document.getElementById('commentOverlay');
+                const content = document.getElementById('commentContent');
+                if (!overlay || !content) return;
+
+                _resetCommentUI();
+
+                overlay.classList.remove('invisible', 'opacity-0');
+                overlay.classList.add('opacity-100');
+                content.classList.remove('scale-95');
+                content.classList.add('scale-100');
+                overlay.dataset.open = 'true';
+
+                _fetchComments(artworkId).then(items => {
+                    if (!items) { _hideLoading(); return; }
+                    _renderAll(document.getElementById('commentList'), items);
+                    _commentState.comments  = items;
+                    _commentState.lastCount = items.length;
+                    _commentState.hasLoaded = true;
+                    _setupInput();
+                });
+                _startPoll(artworkId);
+                _startTimeRefresh();
+            }, 400);
+        })
+        .catch(e => {
+            console.error('[AutoReopen] fetch artwork failed:', e);
+        });
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', _tryOpen);
+    } else {
+        setTimeout(_tryOpen, 200);
+    }
+})();

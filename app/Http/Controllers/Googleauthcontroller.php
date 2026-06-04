@@ -15,7 +15,7 @@ class GoogleAuthController extends Controller
      */
     public function redirect(Request $request)
     {
-        // Store the intended URL so we can return after login
+        // FIX: simpan full URL termasuk fragment #artwork=ID dari query param
         $intended = $request->query('redirect', url()->previous());
         Session::put('google_redirect_after', $intended);
 
@@ -102,7 +102,14 @@ class GoogleAuthController extends Controller
     public function logout(Request $request)
     {
         Session::forget('google_user');
-        $redirectTo = $request->input('redirect', url()->previous());
+
+        $redirectTo  = $request->input('redirect', url()->previous());
+        $artworkId   = $request->input('reopen_artwork_id');
+
+        if ($artworkId) {
+            $redirectTo = rtrim($redirectTo, '/') . '#artwork=' . $artworkId;
+        }
+
         return redirect($redirectTo);
     }
 

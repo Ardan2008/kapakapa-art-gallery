@@ -28,6 +28,7 @@ Route::get('/artworks/{artwork}/comments',  [CommentController::class, 'index'])
 Route::post('/artworks/{artwork}/comments', [CommentController::class, 'store']);
 Route::put('/artworks/{artwork}/comments/{comment}',    [CommentController::class, 'update']);
 Route::delete('/artworks/{artwork}/comments/{comment}', [CommentController::class, 'destroy']);
+Route::get('/artworks/{artwork}', [CommentController::class, 'show']);
 
 // --- GOOGLE OAUTH ---
 Route::get('/auth/google',          [GoogleAuthController::class, 'redirect'])->name('auth.google');
